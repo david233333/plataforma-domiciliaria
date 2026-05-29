@@ -1,0 +1,19 @@
+// =============================================================================
+// TOKENS — MOTION
+// =============================================================================
+//
+// Sistema enterprise = movimiento contenido y predecible. Solo lo necesario:
+// tres duraciones y UNA curva de salida. No hay curvas de entrada/elásticas.
+//
+// Consumido por _primeng-theme.scss (--p-transition-duration), los patrones
+// (skeleton, badges) y utilities/_animations.scss (fadeIn).
+// =============================================================================
+
+:root {
+  --app-duration-fast: 150ms; // hover, tooltips, focus ring
+  --app-duration-normal: 250ms; // dropdowns, modals, fadeIn
+  --app-duration-slow: 400ms; // transiciones de página, shimmer
+
+  // Una sola curva: ease-out estándar (Material "decelerate").
+  --app-ease-out: cubic-bezier(0, 0, 0.2, 1);
+}

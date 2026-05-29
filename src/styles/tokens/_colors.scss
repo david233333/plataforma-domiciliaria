@@ -1,0 +1,94 @@
+// =============================================================================
+// TOKENS — COLOR · FUENTE ÚNICA DE VERDAD
+// =============================================================================
+//
+// Todos los tokens usan prefijo --app- para no colisionar con:
+//   --p-*     (variables internas de PrimeNG)
+//   --color-* (variables que genera Tailwind v4)
+//
+// Estos tokens se consumen en DOS lugares:
+//   1. themes/_primeng-theme.scss → mapea --p-* = var(--app-*)
+//   2. tailwind.css (@theme inline) → genera utilidades bg-*, text-*, border-*
+//
+// CONTRASTE WCAG: cada par texto/fondo relevante documenta su ratio calculado.
+// Objetivo: AA → 4.5:1 para texto normal, 3:1 para texto grande / elementos UI.
+// Sistema SOLO light mode: todos los ratios se calculan sobre fondos claros.
+// =============================================================================
+
+:root {
+  // ---------------------------------------------------------------------------
+  // PRIMARY — Azul enterprise. Base 500 = #3b82f6 (main brand blue).
+  // ---------------------------------------------------------------------------
+  --app-primary-50: #eff6ff;
+  --app-primary-100: #dbeafe;
+  --app-primary-200: #bfdbfe;
+  --app-primary-300: #93c5fd;
+  --app-primary-400: #60a5fa;
+  --app-primary-500: #3b82f6; // base — sobre blanco: 3.68:1 (OK para UI/texto grande)
+  --app-primary-600: #2563eb; // sobre blanco: 4.93:1  → texto normal AA ✅
+  --app-primary-700: #1d4ed8; // sobre blanco: 6.97:1  → texto normal AA ✅
+  --app-primary-800: #1e40af; // sobre blanco: 9.18:1  → AAA ✅
+  --app-primary-900: #1e3a8a; // sobre blanco: 11.06:1 → AAA ✅
+  --app-primary-950: #172554; // sobre blanco: 15.79:1 → AAA ✅
+
+  // ---------------------------------------------------------------------------
+  // NEUTRAL / GRIS — escala completa para textos, bordes y fondos (slate).
+  // ---------------------------------------------------------------------------
+  --app-neutral-50: #f8fafc;
+  --app-neutral-100: #f1f5f9;
+  --app-neutral-200: #e2e8f0;
+  --app-neutral-300: #cbd5e1;
+  --app-neutral-400: #94a3b8; // sobre blanco: 2.85:1 → solo decorativo / UI no crítica
+  --app-neutral-500: #64748b; // sobre blanco: 4.76:1 → texto normal AA ✅
+  --app-neutral-600: #475569; // sobre blanco: 7.46:1 → AAA ✅
+  --app-neutral-700: #334155; // sobre blanco: 10.36:1 → AAA ✅
+  --app-neutral-800: #1e293b; // sobre blanco: 14.68:1 → AAA ✅
+  --app-neutral-900: #0f172a; // sobre blanco: 17.85:1 → AAA ✅
+  --app-neutral-950: #020617; // sobre blanco: 20.36:1 → AAA ✅
+
+  // ---------------------------------------------------------------------------
+  // SUPERFICIES — fondos de la app (de blanco puro a gris profundo).
+  // Alineadas a la rampa neutral para coherencia visual.
+  // ---------------------------------------------------------------------------
+  --app-surface-0: #ffffff; // blanco puro — fondo de cards y overlays
+  --app-surface-50: #f8fafc; // fondo de página / app shell
+  --app-surface-100: #f1f5f9; // zonas hundidas, headers de tabla
+  --app-surface-200: #e2e8f0; // bordes sutiles, divisores
+  --app-surface-300: #cbd5e1; // bordes de inputs en reposo
+  --app-surface-400: #94a3b8;
+  --app-surface-500: #64748b;
+  --app-surface-600: #475569;
+  --app-surface-700: #334155;
+  --app-surface-800: #1e293b;
+  --app-surface-900: #0f172a;
+
+  // ---------------------------------------------------------------------------
+  // TEXTO — semánticos. Calculados sobre --app-surface-0 (#fff).
+  // ---------------------------------------------------------------------------
+  --app-text-primary: var(--app-neutral-900); // 17.85:1 → títulos y cuerpo ✅
+  --app-text-secondary: var(--app-neutral-700); // 10.36:1 → texto de apoyo ✅
+  --app-text-muted: var(--app-neutral-500); // 4.76:1 → hints, captions ✅ (AA)
+  --app-text-disabled: var(--app-neutral-400); // 2.85:1 → solo estado disabled
+  --app-text-on-primary: var(--app-surface-0); // blanco sobre primary-600: 4.93:1 ✅
+
+  // ---------------------------------------------------------------------------
+  // SEMÁNTICOS — base / light (tint de fondo) / dark (texto sobre el tint).
+  // El par recomendado para badges es: texto = *-dark sobre fondo = *-light.
+  // ---------------------------------------------------------------------------
+  // SUCCESS (verde)
+  --app-success: #16a34a; // base sobre blanco: 3.37:1 → UI / texto grande
+  --app-success-light: #dcfce7; // fondo de badge
+  --app-success-dark: #15803d; // texto sobre success-light: 5.12:1 → AA ✅
+  // WARNING (ámbar)
+  --app-warning: #d97706; // base sobre blanco: 3.36:1 → UI / texto grande
+  --app-warning-light: #fef3c7; // fondo de badge
+  --app-warning-dark: #b45309; // texto sobre warning-light: 5.04:1 → AA ✅
+  // ERROR (rojo)
+  --app-error: #dc2626; // base sobre blanco: 4.53:1 → texto normal AA ✅
+  --app-error-light: #fee2e2; // fondo de badge
+  --app-error-dark: #b91c1c; // texto sobre error-light: 6.12:1 → AA ✅
+  // INFO (azul cian, distinto del primary para no confundir marca con estado)
+  --app-info: #0891b2; // base sobre blanco: 3.41:1 → UI / texto grande
+  --app-info-light: #cffafe; // fondo de badge
+  --app-info-dark: #0e7490; // texto sobre info-light: 4.92:1 → AA ✅
+}

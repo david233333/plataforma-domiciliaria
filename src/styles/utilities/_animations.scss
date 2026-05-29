@@ -1,0 +1,41 @@
+// =============================================================================
+// ANIMATIONS — SOLO fadeIn + shimmer · @layer utilities
+// =============================================================================
+//
+// Enterprise = movimiento contenido. NO añadir slide, scale, bounce, pulse,
+// spin, stagger ni ninguna otra. Si necesitas otra animación, justifícala
+// primero contra esta regla.
+//
+// Ambas respetan prefers-reduced-motion.
+// =============================================================================
+
+// Keyframes a nivel de documento (los @keyframes no se "capan" por @layer,
+// pero las clases que los usan sí viven en utilities).
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  // Usado internamente por el patrón .skeleton (no exponer como utilidad).
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer utilities {
+  // fadeIn — entrada de páginas, modals, notificaciones toast.
+  .animate-fade-in {
+    animation: fadeIn var(--app-duration-normal) var(--app-ease-out) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in {
+      animation: none;
+    }
+  }
+}

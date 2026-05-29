@@ -1,0 +1,459 @@
+<div class="container-app section animate-fade-in">
+  <!-- ============================ HEADER ============================ -->
+  <header class="mb-10">
+    <p class="text-overline">Documentación interna</p>
+    <h1 class="text-display-md mt-2">Arquitectura de estilos</h1>
+    <p class="text-body-lg mt-3" style="color: var(--app-text-secondary); max-width: 70ch">
+      Guía para entender cómo está montado el diseño del proyecto: qué hace cada
+      carpeta, qué es un token, cómo conviven PrimeNG y Tailwind, y cómo hacer
+      cambios comunes (como cambiar un color) sin romper nada. Escrita para que
+      la entienda cualquiera, sepa o no de CSS.
+    </p>
+  </header>
+
+  <!-- ============================ ÍNDICE ============================ -->
+  <nav class="card doc-toc mb-12" aria-label="Índice">
+    <p class="text-label-lg mb-3">Contenido</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+      <a href="#vision">1. Visión general</a>
+      <a href="#tokens">2. ¿Qué es un token?</a>
+      <a href="#carpetas">3. Las carpetas de estilos</a>
+      <a href="#layer">4. ¿Qué es una capa (@layer)?</a>
+      <a href="#roles">5. PrimeNG vs Tailwind vs SCSS</a>
+      <a href="#config">6. La configuración</a>
+      <a href="#cambiar-color">7. Cómo cambiar un color</a>
+      <a href="#construir">8. Cómo armar una pantalla</a>
+      <a href="#reglas">9. Reglas de oro</a>
+    </div>
+  </nav>
+
+  <!-- ============================ 1. VISIÓN ============================ -->
+  <section id="vision" class="mb-14">
+    <h2 class="text-heading-xl mb-4">1. Visión general</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      El diseño se apoya en <strong>tres herramientas</strong> que se reparten el
+      trabajo, más una "fuente única de verdad" que las conecta:
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="card">
+        <i class="pi pi-objects-column" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">PrimeNG</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Librería de componentes listos: tablas, selects, calendarios, botones,
+          drawer… Trae el comportamiento y la estructura complejos ya resueltos.
+        </p>
+      </div>
+      <div class="card">
+        <i class="pi pi-th-large" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">Tailwind CSS</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          "Clases utilitarias" para armar el layout: separación, columnas,
+          alineación, tamaños. Se escriben directo en el HTML.
+        </p>
+      </div>
+      <div class="card">
+        <i class="pi pi-palette" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">Tokens + SCSS</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Nuestras variables de diseño (colores, tamaños, sombras) y los patrones
+          reutilizables (tarjetas, campos, badges).
+        </p>
+      </div>
+    </div>
+
+    <div class="doc-callout doc-callout--tip">
+      <i class="pi pi-lightbulb"></i>
+      <div>
+        <strong>Analogía:</strong> piensa en una casa. <em>PrimeNG</em> son los
+        electrodomésticos ya fabricados (nevera, lavadora). <em>Tailwind</em> es
+        cómo distribuyes los muebles en cada cuarto. Y los <em>tokens</em> son la
+        paleta de pintura: si cambias el color de la pintura en un solo lugar,
+        toda la casa cambia de color a la vez.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 2. TOKENS ============================ -->
+  <section id="tokens" class="mb-14">
+    <h2 class="text-heading-xl mb-4">2. ¿Qué es un token?</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Un <strong>token</strong> es una variable de diseño: un nombre que guarda un
+      valor (un color, una medida, una sombra). En CSS se escriben con dos guiones
+      al inicio. Todos los nuestros empiezan con
+      <code class="doc-inline">--app-</code> para no chocar con los de otras
+      librerías.
+    </p>
+    <pre class="doc-code"><code>{{ code.colorToken }}</code></pre>
+    <p class="text-body-md mt-4" style="color: var(--app-text-secondary)">
+      En vez de escribir el color <code class="doc-inline">#3b82f6</code> en 200
+      sitios, lo guardamos UNA vez en
+      <code class="doc-inline">--app-primary-500</code> y en todos lados usamos ese
+      nombre. ¿La ventaja? Si mañana la marca cambia de azul a verde, tocas un solo
+      archivo y todo se actualiza. Eso es la <strong>"fuente única de verdad"</strong>.
+    </p>
+  </section>
+
+  <!-- ============================ 3. CARPETAS ============================ -->
+  <section id="carpetas" class="mb-14">
+    <h2 class="text-heading-xl mb-4">3. Las carpetas de <code class="doc-inline">src/styles</code></h2>
+    <p class="text-body-md mb-5" style="color: var(--app-text-secondary)">
+      Cada carpeta tiene una responsabilidad clara. De arriba hacia abajo, esto es
+      lo que contiene cada una:
+    </p>
+
+    <div class="card !p-0 overflow-hidden mb-6">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Carpeta / archivo</th>
+            <th>¿Qué es?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>abstracts/</td>
+            <td>
+              Herramientas que <strong>no generan CSS por sí solas</strong>: la
+              declaración del orden de capas (<code class="doc-inline">_layers.scss</code>)
+              y "mixins" responsive (<code class="doc-inline">_responsive.scss</code>),
+              que son atajos reutilizables para escribir media queries.
+            </td>
+          </tr>
+          <tr>
+            <td>tokens/</td>
+            <td>
+              El corazón del sistema: todas las variables
+              <code class="doc-inline">--app-*</code>. Colores
+              (<code class="doc-inline">_colors</code>), tipografía
+              (<code class="doc-inline">_typography</code>), espaciado
+              (<code class="doc-inline">_spacing</code>), sombras
+              (<code class="doc-inline">_elevation</code>) y animación
+              (<code class="doc-inline">_motion</code>).
+            </td>
+          </tr>
+          <tr>
+            <td>base/</td>
+            <td>
+              Estilos globales del documento. <code class="doc-inline">_reset</code>
+              normaliza diferencias entre navegadores; <code class="doc-inline">_base</code>
+              define cosas como el foco accesible, la barra de scroll y la
+              tipografía base de la página.
+            </td>
+          </tr>
+          <tr>
+            <td>themes/</td>
+            <td>
+              <code class="doc-inline">_primeng-theme.scss</code>: aquí
+              <strong>conectamos</strong> nuestros tokens con PrimeNG. Es el puente
+              que hace que los componentes de PrimeNG usen nuestros colores.
+            </td>
+          </tr>
+          <tr>
+            <td>typography/</td>
+            <td>
+              Clases de texto con nombre: <code class="doc-inline">.text-heading-xl</code>,
+              <code class="doc-inline">.text-body-md</code>, etc. Empaquetan tamaño +
+              grosor + interlineado en un solo nombre semántico.
+            </td>
+          </tr>
+          <tr>
+            <td>layout/</td>
+            <td>
+              Contenedores de página: <code class="doc-inline">.container-app</code>
+              (ancho máximo centrado), <code class="doc-inline">.container-fluid</code>
+              (ancho completo para tablas), <code class="doc-inline">.section</code>
+              (ritmo vertical).
+            </td>
+          </tr>
+          <tr>
+            <td>patterns/</td>
+            <td>
+              Piezas reutilizables de UI: <code class="doc-inline">.card</code>,
+              <code class="doc-inline">.field</code> (campo de formulario),
+              <code class="doc-inline">.status-badge</code>,
+              <code class="doc-inline">.empty-state</code> y
+              <code class="doc-inline">.skeleton</code>.
+            </td>
+          </tr>
+          <tr>
+            <td>utilities/</td>
+            <td>
+              Animaciones del sistema: solo <code class="doc-inline">fadeIn</code>
+              (aparecer) y <code class="doc-inline">shimmer</code> (el brillo del
+              skeleton). Enterprise = movimiento contenido.
+            </td>
+          </tr>
+          <tr>
+            <td>tailwind.css</td>
+            <td>
+              El punto de entrada de Tailwind. Importa Tailwind y el plugin de
+              PrimeNG, y le dice a Tailwind que use nuestros tokens.
+            </td>
+          </tr>
+          <tr>
+            <td>main.scss</td>
+            <td>
+              El "director de orquesta": importa todo lo anterior en el orden
+              correcto. Es lo que se compila al final.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-callout">
+      <i class="pi pi-info-circle"></i>
+      <div>
+        Los archivos que empiezan con guion bajo (<code class="doc-inline">_colors.scss</code>)
+        son "parciales": no se compilan solos, solo se incluyen desde
+        <code class="doc-inline">main.scss</code>. Es una convención de SCSS.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 4. LAYER ============================ -->
+  <section id="layer" class="mb-14">
+    <h2 class="text-heading-xl mb-4">4. ¿Qué es una capa (<code class="doc-inline">&#64;layer</code>)?</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Cuando dos reglas de CSS quieren pintar lo mismo de distinto color, el
+      navegador tiene que decidir cuál gana. Tradicionalmente gana "la más
+      específica" o "la última escrita", y eso genera peleas eternas (y el famoso
+      <code class="doc-inline">!important</code>).
+    </p>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Las <strong>capas</strong> (<code class="doc-inline">&#64;layer</code>) cambian
+      esa regla: definimos un <strong>orden de capas</strong> y, sin importar la
+      especificidad, <strong>siempre gana la capa que va después</strong>. Es como
+      apilar transparencias: la de encima tapa a la de abajo.
+    </p>
+
+    <p class="text-body-md mb-2" style="color: var(--app-text-secondary)">
+      Nuestro orden (declarado en <code class="doc-inline">abstracts/_layers.scss</code>) es:
+    </p>
+    <pre class="doc-code mb-4"><code>{{ code.layersDecl }}</code></pre>
+
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      De menor a mayor prioridad. Lo clave: <code class="doc-inline">primeng</code>
+      va <strong>antes</strong> que <code class="doc-inline">sp-theme</code>. Por eso
+      cuando en <code class="doc-inline">sp-theme</code> cambiamos un color de
+      PrimeNG, <strong>ganamos sin pelear</strong>:
+    </p>
+    <pre class="doc-code mb-4"><code>{{ code.layerExample }}</code></pre>
+
+    <div class="doc-callout doc-callout--tip">
+      <i class="pi pi-check-circle"></i>
+      <div>
+        Por eso casi nunca verás <code class="doc-inline">!important</code> en el
+        proyecto: el orden de capas ya decide quién gana.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 5. ROLES ============================ -->
+  <section id="roles" class="mb-14">
+    <h2 class="text-heading-xl mb-4">5. ¿PrimeNG, Tailwind o SCSS? ¿Cuál uso?</h2>
+    <p class="text-body-md mb-5" style="color: var(--app-text-secondary)">
+      La regla mental: <strong>cada herramienta para lo suyo</strong>.
+    </p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="card--outlined">
+        <span class="status-badge status-badge--info mb-3">Tailwind</span>
+        <p class="text-body-sm mb-3" style="color: var(--app-text-secondary)">Para acomodar cosas en la pantalla.</p>
+        <pre class="doc-code"><code>{{ code.usageTailwind }}</code></pre>
+      </div>
+      <div class="card--outlined">
+        <span class="status-badge status-badge--success mb-3">Patrones / SCSS</span>
+        <p class="text-body-sm mb-3" style="color: var(--app-text-secondary)">Para piezas repetidas (tarjeta, campo).</p>
+        <pre class="doc-code"><code>{{ code.usagePattern }}</code></pre>
+      </div>
+      <div class="card--outlined">
+        <span class="status-badge status-badge--warning mb-3">PrimeNG</span>
+        <p class="text-body-sm mb-3" style="color: var(--app-text-secondary)">Para el control complejo (select, tabla).</p>
+        <pre class="doc-code"><code>{{ code.usagePrime }}</code></pre>
+      </div>
+    </div>
+
+    <div class="doc-callout doc-callout--danger">
+      <i class="pi pi-times-circle"></i>
+      <div>
+        <strong>El error más común:</strong> intentar cambiar el color interno de
+        un componente PrimeNG con clases de Tailwind. Eso no funciona bien. El color
+        de PrimeNG se cambia con un <strong>token</strong> en
+        <code class="doc-inline">_primeng-theme.scss</code>.
+        <pre class="doc-code mt-3"><code>{{ code.badTailwindOnPrime }}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 6. CONFIG ============================ -->
+  <section id="config" class="mb-14">
+    <h2 class="text-heading-xl mb-4">6. La configuración</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Hay cuatro archivos que arman todo el engranaje:
+    </p>
+
+    <ul class="flex flex-col gap-3 mb-6" role="list">
+      <li class="card--outlined">
+        <code class="doc-inline">postcss.config.json</code>
+        <p class="text-body-sm mt-1" style="color: var(--app-text-secondary)">
+          Activa el plugin de Tailwind v4 para que Angular lo procese al compilar.
+        </p>
+      </li>
+      <li class="card--outlined">
+        <code class="doc-inline">angular.json</code> → <code class="doc-inline">styles</code>
+        <p class="text-body-sm mt-1" style="color: var(--app-text-secondary)">
+          Define el orden de carga: primero los iconos, luego
+          <code class="doc-inline">tailwind.css</code> y al final
+          <code class="doc-inline">main.scss</code>. El orden importa.
+        </p>
+      </li>
+      <li class="card--outlined">
+        <code class="doc-inline">src/styles/tailwind.css</code>
+        <p class="text-body-sm mt-1" style="color: var(--app-text-secondary)">
+          Importa Tailwind + el plugin de PrimeNG y mapea nuestros tokens a las
+          clases de Tailwind (lo que hace que <code class="doc-inline">bg-success</code>
+          use nuestro verde).
+        </p>
+      </li>
+      <li class="card--outlined">
+        <code class="doc-inline">src/app/app.config.ts</code>
+        <p class="text-body-sm mt-1" style="color: var(--app-text-secondary)">
+          Configura PrimeNG: el preset <strong>Lara</strong> (estética enterprise),
+          modo claro fijo, y en qué capa escribe sus estilos.
+        </p>
+      </li>
+    </ul>
+
+    <pre class="doc-code mb-4"><code>{{ code.configSnippet }}</code></pre>
+
+    <div class="doc-callout doc-callout--warn">
+      <i class="pi pi-exclamation-triangle"></i>
+      <div>
+        El <code class="doc-inline">order</code> de aquí <strong>debe ser idéntico</strong>
+        al orden de capas de <code class="doc-inline">_layers.scss</code>. Si no
+        coinciden, PrimeNG pinta fuera de capa y se rompe toda la cascada.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 7. CAMBIAR COLOR ============================ -->
+  <section id="cambiar-color" class="mb-14">
+    <h2 class="text-heading-xl mb-4">7. Cómo cambiar un color (paso a paso)</h2>
+    <p class="text-body-md mb-5" style="color: var(--app-text-secondary)">
+      Esta es la pregunta estrella. La respuesta corta: <strong>toca un solo
+      archivo</strong>. Gracias a los tokens, el cambio se propaga a PrimeNG y a
+      Tailwind a la vez.
+    </p>
+
+    <div class="flex flex-col gap-4 mb-6">
+      <div class="flex items-start gap-4">
+        <span class="doc-step">1</span>
+        <div>
+          <p class="text-label-lg">Abre <code class="doc-inline">src/styles/tokens/_colors.scss</code></p>
+          <p class="text-body-sm" style="color: var(--app-text-secondary)">
+            Ahí están todos los colores de la marca, agrupados por familia.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="doc-step">2</span>
+        <div>
+          <p class="text-label-lg">Cambia el valor del token que quieras</p>
+          <p class="text-body-sm mb-3" style="color: var(--app-text-secondary)">
+            Por ejemplo, pasar la marca de azul a verde:
+          </p>
+          <pre class="doc-code"><code>{{ code.changeColor }}</code></pre>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="doc-step">3</span>
+        <div>
+          <p class="text-label-lg">Guarda. Listo.</p>
+          <p class="text-body-sm" style="color: var(--app-text-secondary)">
+            No tienes que tocar PrimeNG ni Tailwind. Todo lo que use ese token
+            (botones, links, focus, badges, clases <code class="doc-inline">bg-primary-*</code>)
+            cambia automáticamente.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-body-md mb-2" style="color: var(--app-text-secondary)">¿Por qué funciona? Por la cadena de conexiones:</p>
+    <div class="card--outlined mb-6">
+      <pre class="doc-code"><code>_colors.scss            →  --app-primary-500: #16a34a
+   │
+   ├─►  _primeng-theme.scss   →  --p-primary-500: var(--app-primary-500)
+   │      (todos los componentes PrimeNG usan el nuevo color)
+   │
+   └─►  tailwind.css          →  bg-primary-500 usa var(--app-primary-500)
+          (todas las clases de Tailwind usan el nuevo color)</code></pre>
+    </div>
+
+    <div class="doc-callout doc-callout--tip">
+      <i class="pi pi-lightbulb"></i>
+      <div>
+        ¿Quieres cambiar el borde de los inputs, el radio de los botones o la
+        sombra de los menús? Mismo principio, pero el token vive en
+        <code class="doc-inline">_primeng-theme.scss</code> (variables
+        <code class="doc-inline">--p-*</code>) o en
+        <code class="doc-inline">tokens/</code> (variables
+        <code class="doc-inline">--app-*</code>).
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 8. CONSTRUIR ============================ -->
+  <section id="construir" class="mb-14">
+    <h2 class="text-heading-xl mb-4">8. Cómo armar una pantalla nueva</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Receta rápida para una pantalla típica (como "Gestionar novedades"):
+    </p>
+    <ol class="flex flex-col gap-2 mb-6" style="list-style: decimal; padding-left: 1.5rem; color: var(--app-text-secondary)">
+      <li class="text-body-md">Envuelve todo en un contenedor: <code class="doc-inline">.container-app</code> (normal) o <code class="doc-inline">.container-fluid</code> (tablas anchas).</li>
+      <li class="text-body-md">Usa clases de Tailwind para el layout: <code class="doc-inline">grid</code>, <code class="doc-inline">flex</code>, <code class="doc-inline">gap-*</code>.</li>
+      <li class="text-body-md">Usa los patrones para las piezas: <code class="doc-inline">.card</code>, <code class="doc-inline">.field</code>, <code class="doc-inline">.status-badge</code>.</li>
+      <li class="text-body-md">Usa clases de texto con nombre para la jerarquía: <code class="doc-inline">.text-heading-lg</code>, <code class="doc-inline">.text-body-md</code>.</li>
+      <li class="text-body-md">Mete los controles de PrimeNG (<code class="doc-inline">p-select</code>, <code class="doc-inline">p-table</code>…): ya vienen con nuestros colores.</li>
+    </ol>
+
+    <div class="doc-callout">
+      <i class="pi pi-compass"></i>
+      <div>
+        ¿Dudas de cómo se ve algo? Entra a la página
+        <code class="doc-inline">/design-system</code>: ahí está el catálogo visual
+        con todos los colores, textos, tarjetas, badges y un formulario de ejemplo.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 9. REGLAS ============================ -->
+  <section id="reglas" class="mb-6">
+    <h2 class="text-heading-xl mb-4">9. Reglas de oro</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="card--outlined">
+        <h3 class="text-label-lg mb-3" style="color: var(--app-success-dark)">
+          <i class="pi pi-check mr-1"></i> Haz
+        </h3>
+        <ul class="flex flex-col gap-2" role="list">
+          <li class="text-body-sm">Usa siempre tokens <code class="doc-inline">--app-*</code>, nunca colores "a mano".</li>
+          <li class="text-body-sm">Cambia look de PrimeNG en <code class="doc-inline">_primeng-theme.scss</code>.</li>
+          <li class="text-body-sm">Usa Tailwind para layout y espaciado.</li>
+          <li class="text-body-sm">Reutiliza patrones (<code class="doc-inline">.card</code>, <code class="doc-inline">.field</code>).</li>
+        </ul>
+      </div>
+      <div class="card--outlined">
+        <h3 class="text-label-lg mb-3" style="color: var(--app-error-dark)">
+          <i class="pi pi-times mr-1"></i> Evita
+        </h3>
+        <ul class="flex flex-col gap-2" role="list">
+          <li class="text-body-sm">Escribir colores o medidas "a mano" (<code class="doc-inline">#fff</code>, <code class="doc-inline">16px</code>).</li>
+          <li class="text-body-sm">Cambiar PrimeNG con clases de Tailwind.</li>
+          <li class="text-body-sm">Usar <code class="doc-inline">!important</code> (deja que las capas decidan).</li>
+          <li class="text-body-sm">Duplicar lo que Tailwind o los patrones ya hacen.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>

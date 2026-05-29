@@ -1,0 +1,89 @@
+// =============================================================================
+// BASE — SIN @layer (unlayered)
+// =============================================================================
+//
+// El CSS sin capa tiene MÁS prioridad que cualquier @layer. Esto es deliberado:
+// son los defaults globales del documento que nunca queremos que un componente
+// o utilidad pise por accidente (foco accesible, scrollbar, reduced-motion).
+// Úsalo con moderación: solo reglas verdaderamente globales y de base.
+// =============================================================================
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--app-font-body);
+  color: var(--app-text-primary);
+  background-color: var(--app-surface-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-size: var(--app-size-base);
+  line-height: var(--app-leading-normal);
+}
+
+// Selección de texto con tint de marca.
+::selection {
+  background: var(--app-primary-100);
+  color: var(--app-primary-900);
+}
+
+// -----------------------------------------------------------------------------
+// FOCO ACCESIBLE — solo teclado (no aparece al hacer click con mouse).
+// :focus-visible deja al navegador decidir cuándo el foco es relevante.
+// -----------------------------------------------------------------------------
+:focus-visible {
+  outline: 2px solid var(--app-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--app-radius-sm);
+}
+
+// Quitamos el outline por defecto solo cuando NO es focus-visible (click mouse).
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// -----------------------------------------------------------------------------
+// SCROLLBAR — sutil, integrada en fondos claros (WebKit/Blink).
+// -----------------------------------------------------------------------------
+* {
+  scrollbar-width: thin; // Firefox
+  scrollbar-color: var(--app-surface-300) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--app-surface-300);
+  border-radius: var(--app-radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--app-surface-400);
+}
+
+// -----------------------------------------------------------------------------
+// REDUCED MOTION — desactiva TODA animación/transición sin excepción.
+// -----------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

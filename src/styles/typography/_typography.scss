@@ -1,0 +1,134 @@
+// =============================================================================
+// NAMED TYPOGRAPHY STYLES — @layer components
+// =============================================================================
+//
+// QUÉ ES PROPIO vs QUÉ ES TAILWIND (para que el equipo NO duplique):
+//
+//   • Clases .text-display-*, .text-heading-*, .text-body-*, .text-label-*,
+//     .text-caption, .text-overline  →  SON NUESTRAS. Empaquetan size + weight
+//     + line-height + letter-spacing en un solo token semántico. Úsalas para
+//     jerarquía de contenido (títulos de módulo, secciones, párrafos).
+//
+//   • Las utilidades de Tailwind  text-xs … text-7xl, font-medium, leading-*,
+//     tracking-*  →  SON DE TAILWIND. Úsalas para ajustes puntuales en HTML
+//     propio cuando NO necesitas un estilo nombrado completo.
+//
+// Regla práctica: contenido semántico → clase nombrada; ajuste fino → Tailwind.
+//
+// Los headings escalan en móvil con clamp() (fluido entre breakpoint sm y lg).
+// =============================================================================
+
+@layer components {
+  // ---------------------------------------------------------------------------
+  // DISPLAY — heroes, pantallas de bienvenida, KPIs grandes
+  // ---------------------------------------------------------------------------
+  .text-display-xl {
+    font-size: clamp(var(--app-size-5xl), 4vw + 1rem, var(--app-size-7xl));
+    font-weight: var(--app-weight-bold);
+    line-height: var(--app-leading-none);
+    letter-spacing: var(--app-tracking-tighter);
+  }
+  .text-display-lg {
+    font-size: clamp(var(--app-size-4xl), 3vw + 1rem, var(--app-size-6xl));
+    font-weight: var(--app-weight-bold);
+    line-height: var(--app-leading-tight);
+    letter-spacing: var(--app-tracking-tighter);
+  }
+  .text-display-md {
+    font-size: clamp(var(--app-size-3xl), 2vw + 1rem, var(--app-size-5xl));
+    font-weight: var(--app-weight-semibold);
+    line-height: var(--app-leading-tight);
+    letter-spacing: var(--app-tracking-tight);
+  }
+
+  // ---------------------------------------------------------------------------
+  // HEADING — jerarquía de módulos y secciones
+  // ---------------------------------------------------------------------------
+  .text-heading-xl {
+    font-size: clamp(var(--app-size-2xl), 1.5vw + 1rem, var(--app-size-3xl));
+    font-weight: var(--app-weight-semibold);
+    line-height: var(--app-leading-tight);
+    letter-spacing: var(--app-tracking-tight);
+  }
+  .text-heading-lg {
+    font-size: clamp(var(--app-size-xl), 1vw + 1rem, var(--app-size-2xl));
+    font-weight: var(--app-weight-semibold);
+    line-height: var(--app-leading-snug);
+    letter-spacing: var(--app-tracking-tight);
+  }
+  .text-heading-md {
+    font-size: var(--app-size-xl);
+    font-weight: var(--app-weight-semibold);
+    line-height: var(--app-leading-snug);
+    letter-spacing: var(--app-tracking-normal);
+  }
+  .text-heading-sm {
+    font-size: var(--app-size-lg);
+    font-weight: var(--app-weight-medium);
+    line-height: var(--app-leading-snug);
+    letter-spacing: var(--app-tracking-normal);
+  }
+
+  // ---------------------------------------------------------------------------
+  // BODY — contenido, párrafos, descripciones
+  // ---------------------------------------------------------------------------
+  .text-body-lg {
+    font-size: var(--app-size-lg);
+    font-weight: var(--app-weight-regular);
+    line-height: var(--app-leading-relaxed);
+    letter-spacing: var(--app-tracking-normal);
+  }
+  .text-body-md {
+    font-size: var(--app-size-base);
+    font-weight: var(--app-weight-regular);
+    line-height: var(--app-leading-normal);
+    letter-spacing: var(--app-tracking-normal);
+  }
+  .text-body-sm {
+    font-size: var(--app-size-sm);
+    font-weight: var(--app-weight-regular);
+    line-height: var(--app-leading-normal);
+    letter-spacing: var(--app-tracking-normal);
+  }
+
+  // ---------------------------------------------------------------------------
+  // LABEL — etiquetas de formulario, tabs, metadatos
+  // ---------------------------------------------------------------------------
+  .text-label-lg {
+    font-size: var(--app-size-base);
+    font-weight: var(--app-weight-medium);
+    line-height: var(--app-leading-snug);
+    letter-spacing: var(--app-tracking-normal);
+  }
+  .text-label-md {
+    font-size: var(--app-size-sm);
+    font-weight: var(--app-weight-medium);
+    line-height: var(--app-leading-snug);
+    letter-spacing: var(--app-tracking-wide);
+  }
+  .text-label-sm {
+    font-size: var(--app-size-xs);
+    font-weight: var(--app-weight-medium);
+    line-height: var(--app-leading-snug);
+    letter-spacing: var(--app-tracking-wide);
+  }
+
+  // ---------------------------------------------------------------------------
+  // UTILITARIOS
+  // ---------------------------------------------------------------------------
+  .text-caption {
+    font-size: var(--app-size-xs);
+    font-weight: var(--app-weight-regular);
+    line-height: var(--app-leading-normal);
+    letter-spacing: var(--app-tracking-normal);
+    color: var(--app-text-muted);
+  }
+  .text-overline {
+    font-size: var(--app-size-xs);
+    font-weight: var(--app-weight-semibold);
+    line-height: var(--app-leading-snug);
+    letter-spacing: var(--app-tracking-wider);
+    text-transform: uppercase;
+    color: var(--app-text-muted);
+  }
+}

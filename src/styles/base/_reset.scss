@@ -1,0 +1,48 @@
+// =============================================================================
+// RESET — @layer reset (la capa de MENOR prioridad)
+// =============================================================================
+//
+// Tailwind preflight (aterriza en @layer base) ya normaliza headings, body,
+// márgenes, box-sizing en *, etc. NO lo duplicamos.
+//
+// Aquí solo añadimos lo que preflight no cubre o lo que queremos garantizar
+// independientemente de él, principalmente por accesibilidad.
+// =============================================================================
+
+@layer reset {
+  // Refuerzo de box-sizing (preflight ya lo hace, pero lo dejamos explícito
+  // para que el reset sea autónomo si preflight se desactivara).
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  // Listas usadas como contenedores semánticos sin viñetas (navs, menús).
+  // Mantener role="list" preserva el anuncio en lectores de pantalla (Safari
+  // deja de exponer la lista cuando se quita list-style).
+  ul[role='list'],
+  ol[role='list'] {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  // Elementos multimedia se comportan como bloque y nunca desbordan.
+  img,
+  picture,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+    display: block;
+  }
+
+  // Inputs/botones heredan la tipografía del sistema (evita fuentes UA).
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+}

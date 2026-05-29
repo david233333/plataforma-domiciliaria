@@ -1,0 +1,50 @@
+// =============================================================================
+// MAIN.SCSS — ORQUESTADOR DEL SISTEMA DE DISEÑO
+// =============================================================================
+//
+// Orden CRÍTICO. Usamos exclusivamente @use (nunca @import de Sass deprecado).
+//
+// CONTEXTO DE CARGA (definido en angular.json → styles[]):
+//   1º  primeicons.css        — íconos
+//   2º  tailwind.css          — preflight (→ @layer base) + utilities
+//                               (→ @layer utilities) + plugin primeui
+//   3º  main.scss (este)      — declara las capas y llena el resto
+//
+// DECISIÓN — PREFLIGHT ACTIVADO:
+//   Mantenemos el preflight de Tailwind encendido. tailwindcss-primeui está
+//   diseñado para coexistir con él (no resetea los componentes PrimeNG, que
+//   se aíslan dentro de @layer primeng vía cssLayer). Desactivarlo nos
+//   obligaría a reimplementar normalizaciones que ya están resueltas.
+// =============================================================================
+
+// 1. LAYERS — primera línea de CSS que llega al browser.
+//    Establece la jerarquía de cascada para Tailwind, PrimeNG y nuestro SCSS.
+@use 'abstracts/layers';
+
+// 2. TOKENS en :root — deben existir ANTES que cualquier var(--app-*).
+@use 'tokens/colors';
+@use 'tokens/typography' as type-tokens;
+@use 'tokens/spacing';
+@use 'tokens/elevation';
+@use 'tokens/motion';
+
+// 3. RESET mínimo (@layer reset) y defaults globales (sin layer).
+@use 'base/reset';
+@use 'base/base';
+
+// 4. NAMED TYPOGRAPHY STYLES (@layer components).
+@use 'typography/typography' as type-styles;
+
+// 5. OVERRIDE DE TEMA PRIMENG (@layer sp-theme, encima de primeng).
+//    Aquí --p-* = var(--app-*): el vínculo de fuente única de verdad.
+@use 'themes/primeng-theme';
+
+// 6. LAYOUT y containers (@layer layout).
+@use 'layout/containers';
+
+// 7. PATRONES reutilizables (@layer components): card, field, badge,
+//    empty-state, skeleton.
+@use 'patterns/patterns';
+
+// 8. ANIMACIONES (@layer utilities): SOLO fadeIn y shimmer. Nada más.
+@use 'utilities/animations';

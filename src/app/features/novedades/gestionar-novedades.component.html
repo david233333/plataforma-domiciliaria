@@ -1,0 +1,447 @@
+<!--
+  GESTIONAR NOVEDADES — traducción al sistema de diseño nuevo.
+  Reparto de responsabilidades:
+    • LAYOUT / espaciado / responsive  → utilidades Tailwind.
+    • TIPOGRAFÍA de jerarquía           → clases propias (.text-heading-*, .text-overline…).
+    • PATRONES                          → .card, .field, .status-badge, .empty-state.
+    • CONTROLES                         → PrimeNG (p-select, p-multiselect, p-datepicker, p-table…).
+    • COLORES de PrimeNG                → ya vienen de @layer sp-theme (tokens --app-*).
+-->
+<div class="container-fluid section animate-fade-in">
+  <!-- ============================ HEADER ============================ -->
+  <header class="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div class="flex items-center gap-4">
+      <span
+        class="flex items-center justify-center shrink-0"
+        style="
+          width: 3rem;
+          height: 3rem;
+          border-radius: var(--app-radius-lg);
+          background: var(--app-primary-50);
+          color: var(--app-primary-600);
+        "
+      >
+        <i class="pi pi-file-edit" style="font-size: 1.5rem"></i>
+      </span>
+      <div>
+        <p class="text-overline">Operaciones</p>
+        <h1 class="text-heading-xl">Gestionar novedades</h1>
+      </div>
+    </div>
+
+    <p-button
+      label="Descargar informe"
+      icon="pi pi-download"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="descargarInforme()"
+    />
+  </header>
+
+  <!-- ============================ FILTROS ============================ -->
+  <section class="card !p-0 mb-8 overflow-hidden">
+    <!-- Cabecera clickeable que colapsa los filtros -->
+    <button
+      type="button"
+      class="filtros-toggle flex items-center justify-between w-full text-left"
+      [attr.aria-expanded]="filtrosAbiertos()"
+      aria-controls="panel-filtros"
+      (click)="toggleFiltros()"
+    >
+      <span class="flex items-center gap-2">
+        <i class="pi pi-filter" style="color: var(--app-text-secondary)"></i>
+        <span class="text-label-lg">Filtros de novedades</span>
+      </span>
+      <i
+        class="pi pi-chevron-down"
+        style="
+          color: var(--app-text-muted);
+          transition: transform var(--app-duration-normal) var(--app-ease-out);
+        "
+        [style.transform]="filtrosAbiertos() ? 'rotate(180deg)' : 'rotate(0deg)'"
+      ></i>
+    </button>
+
+    @if (filtrosAbiertos()) {
+      <div
+        id="panel-filtros"
+        class="animate-fade-in"
+        style="border-top: 1px solid var(--app-surface-200); padding: var(--app-space-6)"
+      >
+        <form [formGroup]="form">
+          <!-- Grid responsivo de filtros -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-5">
+            <!-- Ciudad -->
+            <div class="field">
+              <label class="field__label" for="ciudad">Ciudad</label>
+              <p-select
+                inputId="ciudad"
+                formControlName="ciudad"
+                [options]="ciudades"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                [showClear]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Tipo identificación -->
+            <div class="field">
+              <label class="field__label" for="tipoDocumento">Tipo de identificación</label>
+              <p-select
+                inputId="tipoDocumento"
+                formControlName="tipoDocumento"
+                [options]="tiposIdentificacion"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                [showClear]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Número identificación -->
+            <div class="field">
+              <label class="field__label" for="numeroDocumento">Número de identificación</label>
+              <input
+                pInputText
+                id="numeroDocumento"
+                formControlName="numeroDocumento"
+                autocomplete="off"
+                placeholder="Ej. 1020304050"
+                class="w-full"
+              />
+            </div>
+
+            <!-- Número remisión -->
+            <div class="field">
+              <label class="field__label" for="remision">Número de remisión</label>
+              <input
+                pInputText
+                id="remision"
+                formControlName="remision"
+                placeholder="Ej. R-00123"
+                class="w-full"
+              />
+            </div>
+
+            <!-- Programa -->
+            <div class="field">
+              <label class="field__label" for="programa">Programa</label>
+              <p-select
+                inputId="programa"
+                formControlName="programa"
+                [options]="programas"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                [showClear]="true"
+                [filter]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Clasificación -->
+            <div class="field">
+              <label class="field__label" for="clasificacion">Clasificación</label>
+              <p-select
+                inputId="clasificacion"
+                formControlName="clasificacion"
+                [options]="clasificaciones"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                [showClear]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Piso (multiselect) -->
+            <div class="field">
+              <label class="field__label" for="piso">Piso</label>
+              <p-multiselect
+                inputId="piso"
+                formControlName="piso"
+                [options]="pisos"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                display="chip"
+                [filter]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Estado -->
+            <div class="field">
+              <label class="field__label" for="estado">Estado</label>
+              <p-select
+                inputId="estado"
+                formControlName="estado"
+                [options]="estados"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                [showClear]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Tipo novedad -->
+            <div class="field">
+              <label class="field__label" for="tiposNovedad">Tipo de novedad</label>
+              <p-select
+                inputId="tiposNovedad"
+                formControlName="tiposNovedad"
+                [options]="tiposNovedad"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                [showClear]="true"
+                [filter]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Especialidad cita -->
+            <div class="field">
+              <label class="field__label" for="especialidadCita">Especialidad de la cita</label>
+              <p-select
+                inputId="especialidadCita"
+                formControlName="especialidadCita"
+                [options]="especialidades"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona"
+                [showClear]="true"
+                [filter]="true"
+                styleClass="w-full"
+                appendTo="body"
+              />
+            </div>
+
+            <!-- Fecha inicio novedad -->
+            <div class="field">
+              <label class="field__label" for="fechaInicioNovedad">Fecha inicio novedad</label>
+              <p-datepicker
+                inputId="fechaInicioNovedad"
+                formControlName="fechaInicioNovedad"
+                dateFormat="dd/mm/yy"
+                iconDisplay="input"
+                [showIcon]="true"
+                [showTime]="true"
+                hourFormat="12"
+                [readonlyInput]="true"
+                [showButtonBar]="true"
+                styleClass="w-full"
+                appendTo="body"
+                placeholder="dd/mm/aaaa"
+              />
+            </div>
+
+            <!-- Fecha fin novedad -->
+            <div class="field">
+              <label class="field__label" for="fechaFinNovedad">Fecha fin novedad</label>
+              <p-datepicker
+                inputId="fechaFinNovedad"
+                formControlName="fechaFinNovedad"
+                dateFormat="dd/mm/yy"
+                iconDisplay="input"
+                [showIcon]="true"
+                [showTime]="true"
+                hourFormat="12"
+                [readonlyInput]="true"
+                [showButtonBar]="true"
+                styleClass="w-full"
+                appendTo="body"
+                placeholder="dd/mm/aaaa"
+              />
+            </div>
+          </div>
+
+          <!-- Toolbar de acciones -->
+          <div
+            class="flex flex-wrap items-center justify-end gap-3 mt-8 pt-6"
+            style="border-top: 1px solid var(--app-surface-200)"
+          >
+            <p-button
+              label="Limpiar"
+              icon="pi pi-times"
+              severity="secondary"
+              [text]="true"
+              (onClick)="limpiar()"
+            />
+            <p-button
+              label="Guardar filtros"
+              icon="pi pi-save"
+              severity="secondary"
+              [outlined]="true"
+              (onClick)="guardarFiltros()"
+            />
+            <p-button
+              label="Buscar"
+              icon="pi pi-search"
+              [loading]="buscando()"
+              (onClick)="buscar()"
+            />
+          </div>
+        </form>
+      </div>
+    }
+  </section>
+
+  <!-- ============================ RESULTADOS ============================ -->
+  <section class="card !p-0 overflow-hidden">
+    @if (buscando()) {
+      <!-- SKELETON: bloque propio fuera de la tabla → render fiable y animación
+           shimmer garantizada (patrón .skeleton). -->
+      <div class="overflow-hidden">
+        <!-- Cabecera simulada -->
+        <div
+          class="flex items-center gap-6"
+          style="padding: var(--app-space-4) var(--app-space-6); border-bottom: 1px solid var(--app-surface-200)"
+        >
+          <div class="skeleton skeleton--text" style="flex: 2; opacity: 0.7"></div>
+          <div class="skeleton skeleton--text" style="flex: 2; opacity: 0.7"></div>
+          <div class="skeleton skeleton--text" style="flex: 1; opacity: 0.7"></div>
+          <div class="skeleton skeleton--text" style="flex: 1; opacity: 0.7"></div>
+          <div class="skeleton skeleton--text" style="flex: 2; opacity: 0.7"></div>
+          <div class="skeleton skeleton--text" style="flex: 2; opacity: 0.7"></div>
+          <div class="skeleton skeleton--text" style="flex: 1; opacity: 0.7"></div>
+        </div>
+
+        <!-- Filas simuladas -->
+        @for (r of skeletonRows; track $index) {
+          <div
+            class="flex items-center gap-6"
+            style="padding: var(--app-space-4) var(--app-space-6); border-bottom: 1px solid var(--app-surface-100)"
+          >
+            <div class="flex flex-col gap-2" style="flex: 2">
+              <div class="skeleton skeleton--text" style="width: 80%"></div>
+              <div class="skeleton skeleton--text" style="width: 50%"></div>
+            </div>
+            <div class="skeleton skeleton--text" style="flex: 2"></div>
+            <div class="skeleton skeleton--text" style="flex: 1"></div>
+            <div class="skeleton skeleton--text" style="flex: 1"></div>
+            <div class="skeleton skeleton--text" style="flex: 2"></div>
+            <div class="skeleton skeleton--text" style="flex: 2"></div>
+            <div class="skeleton skeleton--text" style="flex: 1; max-width: 6rem; border-radius: var(--app-radius-full)"></div>
+            <div class="skeleton skeleton--circle shrink-0" style="width: 2rem; height: 2rem"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <p-table
+        [value]="novedades()"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 20, 30]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+        [scrollable]="true"
+        [tableStyle]="{ 'min-width': '64rem' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Tipo de novedad</th>
+            <th>Paciente</th>
+            <th>Identificación</th>
+            <th>Piso</th>
+            <th>Reporta</th>
+            <th>Gestiona</th>
+            <th>Fecha solicitud</th>
+            <th>Fecha gestión</th>
+            <th>Estado</th>
+            <th style="width: 6rem" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>
+              <div class="flex flex-col">
+                <span class="text-label-md" style="color: var(--app-text-primary)">{{ row.tipoNovedad }}</span>
+                <span class="text-caption">{{ row.especialidad }}</span>
+              </div>
+            </td>
+            <td>{{ row.nombrePaciente }}</td>
+            <td class="font-mono text-sm">{{ row.numeroIdentificacion }}</td>
+            <td>{{ row.piso }}</td>
+            <td>{{ row.usuarioReporta }}</td>
+            <td>
+              @if (row.estado === 'PENDIENTE_GESTION') {
+                <span style="color: var(--app-text-disabled)">—</span>
+              } @else {
+                {{ row.usuarioGestion ?? 'Automático' }}
+              }
+            </td>
+            <td class="whitespace-nowrap">{{ row.fechaSolicitud | date: 'dd/MM/yyyy hh:mm a' }}</td>
+            <td class="whitespace-nowrap">
+              @if (row.fechaGestion) {
+                {{ row.fechaGestion | date: 'dd/MM/yyyy hh:mm a' }}
+              } @else {
+                <span style="color: var(--app-text-disabled)">—</span>
+              }
+            </td>
+            <td>
+              <span class="status-badge" [class]="'status-badge status-badge--' + estadoVariant(row.estado)">
+                <i class="pi {{ estadoIcon(row.estado) }}"></i>
+                {{ estadoLabel(row.estado) }}
+              </span>
+            </td>
+            <td class="text-center">
+              @if (row.tipoNovedad !== 'Activación' && row.estado !== 'PENDIENTE_GESTION') {
+                <p-button
+                  icon="pi pi-eye"
+                  severity="secondary"
+                  [text]="true"
+                  [rounded]="true"
+                  size="small"
+                  ariaLabel="Visualizar novedad"
+                  pTooltip="Visualizar novedad"
+                  tooltipPosition="top"
+                  (onClick)="gestionarNovedad(row)"
+                />
+              }
+              @if (row.estado === 'PENDIENTE_GESTION') {
+                <p-button
+                  icon="pi pi-sync"
+                  [text]="true"
+                  [rounded]="true"
+                  size="small"
+                  ariaLabel="Gestionar novedad"
+                  pTooltip="Gestionar novedad"
+                  tooltipPosition="top"
+                  (onClick)="gestionarNovedad(row)"
+                />
+              }
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="10">
+              <div class="empty-state">
+                <i class="pi pi-inbox empty-state__icon"></i>
+                <p class="empty-state__title">No se encontraron novedades</p>
+                <p class="empty-state__body">
+                  Ajusta los filtros e intenta una nueva búsqueda.
+                </p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </section>
+</div>

@@ -1,0 +1,61 @@
+// =============================================================================
+// TOKENS — TIPOGRAFÍA
+// =============================================================================
+//
+// Inter es la fuente única del sistema (variable font, weights 300-700).
+// JetBrains Mono / Fira Code solo para datos monoespaciados (códigos, IDs, JSON).
+//
+// Escala de tamaños con ratio 1.25 (Major Third), base 16px.
+// Estos tokens alimentan tailwind.css (@theme inline → --text-*) y los named
+// styles de typography/_typography.scss.
+// =============================================================================
+
+:root {
+  // ---------------------------------------------------------------------------
+  // FAMILIAS
+  // ---------------------------------------------------------------------------
+  --app-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --app-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'SFMono-Regular', monospace;
+
+  // ---------------------------------------------------------------------------
+  // ESCALA DE TAMAÑO — ratio 1.25, base 16px (1rem)
+  // ---------------------------------------------------------------------------
+  --app-size-xs: 0.75rem; // 12px
+  --app-size-sm: 0.875rem; // 14px
+  --app-size-base: 1rem; // 16px ← base
+  --app-size-lg: 1.25rem; // 20px
+  --app-size-xl: 1.5625rem; // 25px
+  --app-size-2xl: 1.953rem; // ~31px
+  --app-size-3xl: 2.441rem; // ~39px
+  --app-size-4xl: 3.052rem; // ~49px
+  --app-size-5xl: 3.815rem; // ~61px
+  --app-size-6xl: 4.768rem; // ~76px
+  --app-size-7xl: 5.96rem; // ~95px
+
+  // ---------------------------------------------------------------------------
+  // PESOS
+  // ---------------------------------------------------------------------------
+  --app-weight-light: 300;
+  --app-weight-regular: 400;
+  --app-weight-medium: 500;
+  --app-weight-semibold: 600;
+  --app-weight-bold: 700;
+
+  // ---------------------------------------------------------------------------
+  // LINE-HEIGHT
+  // ---------------------------------------------------------------------------
+  --app-leading-none: 1;
+  --app-leading-tight: 1.2; // displays y headings grandes
+  --app-leading-snug: 1.35; // headings pequeños / labels
+  --app-leading-normal: 1.5; // cuerpo de texto
+  --app-leading-relaxed: 1.65; // párrafos largos
+
+  // ---------------------------------------------------------------------------
+  // LETTER-SPACING
+  // ---------------------------------------------------------------------------
+  --app-tracking-tighter: -0.02em; // displays
+  --app-tracking-tight: -0.01em; // headings
+  --app-tracking-normal: 0;
+  --app-tracking-wide: 0.025em; // labels
+  --app-tracking-wider: 0.08em; // overlines en mayúsculas
+}

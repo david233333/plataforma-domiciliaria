@@ -1,0 +1,71 @@
+// =============================================================================
+// LAYOUT — CONTAINERS & SECTIONS · @layer layout
+// =============================================================================
+//
+// Tailwind maneja: grid/flex, gap, col-span, posicionamiento puntual.
+// Estos patrones manejan: el ANCHO MÁXIMO consistente de las páginas y el
+// ritmo vertical entre secciones, que se repiten en toda la app y no conviene
+// teclear como cadenas largas de utilidades cada vez.
+// =============================================================================
+
+@layer layout {
+  // Contenedor central con ancho máximo y padding lateral responsivo.
+  .container-app {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--app-space-4);
+    max-width: 1280px; // == breakpoint xl
+
+    @media (min-width: 768px) {
+      padding-inline: var(--app-space-6);
+    }
+    @media (min-width: 1024px) {
+      padding-inline: var(--app-space-8);
+    }
+  }
+
+  // Variante FLUIDA: aprovecha todo el ancho disponible (solo padding lateral).
+  // Para pantallas de datos densas (tablas, filtros) donde el ancho es valioso.
+  // Tope alto para que no se estire en exceso en monitores ultra-anchos.
+  .container-fluid {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--app-space-4);
+    max-width: 1920px;
+
+    @media (min-width: 768px) {
+      padding-inline: var(--app-space-6);
+    }
+    @media (min-width: 1024px) {
+      padding-inline: var(--app-space-8);
+    }
+  }
+
+  // Variante angosta para formularios y lectura (líneas no demasiado largas).
+  .container-narrow {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--app-space-4);
+    max-width: 768px; // == breakpoint md
+  }
+
+  // Sección con ritmo vertical estándar entre bloques de contenido.
+  .section {
+    padding-block: var(--app-space-8);
+
+    @media (min-width: 768px) {
+      padding-block: var(--app-space-12);
+    }
+  }
+
+  // Stack vertical con separación uniforme entre hijos directos.
+  .stack > * + * {
+    margin-block-start: var(--app-space-4);
+  }
+  .stack--sm > * + * {
+    margin-block-start: var(--app-space-2);
+  }
+  .stack--lg > * + * {
+    margin-block-start: var(--app-space-8);
+  }
+}

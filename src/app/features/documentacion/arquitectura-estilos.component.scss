@@ -1,0 +1,122 @@
+// Estilos propios de la página de documentación. No tocan PrimeNG.
+
+:host {
+  display: block;
+}
+
+// Bloque de código: fondo oscuro suave, monoespaciado, scroll horizontal.
+.doc-code {
+  margin: 0;
+  padding: var(--app-space-4);
+  background: var(--app-neutral-900);
+  color: var(--app-neutral-100);
+  border-radius: var(--app-radius-md);
+  overflow-x: auto;
+  font-family: var(--app-font-mono);
+  font-size: var(--app-size-sm);
+  line-height: var(--app-leading-relaxed);
+  white-space: pre;
+  tab-size: 2;
+}
+
+// Código en línea (dentro de un párrafo).
+.doc-inline {
+  font-family: var(--app-font-mono);
+  font-size: 0.9em;
+  background: var(--app-surface-100);
+  color: var(--app-primary-700);
+  padding: 0.1em 0.4em;
+  border-radius: var(--app-radius-sm);
+  word-break: break-word;
+}
+
+// Caja de aviso (callout). Variantes por color semántico.
+.doc-callout {
+  display: flex;
+  gap: var(--app-space-3);
+  padding: var(--app-space-4);
+  border-radius: var(--app-radius-md);
+  border-left: 4px solid var(--app-info);
+  background: var(--app-info-light);
+  color: var(--app-info-dark);
+
+  i {
+    font-size: var(--app-size-lg);
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
+
+  &--tip {
+    border-left-color: var(--app-success);
+    background: var(--app-success-light);
+    color: var(--app-success-dark);
+  }
+  &--warn {
+    border-left-color: var(--app-warning);
+    background: var(--app-warning-light);
+    color: var(--app-warning-dark);
+  }
+  &--danger {
+    border-left-color: var(--app-error);
+    background: var(--app-error-light);
+    color: var(--app-error-dark);
+  }
+}
+
+// Tabla de la documentación.
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--app-size-sm);
+
+  th,
+  td {
+    text-align: left;
+    padding: var(--app-space-3) var(--app-space-4);
+    border-bottom: 1px solid var(--app-surface-200);
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--app-surface-50);
+    color: var(--app-text-secondary);
+    font-weight: var(--app-weight-semibold);
+    white-space: nowrap;
+  }
+
+  td:first-child {
+    font-family: var(--app-font-mono);
+    color: var(--app-primary-700);
+    white-space: nowrap;
+  }
+}
+
+// Índice (tabla de contenido) tipo enlaces.
+.doc-toc a {
+  display: block;
+  padding: var(--app-space-2) var(--app-space-3);
+  border-radius: var(--app-radius-md);
+  color: var(--app-text-secondary);
+  text-decoration: none;
+  transition: background var(--app-duration-fast) var(--app-ease-out);
+
+  &:hover {
+    background: var(--app-surface-100);
+    color: var(--app-text-primary);
+  }
+}
+
+// Número de paso (círculo).
+.doc-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: var(--app-radius-full);
+  background: var(--app-primary-500);
+  color: var(--app-text-on-primary);
+  font-weight: var(--app-weight-bold);
+  font-size: var(--app-size-sm);
+}

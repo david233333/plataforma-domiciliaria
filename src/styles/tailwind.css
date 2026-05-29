@@ -1,0 +1,129 @@
+/* =============================================================================
+   TAILWIND CSS v4 — ENTRY POINT
+   =============================================================================
+   ESTE ARCHIVO ES .css A PROPÓSITO (no .scss):
+   @import "tailwindcss" es una directiva PostCSS, no de Sass. Procesarla con
+   el compilador Sass rompería la build.
+
+   Cargado en angular.json ANTES de main.scss. Aquí:
+     - preflight de Tailwind aterriza en @layer base
+     - las utilidades aterrizan en @layer utilities
+   (ambas capas están declaradas en main.scss → posición de cascada correcta).
+   ============================================================================= */
+
+@import "tailwindcss";
+
+/* Plugin oficial PrimeNG ↔ Tailwind. Lee los tokens --p-* y genera utilidades:
+   bg-primary / bg-primary-500, text-surface-*, border-primary-*, etc., además
+   de animaciones compatibles con las directivas de PrimeNG.
+   Como nuestras --p-* = var(--app-*) (ver _primeng-theme.scss), estas utilidades
+   quedan automáticamente conectadas a la fuente única de verdad. */
+@import "tailwindcss-primeui";
+
+/* -----------------------------------------------------------------------------
+   @theme inline:
+   "inline" hace que Tailwind NO genere variables --color-* propias, sino que
+   inyecte directamente var(--app-*) dentro de cada clase utilitaria. Esto evita
+   referencias circulares con :root y mantiene UNA sola fuente de verdad.
+
+   Solo mapeamos tokens que tailwindcss-primeui NO cubre ya:
+     - primary-*  y  surface-*   → ya los provee el plugin (NO los remapeamos).
+     - neutral-*, semánticos, fuentes, sizes, spacing, shadows, breakpoints → aquí.
+
+   NOTA sobre nombres: la rampa de grises del sistema se llama `neutral`
+   (ver tokens/_colors.scss). La exponemos como utilidades neutral-* de Tailwind.
+   --------------------------------------------------------------------------- */
+@theme inline {
+  /* --- NEUTRAL ramp (textos, bordes, fondos sutiles) --- */
+  --color-neutral-50:  var(--app-neutral-50);
+  --color-neutral-100: var(--app-neutral-100);
+  --color-neutral-200: var(--app-neutral-200);
+  --color-neutral-300: var(--app-neutral-300);
+  --color-neutral-400: var(--app-neutral-400);
+  --color-neutral-500: var(--app-neutral-500);
+  --color-neutral-600: var(--app-neutral-600);
+  --color-neutral-700: var(--app-neutral-700);
+  --color-neutral-800: var(--app-neutral-800);
+  --color-neutral-900: var(--app-neutral-900);
+  --color-neutral-950: var(--app-neutral-950);
+
+  /* --- SEMÁNTICOS (estado) --- */
+  --color-success:       var(--app-success);
+  --color-success-light: var(--app-success-light);
+  --color-success-dark:  var(--app-success-dark);
+  --color-warning:       var(--app-warning);
+  --color-warning-light: var(--app-warning-light);
+  --color-warning-dark:  var(--app-warning-dark);
+  --color-error:         var(--app-error);
+  --color-error-light:   var(--app-error-light);
+  --color-error-dark:    var(--app-error-dark);
+  --color-info:          var(--app-info);
+  --color-info-light:    var(--app-info-light);
+  --color-info-dark:     var(--app-info-dark);
+
+  /* --- TEXTO semántico --- */
+  --color-text-primary:   var(--app-text-primary);
+  --color-text-secondary: var(--app-text-secondary);
+  --color-text-muted:     var(--app-text-muted);
+
+  /* --- FUENTES --- */
+  --font-body: var(--app-font-body);
+  --font-mono: var(--app-font-mono);
+
+  /* --- ESCALA DE TAMAÑO (ratio 1.25) --- */
+  --text-xs:   var(--app-size-xs);
+  --text-sm:   var(--app-size-sm);
+  --text-base: var(--app-size-base);
+  --text-lg:   var(--app-size-lg);
+  --text-xl:   var(--app-size-xl);
+  --text-2xl:  var(--app-size-2xl);
+  --text-3xl:  var(--app-size-3xl);
+  --text-4xl:  var(--app-size-4xl);
+  --text-5xl:  var(--app-size-5xl);
+  --text-6xl:  var(--app-size-6xl);
+  --text-7xl:  var(--app-size-7xl);
+
+  /* --- SPACING (base 4px) --- */
+  --spacing-1:  var(--app-space-1);
+  --spacing-2:  var(--app-space-2);
+  --spacing-3:  var(--app-space-3);
+  --spacing-4:  var(--app-space-4);
+  --spacing-5:  var(--app-space-5);
+  --spacing-6:  var(--app-space-6);
+  --spacing-8:  var(--app-space-8);
+  --spacing-10: var(--app-space-10);
+  --spacing-12: var(--app-space-12);
+  --spacing-16: var(--app-space-16);
+  --spacing-20: var(--app-space-20);
+  --spacing-24: var(--app-space-24);
+  --spacing-32: var(--app-space-32);
+
+  /* --- RADIUS --- */
+  --radius-sm:   var(--app-radius-sm);
+  --radius-md:   var(--app-radius-md);
+  --radius-lg:   var(--app-radius-lg);
+  --radius-xl:   var(--app-radius-xl);
+  --radius-full: var(--app-radius-full);
+
+  /* --- SHADOWS --- */
+  --shadow-xs: var(--app-shadow-xs);
+  --shadow-sm: var(--app-shadow-sm);
+  --shadow-md: var(--app-shadow-md);
+  --shadow-lg: var(--app-shadow-lg);
+  --shadow-xl: var(--app-shadow-xl);
+
+  /* --- BREAKPOINTS (alineados con abstracts/_responsive.scss) --- */
+  --breakpoint-xs:  475px;
+  --breakpoint-sm:  640px;
+  --breakpoint-md:  768px;
+  --breakpoint-lg:  1024px;
+  --breakpoint-xl:  1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* -----------------------------------------------------------------------------
+   SAFELIST — clases de estado que se componen dinámicamente en runtime
+   (p.ej. `bg-${status}` desde TypeScript). Tailwind no las ve en el markup,
+   así que las forzamos a generarse.
+   --------------------------------------------------------------------------- */
+@source inline("{bg,text,border}-{success,warning,error,info}");

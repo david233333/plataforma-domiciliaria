@@ -1,0 +1,81 @@
+// Estilos del shell raíz. Los overrides de PrimeNG viven en sp-theme; aquí solo
+// estilamos elementos propios del shell (header, contenido y los ítems del menú).
+
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+// -----------------------------------------------------------------------------
+// HEADER FIJO — altura fija (token), por encima del contenido. El drawer abre
+// con un offset = --app-header-height, así nunca lo cubre.
+// -----------------------------------------------------------------------------
+.app-header {
+  position: fixed;
+  inset: 0 0 auto 0; // top:0; left:0; right:0
+  z-index: 1101; // por encima del panel del drawer
+  height: var(--app-header-height);
+  padding-inline: var(--app-space-4);
+  background: var(--app-surface-0);
+  border-bottom: 1px solid var(--app-surface-200);
+}
+
+// El contenido arranca debajo del header fijo.
+// Cuando el drawer está abierto, EMPUJA el contenido (no lo tapa): el área
+// principal se desplaza el ancho del drawer y se reajusta con transición.
+// Aplica a TODAS las páginas porque vive en el <main> del shell.
+.app-main {
+  display: block;
+  padding-top: var(--app-header-height);
+  min-height: 100dvh;
+  transition: padding-left var(--app-duration-normal) var(--app-ease-out);
+
+  // En pantallas anchas, el drawer empuja el contenido. En móvil/tablet se
+  // mantiene como overlay (empujar 17rem dejaría muy poco espacio útil).
+  @media (min-width: 1024px) {
+    &.app-main--drawer-open {
+      padding-left: var(--app-drawer-width);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// ÍTEMS DE NAVEGACIÓN del drawer
+// -----------------------------------------------------------------------------
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-3);
+  padding: var(--app-space-3) var(--app-space-3);
+  border-radius: var(--app-radius-md);
+  color: var(--app-text-secondary);
+  text-decoration: none;
+  transition:
+    background var(--app-duration-fast) var(--app-ease-out),
+    color var(--app-duration-fast) var(--app-ease-out);
+
+  i {
+    font-size: var(--app-size-base);
+    color: var(--app-text-muted);
+    transition: color var(--app-duration-fast) var(--app-ease-out);
+  }
+
+  &:hover {
+    background: var(--app-surface-100);
+    color: var(--app-text-primary);
+
+    i {
+      color: var(--app-text-secondary);
+    }
+  }
+
+  &--active {
+    background: var(--app-primary-50);
+    color: var(--app-primary-700);
+    font-weight: var(--app-weight-semibold);
+
+    i {
+      color: var(--app-primary-600);
+    }
+  }
+}

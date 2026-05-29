@@ -1,0 +1,276 @@
+// =============================================================================
+// PRIMENG THEME OVERRIDE — @layer sp-theme (ENCIMA de primeng)
+// =============================================================================
+//
+// Aquí ocurre el VÍNCULO entre nuestros tokens --app-* y las variables internas
+// --p-* de PrimeNG. Como sp-theme está declarada después de `primeng` en el
+// orden de @layer, estas reglas ganan SIN necesidad de !important.
+//
+// Resultado: un cambio en tokens/_colors.scss (:root --app-*) se propaga
+// automáticamente a TODOS los componentes PrimeNG en runtime, porque aquí
+// referenciamos var(--app-*) en lugar de hardcodear valores.
+//
+// definePreset (en app.config.ts) establece los valores HEX base del tema;
+// estas reglas los reemplazan por nuestros tokens para tener fuente única.
+// =============================================================================
+
+@layer sp-theme {
+  :root {
+    // -------------------------------------------------------------------------
+    // PRIMARY RAMP → PrimeNG
+    // -------------------------------------------------------------------------
+    --p-primary-50: var(--app-primary-50);
+    --p-primary-100: var(--app-primary-100);
+    --p-primary-200: var(--app-primary-200);
+    --p-primary-300: var(--app-primary-300);
+    --p-primary-400: var(--app-primary-400);
+    --p-primary-500: var(--app-primary-500);
+    --p-primary-600: var(--app-primary-600);
+    --p-primary-700: var(--app-primary-700);
+    --p-primary-800: var(--app-primary-800);
+    --p-primary-900: var(--app-primary-900);
+    --p-primary-950: var(--app-primary-950);
+
+    // Color/contraste de "primary" como rol (texto sobre primary, etc.)
+    --p-primary-color: var(--app-primary-600);
+    --p-primary-contrast-color: var(--app-text-on-primary);
+    --p-primary-hover-color: var(--app-primary-700);
+    --p-primary-active-color: var(--app-primary-800);
+
+    // -------------------------------------------------------------------------
+    // SURFACE RAMP → PrimeNG
+    // -------------------------------------------------------------------------
+    --p-surface-0: var(--app-surface-0);
+    --p-surface-50: var(--app-surface-50);
+    --p-surface-100: var(--app-surface-100);
+    --p-surface-200: var(--app-surface-200);
+    --p-surface-300: var(--app-surface-300);
+    --p-surface-400: var(--app-surface-400);
+    --p-surface-500: var(--app-surface-500);
+    --p-surface-600: var(--app-surface-600);
+    --p-surface-700: var(--app-surface-700);
+    --p-surface-800: var(--app-surface-800);
+    --p-surface-900: var(--app-surface-900);
+
+    // -------------------------------------------------------------------------
+    // TOKENS SEMÁNTICOS GLOBALES (light scheme de PrimeNG)
+    // Coherencia de temperatura entre HTML propio (Tailwind) y componentes PrimeNG.
+    // -------------------------------------------------------------------------
+    --p-content-border-color: var(--app-surface-200);
+    --p-content-background: var(--app-surface-0);
+    --p-text-color: var(--app-text-primary);
+    --p-text-muted-color: var(--app-text-muted);
+    --p-content-border-radius: var(--app-radius-md);
+    --p-anchor-gutter: var(--app-space-2);
+
+    // -------------------------------------------------------------------------
+    // FOCUS RING ACCESIBLE — idéntico al de _base.scss para coherencia total.
+    // -------------------------------------------------------------------------
+    --p-focus-ring-color: var(--app-primary-500);
+    --p-focus-ring-width: 2px;
+    --p-focus-ring-style: solid;
+    --p-focus-ring-offset: 2px;
+
+    // -------------------------------------------------------------------------
+    // TRANSICIONES — coherentes con los tokens de motion.
+    // -------------------------------------------------------------------------
+    --p-transition-duration: var(--app-duration-normal);
+
+    // -------------------------------------------------------------------------
+    // FORMULARIOS — field base (afecta a todos los form controls de PrimeNG)
+    // -------------------------------------------------------------------------
+    --p-form-field-background: var(--app-surface-0);
+    --p-form-field-disabled-background: var(--app-surface-100);
+    --p-form-field-filled-background: var(--app-surface-50);
+    --p-form-field-border-color: var(--app-surface-300);
+    --p-form-field-hover-border-color: var(--app-surface-400);
+    --p-form-field-focus-border-color: var(--app-primary-500);
+    --p-form-field-invalid-border-color: var(--app-error);
+    --p-form-field-border-radius: var(--app-radius-md);
+    --p-form-field-color: var(--app-text-primary);
+    --p-form-field-placeholder-color: var(--app-text-muted);
+    --p-form-field-disabled-color: var(--app-text-disabled);
+    --p-form-field-padding-y: var(--app-space-2);
+    --p-form-field-padding-x: var(--app-space-3);
+    --p-form-field-focus-ring-width: var(--app-focus-ring-width, 2px);
+    --p-form-field-focus-ring-color: var(--app-primary-500);
+
+    // -------------------------------------------------------------------------
+    // INPUTTEXT
+    // -------------------------------------------------------------------------
+    --p-inputtext-background: var(--app-surface-0);
+    --p-inputtext-border-color: var(--app-surface-300);
+    --p-inputtext-hover-border-color: var(--app-surface-400);
+    --p-inputtext-focus-border-color: var(--app-primary-500);
+    --p-inputtext-invalid-border-color: var(--app-error);
+    --p-inputtext-color: var(--app-text-primary);
+    --p-inputtext-placeholder-color: var(--app-text-muted);
+    --p-inputtext-border-radius: var(--app-radius-md);
+    --p-inputtext-padding-y: var(--app-space-2);
+    --p-inputtext-padding-x: var(--app-space-3);
+
+    // TEXTAREA hereda inputtext; aseguramos radio/padding
+    --p-textarea-background: var(--app-surface-0);
+    --p-textarea-border-color: var(--app-surface-300);
+    --p-textarea-focus-border-color: var(--app-primary-500);
+    --p-textarea-border-radius: var(--app-radius-md);
+
+    // PASSWORD (usa inputtext internamente; tokens de icono)
+    --p-password-icon-color: var(--app-text-muted);
+
+    // -------------------------------------------------------------------------
+    // SELECT / DROPDOWN
+    // -------------------------------------------------------------------------
+    --p-select-background: var(--app-surface-0);
+    --p-select-border-color: var(--app-surface-300);
+    --p-select-hover-border-color: var(--app-surface-400);
+    --p-select-focus-border-color: var(--app-primary-500);
+    --p-select-invalid-border-color: var(--app-error);
+    --p-select-color: var(--app-text-primary);
+    --p-select-placeholder-color: var(--app-text-muted);
+    --p-select-border-radius: var(--app-radius-md);
+    --p-select-overlay-background: var(--app-surface-0);
+    --p-select-overlay-border-color: var(--app-surface-200);
+    --p-select-overlay-border-radius: var(--app-radius-lg);
+    --p-select-overlay-shadow: var(--app-shadow-lg);
+    --p-select-option-color: var(--app-text-primary);
+    --p-select-option-focus-background: var(--app-primary-50);
+    --p-select-option-focus-color: var(--app-primary-700);
+    --p-select-option-selected-background: var(--app-primary-100);
+    --p-select-option-selected-color: var(--app-primary-800);
+    --p-select-option-selected-focus-background: var(--app-primary-100);
+    --p-select-option-border-radius: var(--app-radius-sm);
+    --p-select-dropdown-color: var(--app-text-muted);
+
+    // -------------------------------------------------------------------------
+    // MULTISELECT
+    // -------------------------------------------------------------------------
+    --p-multiselect-background: var(--app-surface-0);
+    --p-multiselect-border-color: var(--app-surface-300);
+    --p-multiselect-hover-border-color: var(--app-surface-400);
+    --p-multiselect-focus-border-color: var(--app-primary-500);
+    --p-multiselect-invalid-border-color: var(--app-error);
+    --p-multiselect-border-radius: var(--app-radius-md);
+    --p-multiselect-overlay-background: var(--app-surface-0);
+    --p-multiselect-overlay-border-color: var(--app-surface-200);
+    --p-multiselect-overlay-border-radius: var(--app-radius-lg);
+    --p-multiselect-overlay-shadow: var(--app-shadow-lg);
+    --p-multiselect-option-focus-background: var(--app-primary-50);
+    --p-multiselect-option-selected-background: var(--app-primary-100);
+    --p-multiselect-option-selected-color: var(--app-primary-800);
+    --p-multiselect-chip-border-radius: var(--app-radius-sm);
+
+    // -------------------------------------------------------------------------
+    // DATEPICKER
+    // -------------------------------------------------------------------------
+    --p-datepicker-panel-background: var(--app-surface-0);
+    --p-datepicker-panel-border-color: var(--app-surface-200);
+    --p-datepicker-panel-border-radius: var(--app-radius-lg);
+    --p-datepicker-panel-shadow: var(--app-shadow-lg);
+    --p-datepicker-header-background: var(--app-surface-0);
+    --p-datepicker-date-color: var(--app-text-primary);
+    --p-datepicker-date-hover-background: var(--app-primary-50);
+    --p-datepicker-date-selected-background: var(--app-primary-500);
+    --p-datepicker-date-selected-color: var(--app-text-on-primary);
+    --p-datepicker-today-background: var(--app-surface-100);
+    --p-datepicker-date-border-radius: var(--app-radius-sm);
+
+    // -------------------------------------------------------------------------
+    // CHECKBOX
+    // -------------------------------------------------------------------------
+    --p-checkbox-background: var(--app-surface-0);
+    --p-checkbox-border-color: var(--app-surface-300);
+    --p-checkbox-hover-border-color: var(--app-surface-400);
+    --p-checkbox-checked-background: var(--app-primary-500);
+    --p-checkbox-checked-hover-background: var(--app-primary-600);
+    --p-checkbox-checked-border-color: var(--app-primary-500);
+    --p-checkbox-icon-checked-color: var(--app-text-on-primary);
+    --p-checkbox-invalid-border-color: var(--app-error);
+    --p-checkbox-border-radius: var(--app-radius-sm);
+
+    // -------------------------------------------------------------------------
+    // RADIOBUTTON
+    // -------------------------------------------------------------------------
+    --p-radiobutton-background: var(--app-surface-0);
+    --p-radiobutton-border-color: var(--app-surface-300);
+    --p-radiobutton-hover-border-color: var(--app-surface-400);
+    --p-radiobutton-checked-background: var(--app-primary-500);
+    --p-radiobutton-checked-border-color: var(--app-primary-500);
+    --p-radiobutton-icon-checked-color: var(--app-text-on-primary);
+    --p-radiobutton-invalid-border-color: var(--app-error);
+
+    // -------------------------------------------------------------------------
+    // TOGGLESWITCH
+    // -------------------------------------------------------------------------
+    --p-toggleswitch-background: var(--app-surface-300);
+    --p-toggleswitch-hover-background: var(--app-surface-400);
+    --p-toggleswitch-checked-background: var(--app-primary-500);
+    --p-toggleswitch-checked-hover-background: var(--app-primary-600);
+    --p-toggleswitch-handle-background: var(--app-surface-0);
+    --p-toggleswitch-handle-checked-background: var(--app-surface-0);
+    --p-toggleswitch-border-radius: var(--app-radius-full);
+
+    // -------------------------------------------------------------------------
+    // BUTTON
+    // -------------------------------------------------------------------------
+    --p-button-primary-background: var(--app-primary-600);
+    --p-button-primary-hover-background: var(--app-primary-700);
+    --p-button-primary-active-background: var(--app-primary-800);
+    --p-button-primary-border-color: var(--app-primary-600);
+    --p-button-primary-hover-border-color: var(--app-primary-700);
+    --p-button-primary-color: var(--app-text-on-primary);
+    --p-button-secondary-background: var(--app-surface-100);
+    --p-button-secondary-hover-background: var(--app-surface-200);
+    --p-button-secondary-color: var(--app-text-secondary);
+    --p-button-secondary-border-color: var(--app-surface-200);
+    --p-button-border-radius: var(--app-radius-md);
+    --p-button-padding-y: var(--app-space-2);
+    --p-button-padding-x: var(--app-space-4);
+
+    // -------------------------------------------------------------------------
+    // OVERLAYS GENÉRICOS (popover, menu, tooltip, dialog)
+    // -------------------------------------------------------------------------
+    --p-overlay-popover-background: var(--app-surface-0);
+    --p-overlay-popover-border-color: var(--app-surface-200);
+    --p-overlay-popover-border-radius: var(--app-radius-lg);
+    --p-overlay-popover-shadow: var(--app-shadow-lg);
+    --p-overlay-modal-background: var(--app-surface-0);
+    --p-overlay-modal-border-color: var(--app-surface-200);
+    --p-overlay-modal-border-radius: var(--app-radius-lg);
+    --p-overlay-modal-shadow: var(--app-shadow-xl);
+    --p-overlay-select-background: var(--app-surface-0);
+    --p-overlay-select-border-color: var(--app-surface-200);
+    --p-overlay-select-shadow: var(--app-shadow-lg);
+    --p-tooltip-background: var(--app-neutral-800);
+    --p-tooltip-color: var(--app-surface-0);
+    --p-tooltip-border-radius: var(--app-radius-md);
+
+    // -------------------------------------------------------------------------
+    // DATATABLE — bordes/headers coherentes con superficies.
+    // -------------------------------------------------------------------------
+    --p-datatable-header-cell-background: var(--app-surface-50);
+    --p-datatable-header-cell-color: var(--app-text-secondary);
+    --p-datatable-header-cell-border-color: var(--app-surface-200);
+    --p-datatable-body-cell-border-color: var(--app-surface-200);
+    --p-datatable-row-background: var(--app-surface-0);
+    --p-datatable-row-hover-background: var(--app-surface-50);
+    --p-datatable-row-color: var(--app-text-primary);
+    --p-datatable-border-color: var(--app-surface-200);
+
+    // -------------------------------------------------------------------------
+    // MENSAJES / TOAST — usa la paleta semántica.
+    // -------------------------------------------------------------------------
+    --p-message-error-background: var(--app-error-light);
+    --p-message-error-color: var(--app-error-dark);
+    --p-message-error-border-color: var(--app-error);
+    --p-message-success-background: var(--app-success-light);
+    --p-message-success-color: var(--app-success-dark);
+    --p-message-success-border-color: var(--app-success);
+    --p-message-warn-background: var(--app-warning-light);
+    --p-message-warn-color: var(--app-warning-dark);
+    --p-message-warn-border-color: var(--app-warning);
+    --p-message-info-background: var(--app-info-light);
+    --p-message-info-color: var(--app-info-dark);
+    --p-message-info-border-color: var(--app-info);
+  }
+}

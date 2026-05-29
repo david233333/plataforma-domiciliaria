@@ -1,0 +1,25 @@
+// =============================================================================
+// CASCADE LAYERS — DEBE SER LA PRIMERA LÍNEA DE CSS QUE LLEGA AL BROWSER
+// =============================================================================
+//
+// El orden de @layer define la prioridad de la cascada para TODOS los sistemas
+// (Tailwind, PrimeNG, nuestro SCSS). Un estilo en una capa posterior gana sobre
+// uno de una capa anterior, sin importar la especificidad del selector.
+//
+//   reset      → normalizaciones mínimas propias
+//   base       → Tailwind preflight aterriza aquí (el nombre COINCIDE a propósito)
+//   primeng    → estilos de los componentes PrimeNG (inyectados via cssLayer)
+//   sp-theme   → nuestros overrides de tokens --p-* (ENCIMA de primeng → gana sin !important)
+//   layout     → containers y grid propios
+//   components → patrones reutilizables (card, field, badge, skeleton…)
+//   utilities  → Tailwind utilities aterrizan aquí (nombre COINCIDE) → máxima prioridad
+//
+// Tailwind v4 emite internamente `@layer base` y `@layer utilities`. Como
+// declaramos esos nombres aquí, sus estilos aterrizan EXACTAMENTE en la posición
+// correcta de la cascada sin configuración adicional.
+//
+// IMPORTANTE: este mismo orden debe replicarse en `providePrimeNG → cssLayer.order`
+// dentro de app.config.ts. Si difieren, PrimeNG inyecta fuera de capa y rompe todo.
+// =============================================================================
+
+@layer reset, base, primeng, sp-theme, layout, components, utilities;

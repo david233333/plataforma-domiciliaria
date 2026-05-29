@@ -1,0 +1,198 @@
+// =============================================================================
+// PATTERNS — patrones reutilizables · @layer components
+// =============================================================================
+//
+// Cada patrón documenta el reparto de responsabilidades con Tailwind.
+// Regla: si Tailwind ya lo cubre con utilidades simples, NO se hace patrón.
+// Estos existen porque combinan varias decisiones de diseño (color de marca,
+// estados, accesibilidad, layout interno) que deben repetirse idénticas.
+// =============================================================================
+
+@use '../abstracts/responsive' as *;
+
+@layer components {
+  // ===========================================================================
+  // CARD
+  // Tailwind maneja: el contenido interno (grid, gap, padding extra puntual).
+  // Este patrón maneja: superficie, borde de marca, sombra-xs y radio estándar.
+  // (Ghost y elevated NO se incluyen: innecesarios en enterprise.)
+  // ===========================================================================
+  .card {
+    background-color: var(--app-surface-0);
+    border: 1px solid var(--app-surface-200);
+    border-radius: var(--app-radius-md);
+    box-shadow: var(--app-shadow-xs);
+    padding: var(--app-space-6);
+  }
+
+  .card--outlined {
+    background-color: var(--app-surface-0);
+    border: 1px solid var(--app-surface-300); // borde visible
+    border-radius: var(--app-radius-md);
+    box-shadow: none; // sin sombra
+    padding: var(--app-space-6);
+  }
+
+  // ===========================================================================
+  // FIELD (campo de formulario)
+  // Tailwind maneja: la disposición en grid de varios fields (grid-cols-2, gap).
+  // Este patrón maneja: la estructura interna label/control/mensaje, tipografía
+  // de label, color del asterisco y la RESERVA DE ALTURA del mensaje para que
+  // mostrar un error no provoque layout shift.
+  // ===========================================================================
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+  }
+
+  .field__label {
+    font-size: var(--app-size-sm);
+    font-weight: var(--app-weight-medium);
+    line-height: var(--app-leading-snug);
+    color: var(--app-text-primary);
+  }
+
+  .field__required {
+    color: var(--app-error);
+    margin-inline-start: var(--app-space-1);
+  }
+
+  .field__hint {
+    font-size: var(--app-size-sm);
+    line-height: var(--app-leading-snug);
+    color: var(--app-text-muted);
+  }
+
+  .field__error {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+    font-size: var(--app-size-sm);
+    line-height: var(--app-leading-snug);
+    color: var(--app-error-dark);
+
+    &::before {
+      // ícono de alerta (primeicons). Decorativo → aria-hidden implícito.
+      font-family: 'primeicons';
+      content: '\e90c'; // pi-exclamation-triangle
+      font-size: var(--app-size-xs);
+      line-height: 1;
+    }
+  }
+
+  // Reserva altura fija de una línea de mensaje → sin saltos al validar.
+  .field__message-slot {
+    min-height: calc(var(--app-size-sm) * var(--app-leading-snug));
+  }
+
+  // ===========================================================================
+  // STATUS BADGE (badges semánticos)
+  // Tailwind maneja: posicionar el badge dentro de una celda/fila.
+  // Este patrón maneja: tint de fondo + texto contrastado WCAG por estado.
+  // ===========================================================================
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+    padding: var(--app-space-1) var(--app-space-3);
+    border-radius: var(--app-radius-full);
+    font-size: var(--app-size-xs);
+    font-weight: var(--app-weight-semibold);
+    line-height: var(--app-leading-none);
+    letter-spacing: var(--app-tracking-wide);
+    white-space: nowrap;
+  }
+  // success-dark sobre success-light = 5.12:1 ✅
+  .status-badge--success {
+    background-color: var(--app-success-light);
+    color: var(--app-success-dark);
+  }
+  // warning-dark sobre warning-light = 5.04:1 ✅
+  .status-badge--warning {
+    background-color: var(--app-warning-light);
+    color: var(--app-warning-dark);
+  }
+  // error-dark sobre error-light = 6.12:1 ✅
+  .status-badge--error {
+    background-color: var(--app-error-light);
+    color: var(--app-error-dark);
+  }
+  // info-dark sobre info-light = 4.92:1 ✅
+  .status-badge--info {
+    background-color: var(--app-info-light);
+    color: var(--app-info-dark);
+  }
+
+  // ===========================================================================
+  // EMPTY STATE
+  // Tailwind maneja: dónde se coloca dentro de la tabla/listado contenedor.
+  // Este patrón maneja: composición centrada, tono muted y ritmo interno.
+  // ===========================================================================
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--app-space-3);
+    padding: var(--app-space-12) var(--app-space-6);
+    color: var(--app-text-muted);
+  }
+  .empty-state__icon {
+    font-size: var(--app-size-4xl);
+    color: var(--app-surface-400);
+    line-height: 1;
+  }
+  .empty-state__title {
+    font-size: var(--app-size-lg);
+    font-weight: var(--app-weight-semibold);
+    color: var(--app-text-secondary);
+  }
+  .empty-state__body {
+    font-size: var(--app-size-sm);
+    color: var(--app-text-muted);
+    max-width: 40ch;
+  }
+
+  // ===========================================================================
+  // SKELETON
+  // Tailwind maneja: el tamaño/posición de cada placeholder (w-*, h-*).
+  // Este patrón maneja: el fondo shimmer animado (única animación del patrón).
+  // El keyframe `shimmer` vive en utilities/_animations.scss.
+  // ===========================================================================
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--app-surface-200);
+    border-radius: var(--app-radius-sm);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 0.6) 50%,
+        transparent 100%
+      );
+      animation: shimmer var(--app-duration-slow) var(--app-ease-out) infinite;
+    }
+
+    // Respeta reduced-motion: sin barrido, solo el bloque gris estático.
+    @media (prefers-reduced-motion: reduce) {
+      &::after {
+        animation: none;
+      }
+    }
+  }
+  .skeleton--text {
+    height: calc(var(--app-size-base) * var(--app-leading-normal));
+    border-radius: var(--app-radius-sm);
+  }
+  .skeleton--circle {
+    border-radius: var(--app-radius-full);
+  }
+}

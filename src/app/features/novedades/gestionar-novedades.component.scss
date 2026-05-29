@@ -1,0 +1,19 @@
+// Estilos propios del componente. Los overrides de PrimeNG NO van aquí:
+// viven en src/styles/themes/_primeng-theme.scss (@layer sp-theme).
+
+:host {
+  display: block;
+}
+
+// Cabecera colapsable de filtros: reset del botón nativo + hover sutil.
+.filtros-toggle {
+  padding: var(--app-space-4) var(--app-space-6);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background var(--app-duration-fast) var(--app-ease-out);
+
+  &:hover {
+    background: var(--app-surface-50);
+  }
+}

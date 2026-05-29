@@ -1,0 +1,41 @@
+// =============================================================================
+// RESPONSIVE MIXINS
+// =============================================================================
+//
+// Breakpoints alineados 1:1 con los de Tailwind (@theme inline en tailwind.css).
+// Úsalos SOLO dentro de patrones SCSS (@layer components/layout). Para responsive
+// en HTML propio usa los prefijos de Tailwind (md:, lg:, xl:) — no estos mixins.
+//
+//   respond-to($bp)    → mobile-first: aplica DESDE $bp hacia arriba  (min-width)
+//   respond-below($bp) → desktop-first: aplica POR DEBAJO de $bp      (max-width)
+// =============================================================================
+
+$breakpoints: (
+  'xs': 475px,
+  'sm': 640px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1280px,
+  '2xl': 1536px,
+);
+
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @error "respond-to: breakpoint `#{$breakpoint}` no existe. Opciones: #{map-keys($breakpoints)}.";
+  }
+}
+
+@mixin respond-below($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    // -0.02px evita solapamiento en el punto de corte exacto
+    @media (max-width: (map-get($breakpoints, $breakpoint) - 0.02px)) {
+      @content;
+    }
+  } @else {
+    @error "respond-below: breakpoint `#{$breakpoint}` no existe. Opciones: #{map-keys($breakpoints)}.";
+  }
+}

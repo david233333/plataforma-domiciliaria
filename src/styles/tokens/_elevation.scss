@@ -1,0 +1,30 @@
+// =============================================================================
+// TOKENS — ELEVATION (sombras)
+// =============================================================================
+//
+// 5 niveles + inner. Sutiles, frías y de bajo contraste: apropiadas para una
+// UI enterprise en light mode (nunca sombras dramáticas). Construidas sobre
+// neutral-900 con alpha bajo para integrarse en fondos claros.
+//
+// Alimenta tailwind.css (@theme inline → --shadow-*) y los patrones (.card…).
+// =============================================================================
+
+:root {
+  // xs → bordes/cards en reposo, separación mínima del fondo
+  --app-shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+
+  // sm → cards interactivas, controles elevados
+  --app-shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.08), 0 1px 2px -1px rgb(15 23 42 / 0.06);
+
+  // md → dropdowns, popovers, hover de cards
+  --app-shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+
+  // lg → overlays de PrimeNG (select, datepicker, menus)
+  --app-shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.05);
+
+  // xl → modals / dialogs centrales
+  --app-shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.05);
+
+  // inner → campos hundidos, wells
+  --app-shadow-inner: inset 0 2px 4px 0 rgb(15 23 42 / 0.05);
+}
