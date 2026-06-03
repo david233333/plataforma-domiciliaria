@@ -16,14 +16,27 @@
   z-index: 1101; // por encima del panel del drawer
   height: var(--app-header-height);
   padding-inline: var(--app-space-4);
-  background: var(--app-surface-0);
-  border-bottom: 1px solid var(--app-surface-200);
+  background: linear-gradient(
+    90deg,
+    var(--app-primary-800) 0%,
+    var(--app-primary-700) 100%
+  );
+  border-bottom: 1px solid var(--app-primary-900);
+
+  // El botón hamburguesa de PrimeNG vive como p-button "text"; lo forzamos a blanco.
+  ::ng-deep .p-button.p-button-text {
+    color: var(--app-surface-0);
+  }
+  ::ng-deep .p-button.p-button-text:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--app-surface-0);
+  }
 
   // Separador vertical entre las acciones de la derecha.
   &__sep {
     width: 1px;
     height: 1.5rem;
-    background: var(--app-surface-200);
+    background: rgba(255, 255, 255, 0.28);
   }
 }
 
@@ -40,16 +53,22 @@
     display: block;
     height: 2rem; // 32px — escala manteniendo proporción
     width: auto;
+    // El logo SURA es azul oscuro; sobre el header azul lo apoyamos en un chip
+    // blanco para que conserve su color de marca y se lea con claridad.
+    padding: var(--app-space-1) var(--app-space-2);
+    background: var(--app-surface-0);
+    border-radius: var(--app-radius-md);
+    box-sizing: content-box;
   }
 
   &__divider {
     width: 1px;
     height: 1.75rem;
-    background: var(--app-surface-200);
+    background: rgba(255, 255, 255, 0.28);
   }
 
   &__name {
-    color: var(--app-text-primary);
+    color: var(--app-surface-0);
   }
 }
 

@@ -42,10 +42,14 @@ import { NotificacionesFacade } from '../../application/notificaciones/notificac
       width: 2.5rem;
       height: 2.5rem;
       border-radius: var(--app-radius-full, 9999px);
-      color: var(--app-text-secondary, #475569);
+      color: var(--app-surface-0, #ffffff);
     }
     .notif-badge:hover {
-      background: var(--app-surface-50, #f8fafc);
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .notif-badge:focus-visible {
+      outline: 2px solid var(--app-surface-0, #ffffff);
+      outline-offset: 2px;
     }
     .notif-badge__count {
       position: absolute;
@@ -55,8 +59,9 @@ import { NotificacionesFacade } from '../../application/notificaciones/notificac
       height: 1.1rem;
       padding: 0 0.25rem;
       border-radius: var(--app-radius-full, 9999px);
-      background: var(--app-primary-600, #2563eb);
+      background: var(--app-error, #dc2626);
       color: #fff;
+      border: 1px solid var(--app-surface-0, #ffffff);
       font-size: 0.7rem;
       line-height: 1.1rem;
       text-align: center;

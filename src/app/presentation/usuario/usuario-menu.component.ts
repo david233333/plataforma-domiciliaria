@@ -104,11 +104,11 @@ interface UsuarioSesion {
         border-color var(--app-duration-fast) var(--app-ease-out);
     }
     .usuario-trigger:hover {
-      background: var(--app-surface-50);
-      border-color: var(--app-surface-200);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.28);
     }
     .usuario-trigger:focus-visible {
-      outline: 2px solid var(--app-primary-600);
+      outline: 2px solid var(--app-surface-0);
       outline-offset: 2px;
     }
 
@@ -125,14 +125,14 @@ interface UsuarioSesion {
       }
     }
     .usuario-trigger__nombre {
-      color: var(--app-text-primary);
+      color: var(--app-surface-0);
     }
     .usuario-trigger__rol {
-      color: var(--app-text-muted);
+      color: rgba(255, 255, 255, 0.75);
     }
     .usuario-trigger__chevron {
       font-size: 0.7rem;
-      color: var(--app-text-muted);
+      color: rgba(255, 255, 255, 0.75);
     }
 
     /* ---- Panel desplegado ---- */
@@ -194,6 +194,19 @@ interface UsuarioSesion {
     }
     .usuario-panel__meta-value {
       color: var(--app-text-primary);
+    }
+
+    /* Avatar del disparador: blanco con texto azul para destacar sobre el header. */
+    :host ::ng-deep .usuario-trigger__avatar {
+      background: var(--app-surface-0);
+      color: var(--app-primary-700);
+      font-weight: var(--app-weight-semibold);
+    }
+    /* Avatar del panel: como vive sobre fondo blanco, lo dejamos en azul de marca. */
+    :host ::ng-deep .usuario-panel__avatar {
+      background: var(--app-primary-600);
+      color: var(--app-surface-0);
+      font-weight: var(--app-weight-semibold);
     }
 
     :host ::ng-deep .usuario-panel__logout {
