@@ -25,16 +25,42 @@ export const routes: Routes = [
   {
     path: 'novedades',
     loadChildren: () =>
-      import('./presentation/novedades/novedades.routes').then(
+      import('./presentation/hospitalario/gestionar-novedades/novedades.routes').then(
         (m) => m.NOVEDADES_ROUTES,
       ),
+  },
+
+  // Informes — un componente dedicado por ámbito.
+  {
+    path: 'hospitalario/informes',
+    loadComponent: () =>
+      import('./presentation/hospitalario/informes-h/informes-h.component').then(
+        (m) => m.InformesHComponent,
+      ),
+    title: 'Informes hospitalario · Salud en Casa',
+  },
+  {
+    path: 'no-hospitalario/informes',
+    loadComponent: () =>
+      import('./presentation/no-hospitalario/informes-nh/informes-nh.component').then(
+        (m) => m.InformesNhComponent,
+      ),
+    title: 'Informes no hospitalario · Salud en Casa',
+  },
+  {
+    path: 'no-hospitalario/solicitudes',
+    loadComponent: () =>
+      import('./presentation/no-hospitalario/solicitudes/solicitudes.component').then(
+        (m) => m.SolicitudesComponent,
+      ),
+    title: 'Solicitudes no hospitalario · Salud en Casa',
   },
 
   {
     path: 'arquitectura-estilos',
     loadComponent: () =>
       import(
-        './presentation/documentacion/arquitectura-estilos.component'
+        './presentation/documentacion/arquitectura-estilos/arquitectura-estilos.component'
       ).then((m) => m.ArquitecturaEstilosComponent),
     title: 'Arquitectura de estilos',
   },
@@ -43,7 +69,7 @@ export const routes: Routes = [
         {
           path: 'design-system',
           loadComponent: () =>
-            import('./presentation/design-system/design-system.component').then(
+            import('./presentation/documentacion/design-system/design-system.component').then(
               (m) => m.DesignSystemComponent,
             ),
           title: 'Design System',

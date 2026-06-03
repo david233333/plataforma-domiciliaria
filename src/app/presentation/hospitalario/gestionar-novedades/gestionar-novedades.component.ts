@@ -18,11 +18,11 @@ import { TableModule } from 'primeng/table';
 import { Tooltip } from 'primeng/tooltip';
 
 // Dominio (solo TIPOS y casos de uso — la presentación no conoce HTTP ni reglas)
-import { Novedad } from '../../domain/novedades/entities/novedad.entity';
-import { EstadoNovedad } from '../../domain/novedades/entities/estado-novedad';
-import { FiltroNovedades } from '../../domain/novedades/entities/filtro-novedades';
-import { BuscarNovedadesUseCase } from '../../domain/novedades/use-cases/buscar-novedades.use-case';
-import { GestionarNovedadUseCase } from '../../domain/novedades/use-cases/gestionar-novedad.use-case';
+import { Novedad } from '../../../domain/novedades/entities/novedad.entity';
+import { EstadoNovedad } from '../../../domain/novedades/entities/estado-novedad';
+import { FiltroNovedades } from '../../../domain/novedades/entities/filtro-novedades';
+import { BuscarNovedadesUseCase } from '../../../domain/novedades/use-cases/buscar-novedades.use-case';
+import { GestionarNovedadUseCase } from '../../../domain/novedades/use-cases/gestionar-novedad.use-case';
 
 // Catálogos/labels de UI co-localizados (convención i18n)
 import {

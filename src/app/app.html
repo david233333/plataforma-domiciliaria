@@ -61,16 +61,49 @@
     <span class="text-overline">Navegación</span>
   </ng-template>
 
-  <nav class="flex flex-col gap-1" aria-label="Menú principal">
-    @for (item of navItems; track item.route) {
-      <a
-        class="nav-item"
-        [routerLink]="item.route"
-        routerLinkActive="nav-item--active"
-      >
-        <i class="pi {{ item.icon }}"></i>
-        <span class="text-label-md">{{ item.label }}</span>
-      </a>
+  <nav class="flex flex-col gap-4" aria-label="Menú principal">
+    <a
+      class="nav-item"
+      [routerLink]="inicioItem.route"
+      routerLinkActive="nav-item--active"
+    >
+      <i class="pi {{ inicioItem.icon }}"></i>
+      <span class="text-label-md">{{ inicioItem.label }}</span>
+    </a>
+
+    @for (section of navSections; track section.key) {
+      @let expanded = expandedSections()[section.key];
+      <div class="nav-section">
+        <button
+          type="button"
+          class="nav-section__header"
+          [attr.aria-expanded]="expanded"
+          [attr.aria-controls]="'nav-section-' + section.key"
+          (click)="toggleSection(section.key)"
+        >
+          <span class="text-overline">{{ section.label }}</span>
+          <i
+            class="pi pi-chevron-down nav-section__chevron"
+            [class.nav-section__chevron--collapsed]="!expanded"
+            aria-hidden="true"
+          ></i>
+        </button>
+
+        @if (expanded) {
+          <div class="flex flex-col gap-1" [id]="'nav-section-' + section.key">
+            @for (item of section.items; track item.route) {
+              <a
+                class="nav-item"
+                [routerLink]="item.route"
+                routerLinkActive="nav-item--active"
+              >
+                <i class="pi {{ item.icon }}"></i>
+                <span class="text-label-md">{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        }
+      </div>
     }
   </nav>
 </p-drawer>

@@ -16,7 +16,7 @@ Cada slice de `presentation/` co-localiza sus etiquetas y catálogos en un archi
 de constantes con sufijo `*.labels.ts`, p. ej.:
 
 ```
-presentation/novedades/novedades.labels.ts
+presentation/hospitalario/novedades.labels.ts
 ```
 
 Ese archivo exporta objetos/constantes con los textos y catálogos de la pantalla.

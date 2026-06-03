@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { provideNovedades } from '../../application/di/novedades.providers';
+import { provideNovedades } from '../../../application/di/novedades.providers';
 
 /**
  * Rutas de la feature novedades. El cableado de DI (`provideNovedades`) se

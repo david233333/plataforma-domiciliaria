@@ -3,7 +3,7 @@
  * estados posibles y las reglas asociadas viven aquí, no en la presentación.
  *
  * La COSMÉTICA (label/variant/icon para el badge) NO pertenece al dominio: vive
- * en `presentation/novedades` porque es decisión visual, no regla de negocio.
+ * en `presentation/hospitalario` porque es decisión visual, no regla de negocio.
  */
 export const ESTADOS_NOVEDAD = [
   'PENDIENTE_GESTION',
