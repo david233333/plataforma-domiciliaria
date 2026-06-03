@@ -10,19 +10,26 @@ import { environment } from '../environments/environment';
 // =============================================================================
 export const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'inicio',
+    pathMatch: 'full',
+  },
+  {
+    path: 'inicio',
+    loadComponent: () =>
+      import('./presentation/inicio/inicio.component').then(
+        (m) => m.InicioComponent,
+      ),
+    title: 'Inicio · Salud en Casa',
+  },
+  {
     path: 'novedades',
     loadChildren: () =>
       import('./presentation/novedades/novedades.routes').then(
         (m) => m.NOVEDADES_ROUTES,
       ),
   },
-  {
-    path: 'notificaciones',
-    loadChildren: () =>
-      import('./presentation/notificaciones/notificaciones.routes').then(
-        (m) => m.NOTIFICACIONES_ROUTES,
-      ),
-  },
+
   {
     path: 'arquitectura-estilos',
     loadComponent: () =>

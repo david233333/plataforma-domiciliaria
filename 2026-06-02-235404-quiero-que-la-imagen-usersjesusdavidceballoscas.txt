@@ -1,0 +1,2449 @@
+╭─── Claude Code v2.1.161 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                    Welcome back!                   │ started                 │
+│                                                    │ Run /init to create a … │
+│                       ▐▛███▜▌                      │ ─────────────────────── │
+│                      ▝▜█████▛▘                     │ What's new              │
+│                        ▘▘ ▝▝                       │ `OTEL_RESOURCE_ATTRIBU… │
+│  Opus 4.8 · Claude Pro · jdceballos@unac.edu.co's  │ `claude agents` rows n… │
+│  Organization                                      │ `/mcp` now collapses c… │
+│  ~/Documents/salud-en-casa/plataforma-domiciliaria │ /release-notes for more │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+❯ /model 
+  ⎿  Kept model as Opus 4.8
+
+❯ quiero que la imagen /Users/jesusdavidceballoscastillo/Documents/salud-en-cas 
+  a/plataforma-domiciliaria/logo-sura.svg quede arriba en la parte superio del  
+  header antes del texto plataforma domiciliara asi como esta imagen [Image     
+  #1], mira como lo separas con el texto plataforma domiciliar pero que quede   
+  bonito.                                                                       
+  ⎿  [Image #1]
+
+⏺ Voy a buscar el componente del header donde está el texto "Plataforma
+  Domiciliaria" para añadir el logo.
+
+  Searched for 1 pattern, read 2 files, listed 1 directory (ctrl+o to expand)
+
+⏺ Voy a revisar la configuración de assets en angular.json y los estilos del
+  header.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+⏺ Voy a mover el logo a public/ para que Angular lo sirva, y revisar app.ts.
+
+⏺ Bash(git mv logo-sura.svg public/logo-sura.svg 2>/dev/null || mv logo-sura.svg
+      public/logo-sura.svg; ls -la public/)
+  ⎿  total 40
+     drwxr-xr-x@  4 jesusdavidceballoscastillo  staff    128 Jun  2 20:27 .
+     drwxr-xr-x@ 24 jesusdavidceballoscastillo  staff    768 Jun  2 20:27 .
+     … +5 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Ahora actualizo el header para incluir el logo antes del texto, con un
+  separador. Uso NgOptimizedImage según las convenciones del proyecto.
+
+⏺ Update(src/app/app.ts)
+  ⎿  Added 1 line
+      1  import { ChangeDetectionStrategy, Component, signal } from '@ang
+         ular/core';
+      2 +import { NgOptimizedImage } from '@angular/common';             
+      3  import { RouterLink, RouterLinkActive, RouterOutlet } from '@ang
+         ular/router';
+      4  import { Drawer } from 'primeng/drawer';
+      5  import { ButtonModule } from 'primeng/button';
+
+⏺ Update(src/app/app.ts)
+  ⎿  Added 1 line
+      19      RouterOutlet,
+      20      RouterLink,
+      21      RouterLinkActive,
+      22 +    NgOptimizedImage,                                          
+      23      Drawer,
+      24      ButtonModule,
+      25      NotificacionesBadgeComponent,
+
+⏺ Update(src/app/app.html)
+  ⎿  Added 11 lines, removed 2 lines
+      22      [attr.aria-expanded]="drawerVisible()"
+      23      (onClick)="toggleDrawer()"
+      24    />
+      25 -  <a routerLink="/novedades" class="text-label-lg" style="color
+         -: var(--app-text-primary)">                                    
+      26 -    Plataforma Domiciliaria                                    
+      25 +  <a routerLink="/novedades" class="app-brand" aria-label="Sura
+         + — Plataforma Domiciliaria">                                   
+      26 +    <img                                                       
+      27 +      ngSrc="logo-sura.svg"                                    
+      28 +      width="139"                                              
+      29 +      height="48"                                              
+      30 +      priority                                                 
+      31 +      alt="Sura"                                               
+      32 +      class="app-brand__logo"                                  
+      33 +    />                                                         
+      34 +    <span class="app-brand__divider" aria-hidden="true"></span>
+      35 +    <span class="text-label-lg app-brand__name">Plataforma Domi
+         +ciliaria</span>                                                
+      36    </a>
+      37  
+      38    <!-- Badge de notificaciones: lee el estado compartido del No
+          tificacionesFacade. -->
+
+⏺ Ahora agrego los estilos del brand en el SCSS:
+
+⏺ Update(src/app/app.scss)
+  ⎿  Added 26 lines
+      20    border-bottom: 1px solid var(--app-surface-200);
+      21  }
+      22  
+      23 +// ------------------------------------------------------------
+         +-----------------                                              
+      24 +// MARCA (logo + separador + nombre) en el header.             
+      25 +// ------------------------------------------------------------
+         +-----------------                                              
+      26 +.app-brand {                                                   
+      27 +  display: inline-flex;                                        
+      28 +  align-items: center;                                         
+      29 +  gap: var(--app-space-3);                                     
+      30 +  text-decoration: none;                                       
+      31 +                                                               
+      32 +  &__logo {                                                    
+      33 +    display: block;                                            
+      34 +    height: 2rem; // 32px — escala manteniendo proporción      
+      35 +    width: auto;                                               
+      36 +  }                                                            
+      37 +                                                               
+      38 +  &__divider {                                                 
+      39 +    width: 1px;                                                
+      40 +    height: 1.75rem;                                           
+      41 +    background: var(--app-surface-200);                        
+      42 +  }                                                            
+      43 +                                                               
+      44 +  &__name {                                                    
+      45 +    color: var(--app-text-primary);                            
+      46 +  }                                                            
+      47 +}                                                              
+      48 +                                                               
+      49  // El contenido arranca debajo del header fijo.
+      50  // Cuando el drawer está abierto, EMPUJA el contenido (no lo ta
+          pa): el área
+      51  // principal se desplaza el ancho del drawer y se reajusta con 
+          transición.
+
+⏺ Verifico que compile correctamente:
+
+⏺ Bash(npx ng build --configuration development 2>&1 | tail -25)
+  ⎿  Initial chunk files | Names                          |  Raw size
+     chunk-L23OUJMN.js   | -                              | 864.67 kB |
+     chunk-6UNILOMT.js   | -                              | 344.61 kB |
+     … +21 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+⏺ Compila correctamente. Listo.
+
+  Hice lo siguiente:
+
+  1. Moví el logo de la raíz a public/logo-sura.svg (con git mv) para que
+  Angular lo sirva como asset estático.
+  2. Header (app.html): reemplacé el texto suelto por un bloque de marca con el
+  logo SURA, un separador vertical y el texto "Plataforma Domiciliaria", todo
+  dentro del mismo enlace a /novedades. Usé NgOptimizedImage (ngSrc + priority)
+  según las convenciones del proyecto.
+  3. Estilos (app.scss): agregué .app-brand con display:inline-flex, el logo
+  escalado a 32px de alto manteniendo proporción (width:auto), y un divisor
+  sutil (1px con --app-surface-200) que separa el logo del texto de forma
+  limpia.
+
+  El resultado: el logo SURA queda a la izquierda en el header (después del
+  botón de menú), seguido de una línea divisoria fina y el texto "Plataforma
+  Domiciliaria", tal como en la imagen de referencia.
+
+  Para verlo, levanta el dev server con ! npm start (o ! npx ng serve).
+
+✻ Crunched for 1m 16s
+
+❯ tambien en el header quiero al final de la parte superio derecha quiero una   
+  parte donde donde se vea el usuario registrado y la posibilidad de cerrar     
+  sesion y su ultimo inicio de sesion, de momento hazlo con datos quemados.     
+  dame algo bonito, siempre recuerda implementar todo con nuestro desing system 
+
+⏺ Voy a revisar el design system y el componente de badge existente para seguir
+  los mismos patrones.
+
+  Read 1 file, listed 1 directory (ctrl+o to expand)
+
+⏺ Bash(ls node_modules/primeng/popover node_modules/primeng/menu
+      node_modules/primeng/avatar 2>/dev/null && echo "FOUND"; echo "=== version
+      ==="; node -p "require('./n…)
+  ⎿  === version ===
+     21.1.8
+  Searched for 3 patterns, listed 3 directories (ctrl+o to expand)
+
+⏺ Ahora creo el componente de menú de usuario con PrimeNG Popover + Avatar,
+  datos quemados y tokens del design system.
+
+⏺ Write(src/app/presentation/usuario/usuario-menu.component.ts)
+  ⎿  Wrote 226 lines to
+     src/app/presentation/usuario/usuario-menu.component.ts
+         from '@angular/core';ionStrategy, Component, computed, signal } 
+       2 import { DatePipe } from '@angular/common';
+       3 import { Popover } from 'primeng/popover';
+       4 import { Avatar } from 'primeng/avatar';
+       5 import { ButtonModule } from 'primeng/button';
+       7 /** Datos del usuario en sesión. Quemados por ahora — vendrán de
+         l AuthFacade. */
+       8 interface UsuarioSesion {
+       9   readonly nombre: string;
+      10   readonly rol: string;
+     … +231 lines (ctrl+o to expand)
+
+⏺ Wire el estado abierto/cerrado del popover y luego lo integro en el header.
+
+⏺ Update(src/app/presentation/usuario/usuario-menu.component.ts)
+  ⎿  Added 6 lines, removed 1 line
+      42        <i class="pi pi-chevron-down usuario-trigger__chevron" ar
+          ia-hidden="true"></i>
+      43      </button>
+      44  
+      45 -    <p-popover #op styleClass="usuario-popover">               
+      45 +    <p-popover                                                 
+      46 +      #op                                                      
+      47 +      styleClass="usuario-popover"                             
+      48 +      (onShow)="abierto.set(true)"                             
+      49 +      (onHide)="abierto.set(false)"                            
+      50 +    >                                                          
+      51        <div class="usuario-panel" role="dialog" aria-label="Info
+          rmación de usuario">
+      52          <header class="usuario-panel__head">
+      53            <p-avatar
+
+⏺ Ahora lo integro en el header, reemplazando el badge para colocar ambos a la
+  derecha:
+
+⏺ Update(src/app/app.html)
+  ⎿  Added 7 lines, removed 2 lines
+      35      <span class="text-label-lg app-brand__name">Plataforma Domi
+          ciliaria</span>
+      36    </a>
+      37  
+      38 -  <!-- Badge de notificaciones: lee el estado compartido del No
+         -tificacionesFacade. -->                                        
+      39 -  <app-notificaciones-badge class="ml-auto" />                 
+      38 +  <!-- Acciones del extremo derecho: notificaciones + usuario e
+         +n sesión. -->                                                  
+      39 +  <div class="ml-auto flex items-center gap-2">                
+      40 +    <!-- Badge de notificaciones: lee el estado compartido del 
+         +NotificacionesFacade. -->                                      
+      41 +    <app-notificaciones-badge />                               
+      42 +    <span class="app-header__sep" aria-hidden="true"></span>   
+      43 +    <app-usuario-menu />                                       
+      44 +  </div>                                                       
+      45  </header>
+      46  
+      47  <!-- ============================ DRAWER / MENÚ ===============
+          ============= -->
+
+⏺ Update(src/app/app.ts)
+  ⎿  Added 1 line
+       5  import { ButtonModule } from 'primeng/button';
+       6  import { routeFadeAnimation } from './core/animations/animation
+          s';
+       7  import { NotificacionesBadgeComponent } from './presentation/no
+          tificaciones/notificaciones-badge.component';
+       8 +import { UsuarioMenuComponent } from './presentation/usuario/us
+         +uario-menu.component';                                         
+       9  
+      10  interface NavItem {
+      11    readonly label: string;
+
+⏺ Update(src/app/app.ts)
+  ⎿  Added 1 line
+      24      Drawer,
+      25      ButtonModule,
+      26      NotificacionesBadgeComponent,
+      27 +    UsuarioMenuComponent,                                      
+      28    ],
+      29    templateUrl: './app.html',
+      30    styleUrl: './app.scss',
+
+⏺ Agrego el separador del header en el SCSS:
+
+⏺ Update(src/app/app.scss)
+  ⎿  Added 7 lines
+      18    padding-inline: var(--app-space-4);
+      19    background: var(--app-surface-0);
+      20    border-bottom: 1px solid var(--app-surface-200);
+      21 +                                                               
+      22 +  // Separador vertical entre las acciones de la derecha.      
+      23 +  &__sep {                                                     
+      24 +    width: 1px;                                                
+      25 +    height: 1.5rem;                                            
+      26 +    background: var(--app-surface-200);                        
+      27 +  }                                                            
+      28  }
+      29  
+      30  // ------------------------------------------------------------
+          -----------------
+
+⏺ Bash(npx ng build --configuration development 2>&1 | tail -20)
+  ⎿  chunk-NQCYLE26.js   | -                              | 167.72 kB |
+     styles.css          | styles                         |  61.49 kB |
+     chunk-GOMI4DH3.js   | -                              |   1.37 kB |
+     … +16 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+⏺ Compila sin errores. Listo.
+
+  Agregué un menú de usuario en el extremo superior derecho del header:
+
+  Nuevo componente src/app/presentation/usuario/usuario-menu.component.ts:
+  - Disparador en el header: avatar circular con iniciales (LV), nombre y rol,
+  más un chevron. En móvil (<640px) solo se ve el avatar para ahorrar espacio.
+  - Popover desplegable (PrimeNG p-popover) que muestra:
+    - Avatar grande + nombre completo + correo + un chip con el rol.
+    - Bloque destacado con el último inicio de sesión (ícono de reloj + fecha
+  formateada con DatePipe).
+    - Botón "Cerrar sesión" (severity danger) con un cerrarSesion() placeholder
+  listo para conectar al futuro AuthFacade.
+
+  Integración en el header (app.html): un contenedor a la derecha agrupa el
+  badge de notificaciones + un separador vertical + el menú de usuario.
+
+  Detalles de calidad:
+  - Todo con tokens del design system (--app-*), clases tipográficas
+  (text-label-md, text-overline, etc.) y componentes PrimeNG (Popover, Avatar,
+  Button).
+  - Accesibilidad: aria-expanded sincronizado con el estado real del popover
+  (vía onShow/onHide), aria-haspopup="dialog", role="dialog", focus-visible con
+  outline, labels descriptivos.
+  - OnPush, signals (signal/computed), sin decoradores de host, sin any.
+
+  Los datos están quemados en el signal<UsuarioSesion> — cuando exista el
+  AuthFacade solo se reemplaza esa fuente y el cerrarSesion().
+
+  Para verlo: ! npm start y haz clic en el avatar a la derecha del header.
+
+✻ Sautéed for 1m 52s
+
+※ recap: Goal: improving the app header with the design system. Added the SURA logo before the title, plus a user menu (avatar, last login, logout) at the top right with hardcoded data. Both build cleanly. Next: run the app to verify visually. (disable recaps in /config)
+
+❯ quiero que hagas un ajuste, el header lo quiero de color azul y pues lo que   
+  hay dentro del header un color diferente al ne                                
+  gro para que se pueda ver bien dame le ajuste, quiero ver que tal se ve       
+
+⏺ Voy a poner el header azul y ajustar los elementos internos a colores claros.
+  El logo SURA es azul oscuro, así que lo coloco sobre un chip blanco para que
+  siga visible y on-brand.
+
+⏺ Update(src/app/app.scss)
+  ⎿  Added 16 lines, removed 3 lines
+      16    z-index: 1101; // por encima del panel del drawer
+      17    height: var(--app-header-height);
+      18    padding-inline: var(--app-space-4);
+      19 -  background: var(--app-surface-0);                            
+      20 -  border-bottom: 1px solid var(--app-surface-200);             
+      19 +  background: linear-gradient(                                 
+      20 +    90deg,                                                     
+      21 +    var(--app-primary-800) 0%,                                 
+      22 +    var(--app-primary-700) 100%                                
+      23 +  );                                                           
+      24 +  border-bottom: 1px solid var(--app-primary-900);             
+      25  
+      26 +  // El botón hamburguesa de PrimeNG vive como p-button "text";
+         + lo forzamos a blanco.                                         
+      27 +  ::ng-deep .p-button.p-button-text {                          
+      28 +    color: var(--app-surface-0);                               
+      29 +  }                                                            
+      30 +  ::ng-deep .p-button.p-button-text:hover {                    
+      31 +    background: rgba(255, 255, 255, 0.14);                     
+      32 +    color: var(--app-surface-0);                               
+      33 +  }                                                            
+      34 +                                                               
+      35    // Separador vertical entre las acciones de la derecha.
+      36    &__sep {
+      37      width: 1px;
+      38      height: 1.5rem;
+      26 -    background: var(--app-surface-200);                        
+      39 +    background: rgba(255, 255, 255, 0.28);                     
+      40    }
+      41  }
+      42  
+
+⏺ Ahora ajusto el brand: chip blanco para el logo y texto blanco.
+
+⏺ Update(src/app/app.scss)
+  ⎿  Added 8 lines, removed 2 lines
+      53      display: block;
+      54      height: 2rem; // 32px — escala manteniendo proporción
+      55      width: auto;
+      56 +    // El logo SURA es azul oscuro; sobre el header azul lo apo
+         +yamos en un chip                                               
+      57 +    // blanco para que conserve su color de marca y se lea con 
+         +claridad.                                                      
+      58 +    padding: var(--app-space-1) var(--app-space-2);            
+      59 +    background: var(--app-surface-0);                          
+      60 +    border-radius: var(--app-radius-md);                       
+      61 +    box-sizing: content-box;                                   
+      62    }
+      63  
+      64    &__divider {
+      65      width: 1px;
+      66      height: 1.75rem;
+      61 -    background: var(--app-surface-200);                        
+      67 +    background: rgba(255, 255, 255, 0.28);                     
+      68    }
+      69  
+      70    &__name {
+      65 -    color: var(--app-text-primary);                            
+      71 +    color: var(--app-surface-0);                               
+      72    }
+      73  }
+      74  
+
+⏺ Ahora el badge de notificaciones a blanco:
+
+⏺ Update(src/app/presentation/notificaciones/notificaciones-badge.component.ts)
+  ⎿  Added 8 lines, removed 3 lines
+      42        width: 2.5rem;
+      43        height: 2.5rem;
+      44        border-radius: var(--app-radius-full, 9999px);
+      45 -      color: var(--app-text-secondary, #475569);               
+      45 +      color: var(--app-surface-0, #ffffff);                    
+      46      }
+      47      .notif-badge:hover {
+      48 -      background: var(--app-surface-50, #f8fafc);              
+      48 +      background: rgba(255, 255, 255, 0.14);                   
+      49      }
+      50 +    .notif-badge:focus-visible {                               
+      51 +      outline: 2px solid var(--app-surface-0, #ffffff);        
+      52 +      outline-offset: 2px;                                     
+      53 +    }                                                          
+      54      .notif-badge__count {
+      55        position: absolute;
+      56        top: 0.25rem;
+     ...
+      59        height: 1.1rem;
+      60        padding: 0 0.25rem;
+      61        border-radius: var(--app-radius-full, 9999px);
+      58 -      background: var(--app-primary-600, #2563eb);             
+      62 +      background: var(--app-danger, #dc2626);                  
+      63        color: #fff;
+      64 +      border: 1px solid var(--app-surface-0, #ffffff);         
+      65        font-size: 0.7rem;
+      66        line-height: 1.1rem;
+      67        text-align: center;
+
+  Searched for 1 pattern (ctrl+o to expand)
+⏺ El token es --app-error, lo corrijo:
+
+⏺ Update(src/app/presentation/notificaciones/notificaciones-badge.component.ts)
+  ⎿  Added 1 line, removed 1 line
+      59        height: 1.1rem;
+      60        padding: 0 0.25rem;
+      61        border-radius: var(--app-radius-full, 9999px);
+      62 -      background: var(--app-danger, #dc2626);                  
+      62 +      background: var(--app-error, #dc2626);                   
+      63        color: #fff;
+      64        border: 1px solid var(--app-surface-0, #ffffff);
+      65        font-size: 0.7rem;
+
+⏺ Ahora el trigger del menú de usuario a colores claros (el panel desplegado
+  queda sobre blanco, así que ese no cambia):
+
+⏺ Update(src/app/presentation/usuario/usuario-menu.component.ts)
+  ⎿  Added 3 lines, removed 3 lines
+      104          border-color var(--app-duration-fast) var(--app-ease-o
+           ut);
+      105      }
+      106      .usuario-trigger:hover {
+      107 -      background: var(--app-surface-50);                      
+      108 -      border-color: var(--app-surface-200);                   
+      107 +      background: rgba(255, 255, 255, 0.14);                  
+      108 +      border-color: rgba(255, 255, 255, 0.28);                
+      109      }
+      110      .usuario-trigger:focus-visible {
+      111 -      outline: 2px solid var(--app-primary-600);              
+      111 +      outline: 2px solid var(--app-surface-0);                
+      112        outline-offset: 2px;
+      113      }
+      114  
+
+⏺ Update(src/app/presentation/usuario/usuario-menu.component.ts)
+  ⎿  Added 3 lines, removed 3 lines
+      125        }
+      126      }
+      127      .usuario-trigger__nombre {
+      128 -      color: var(--app-text-primary);                         
+      128 +      color: var(--app-surface-0);                            
+      129      }
+      130      .usuario-trigger__rol {
+      131 -      color: var(--app-text-muted);                           
+      131 +      color: rgba(255, 255, 255, 0.75);                       
+      132      }
+      133      .usuario-trigger__chevron {
+      134        font-size: 0.7rem;
+      135 -      color: var(--app-text-muted);                           
+      135 +      color: rgba(255, 255, 255, 0.75);                       
+      136      }
+      137  
+      138      /* ---- Panel desplegado ---- */
+
+⏺ Le doy contraste al avatar del trigger (fondo blanco, texto azul) para que
+  destaque sobre el header azul:
+
+⏺ Update(src/app/presentation/usuario/usuario-menu.component.ts)
+  ⎿  Added 13 lines
+      196        color: var(--app-text-primary);
+      197      }
+      198  
+      199 +    /* Avatar del disparador: blanco con texto azul para desta
+          +car sobre el header. */                                       
+      200 +    :host ::ng-deep .usuario-trigger__avatar {                
+      201 +      background: var(--app-surface-0);                       
+      202 +      color: var(--app-primary-700);                          
+      203 +      font-weight: var(--app-weight-semibold);                
+      204 +    }                                                         
+      205 +    /* Avatar del panel: como vive sobre fondo blanco, lo deja
+          +mos en azul de marca. */                                      
+      206 +    :host ::ng-deep .usuario-panel__avatar {                  
+      207 +      background: var(--app-primary-600);                     
+      208 +      color: var(--app-surface-0);                            
+      209 +      font-weight: var(--app-weight-semibold);                
+      210 +    }                                                         
+      211 +                                                              
+      212      :host ::ng-deep .usuario-panel__logout {
+      213        width: 100%;
+      214        justify-content: center;
+
+⏺ Bash(npx ng build --configuration development 2>&1 | tail -8)
+  ⎿  chunk-QEY6XTVQ.js   | novedades-routes               |   6.43 kB |
+     chunk-7LKBB4NU.js   | -                              |   1.66 kB |
+     chunk-Z46HL73O.js   | notificaciones-routes          | 357 bytes |
+     … +6 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+⏺ Compila sin errores. Listo el ajuste.
+
+  Qué cambié para el header azul:
+
+  Header (app.scss):
+  - Fondo azul con degradado sutil de --app-primary-800 → --app-primary-700,
+  borde inferior --app-primary-900.
+  - Botón hamburguesa (PrimeNG) forzado a blanco con hover translúcido.
+  - Separadores verticales en blanco translúcido (rgba(255,255,255,0.28)).
+
+  Brand / logo:
+  - El logo SURA es azul oscuro, así que lo apoyé en un chip blanco (padding +
+  fondo blanco + radius) para que conserve su color de marca y se lea bien.
+  - Texto "Plataforma Domiciliaria" en blanco.
+
+  Badge de notificaciones:
+  - Ícono en blanco, hover translúcido, focus visible blanco.
+  - El contador ahora usa --app-error (rojo) con borde blanco, que contrasta
+  mejor que el azul sobre el header azul.
+
+  Menú de usuario:
+  - Trigger: nombre en blanco, rol/chevron en blanco translúcido, hover y borde
+  translúcidos.
+  - Avatar del trigger: fondo blanco con iniciales azules para destacar.
+  - El panel desplegable sigue sobre fondo blanco (sin cambios de legibilidad),
+  con su avatar en azul de marca.
+
+  Para verlo: ! npm start. Si quieres otro tono de azul (más claro/plano sin
+  degradado, o el azul corporativo #0033a0 del logo), dime y lo ajusto.
+
+✻ Baked for 1m 29s
+
+※ recap: We styled the app header: added the SURA logo and "Plataforma Domiciliaria" text, a right-side user menu with logout and last login, and made the header blue with light-colored contents. All builds pass. Next: run `npm start` to preview. (disable recaps in /config)
+
+❯ ahora tengo esta imagen, quiero que en la barra lateral añadas un opcion de   
+  home que este de primeras  y redirija a la imagen de este tigre de sura       
+  [Image #3] y ademas de un texto como bienvenido a salud en casa, dame algo    
+  bien bonito y ubica la imagen en la careta que realmente deberia ir.          
+  ⎿  [Image #3]
+
+⏺ El usuario revirtió los cambios del header azul — trabajo desde el estado
+  actual (header blanco). Ahora la nueva tarea. Déjame ver las rutas y mover la
+  imagen.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Bash(git mv tigre_sura.png public/tigre_sura.png 2>/dev/null || mv
+      tigre_sura.png public/tigre_sura.png; ls public/)
+  ⎿  favicon.ico
+     logo-sura.svg
+     tigre_sura.png
+
+⏺ Ahora creo la página de inicio. Reviso las clases tipográficas disponibles:
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Ahora creo el componente de inicio con la imagen del tigre y un diseño
+  atractivo usando el design system:
+
+⏺ Write(src/app/presentation/inicio/inicio.component.ts)
+  ⎿  Wrote 198 lines to src/app/presentation/inicio/inicio.component.ts
+         e';ort { ChangeDetectionStrategy, Component } from '@angular/cor
+       2 import { NgOptimizedImage } from '@angular/common';
+       3 
+       5  * Página de inicio (Home). Pantalla de bienvenida con la mascot
+         a de Sura.
+       6  * Construida con tokens del design system; sin lógica de negoci
+       7  */
+       8 @Component({
+       9   selector: 'app-inicio',
+      10   changeDetection: ChangeDetectionStrategy.OnPush,
+     … +197 lines (ctrl+o to expand)
+
+⏺ Ahora agrego la ruta inicio (y redirect por defecto) y el ítem de menú al
+  inicio del drawer:
+
+⏺ Update(src/app/app.routes.ts)
+  ⎿  Added 13 lines
+      10  // ============================================================
+          =================
+      11  export const routes: Routes = [
+      12    {
+      13 +    path: '',                                                  
+      14 +    redirectTo: 'inicio',                                      
+      15 +    pathMatch: 'full',                                         
+      16 +  },                                                           
+      17 +  {                                                            
+      18 +    path: 'inicio',                                            
+      19 +    loadComponent: () =>                                       
+      20 +      import('./presentation/inicio/inicio.component').then(   
+      21 +        (m) => m.InicioComponent,                              
+      22 +      ),                                                       
+      23 +    title: 'Inicio · Salud en Casa',                           
+      24 +  },                                                           
+      25 +  {                                                            
+      26      path: 'novedades',
+      27      loadChildren: () =>
+      28        import('./presentation/novedades/novedades.routes').then(
+
+⏺ Update(src/app/app.ts)
+  ⎿  Added 1 line
+      38  
+      39    /** Opciones de navegación del drawer. */
+      40    protected readonly navItems: NavItem[] = [
+      41 +    { label: 'Inicio', icon: 'pi pi-home', route: '/inicio' }, 
+      42      { label: 'Gestionar novedades', icon: 'pi pi-file-edit', ro
+          ute: '/novedades' },
+      43      { label: 'Notificaciones', icon: 'pi pi-bell', route: '/not
+          ificaciones' },
+      44      { label: 'Design System', icon: 'pi pi-palette', route: '/d
+          esign-system' },
+
+⏺ También actualizo el enlace del logo del header para que apunte a inicio:
+
+⏺ Update(src/app/app.html)  ⎿  Added 1 line, removed 1 line
+      22      [attr.aria-expanded]="drawerVisible()"
+      23      (onClick)="toggleDrawer()"
+      24    />
+      25 -  <a routerLink="/novedades" class="app-brand" aria-label="Sura
+         - — Plataforma Domiciliaria">                                   
+      25 +  <a routerLink="/inicio" class="app-brand" aria-label="Sura — 
+         +Plataforma Domiciliaria">                                      
+      26      <img
+      27        ngSrc="logo-sura.svg"
+      28        width="139"
+
+⏺ Bash(npx ng build --configuration development 2>&1 | tail -12)
+  ⎿  chunk-KQP4VVAB.js   | design-system-component        | 154.47 kB |
+     chunk-6X45CES2.js   | arquitectura-estilos-component |  74.32 kB |
+     chunk-PUGWOEUB.js   | inicio-component               |  11.29 kB |
+     … +10 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+⏺ Compila sin errores (el chunk inicio-component aparece lazy-loaded). Listo.
+
+  Qué hice:
+
+  1. Imagen en su carpeta correcta
+  - Moví tigre_sura.png de la raíz del proyecto a public/ (con git mv), que es
+  la carpeta de assets estáticos que Angular sirve (definida en angular.json).
+  Así se referencia como ngSrc="tigre_sura.png".
+
+  2. Nueva página de Inicio (src/app/presentation/inicio/inicio.component.ts)
+  - Tarjeta de bienvenida en dos columnas: a la izquierda el texto, a la derecha
+  el tigre de Sura.
+  - Título grande "Bienvenido a Salud en Casa" (con "Salud en Casa" en azul de
+  marca), un eyebrow "Plataforma domiciliaria", subtítulo y 3 highlights con
+  íconos.
+  - El tigre con NgOptimizedImage (priority), drop-shadow, un halo radial detrás
+  y una animación suave de flotación (respetando prefers-reduced-motion).
+  - En móvil se apila (imagen arriba, texto abajo); en ≥900px va lado a lado.
+  - Todo con tokens del design system (--app-*) y clases tipográficas
+  (text-display-md, text-body-lg, text-overline).
+
+  3. Ítem "Inicio" de primero en la barra lateral (app.ts)
+  - Agregado como primer navItem con ícono pi pi-home → ruta /inicio.
+
+  4. Rutas (app.routes.ts)
+  - Ruta inicio lazy-loaded + redirect de '' → inicio (ahora la app abre en Home
+  por defecto).
+  - También actualicé el logo del header para que lleve a /inicio.
+
+  Para verlo: ! npm start. ¿Quieres que el tigre sea más grande/pequeño, o
+  ajustar el texto de bienvenida?
+
+✻ Sautéed for 1m 25s
+
+※ recap: We've been styling the Sura health platform's Angular UI. I added a header logo, a user menu, and a new Inicio (home) page with the tiger mascot and welcome text, all building successfully. Next: run the app to review visually. (disable recaps in /config)
+
+❯ este componente de inicio en que otra carpeta podria ir? no debria estar como 
+  en shared o algo asi?                                                         
+
+⏺ Buena pregunta. Déjame ver cómo está organizado shared/ y presentation/ para
+  responderte con base en la arquitectura real del proyecto.
+
+  Read 1 file, listed 1 directory (ctrl+o to expand)
+
+⏺ Mirando la propia documentación de tu arquitectura, shared/ no es el lugar 
+  correcto para este componente. Te explico por qué y cuáles serían las opciones
+  reales.
+
+  Por qué NO va en shared/
+
+  El README.md de shared/ lo dice explícitamente:
+
+  ▎ UI tonta (wrappers presentacionales de PrimeNG en ui/), pipes/, directives/ 
+  ▎ y utils/ sin negocio. No depende de ninguna capa interna.
+
+  shared/ es para piezas reutilizables y genéricas (un botón, un pipe de fechas,
+  una directiva) que se usan en muchas pantallas. La regla mental es: "¿esto lo
+  van a importar varios componentes?"
+
+  Tu InicioComponent es lo contrario:
+  - Es una página completa con ruta propia (/inicio), no un bloque reutilizable.
+  - Tiene contenido específico del dominio ("Salud en Casa", la mascota, los
+  highlights).
+  - Nadie más lo va a importar — el router lo carga directo.
+
+  Por eso presentation/inicio/ es exactamente donde debe estar, junto a tus
+  otras páginas con ruta (novedades, notificaciones, documentacion,
+  design-system). Es coherente con lo que ya tienes.
+
+  Comparación rápida
+
+  ┌──────────────────────┬────────────────────────────┬─────────────────────┐
+  │       Carpeta        │         Qué va ahí         │   ¿Inicio encaja?   │
+  ├──────────────────────┼────────────────────────────┼─────────────────────┤
+  │ presentation/inicio/ │ Páginas/vistas con ruta    │ ✅ Sí — aquí está   │
+  │                      │                            │ bien                │
+  ├──────────────────────┼────────────────────────────┼─────────────────────┤
+  │                      │ UI tonta reutilizable, sin │ ❌ No es            │
+  │ shared/              │  negocio ni rutas          │ reutilizable ni     │
+  │                      │                            │ genérico            │
+  ├──────────────────────┼────────────────────────────┼─────────────────────┤
+  │ core/                │ Servicios singleton, infra │ ❌ No es un         │
+  │                      │  de app (auth, http, i18n) │ servicio            │
+  └──────────────────────┴────────────────────────────┴─────────────────────┘
+
+  Matiz: lo que sí podría salir hacia shared/
+
+  Si en algún momento partes el InicioComponent y aparece una pieza genuinamente
+  reutilizable —por ejemplo una <app-hero-card> o un <app-feature-list> que
+  pienses usar también en otras pantallas— esa pieza sí iría en shared/ui/, y
+  InicioComponent la consumiría. Pero hoy no hay nada reutilizable ahí: es todo
+  contenido propio de la página de bienvenida.
+
+  Recomendación
+
+  Déjalo en presentation/inicio/. La única mejora "de nombre" que podrías
+  considerar es llamarlo presentation/home/ si el equipo prefiere inglés, pero
+  como tus rutas y labels están en español (/inicio, "Inicio"), inicio es lo más
+  consistente.
+
+  ¿Quieres que no toque nada (que es mi recomendación), o prefieres que extraiga
+  alguna parte como componente reutilizable en shared/ui/?
+
+✻ Worked for 31s
+
+❯ en el proyecto como se esta manejando el tema de los estilos, no debria       
+  manejarlos tailwind, es que veo que mucho se hace en el css?                  
+
+⏺ Buena observación. Déjame revisar cómo está montado realmente el sistema de
+  estilos antes de opinar.
+
+  Read 1 file, listed 1 directory (ctrl+o to expand)
+
+⏺ Déjame ver cómo lo resuelven los componentes que ya existían en el proyecto,
+  para no darte mi opinión sino la convención real del repo.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Ahora tengo el panorama completo. Tu instinto es correcto. Te explico cómo se
+  maneja realmente y por qué mi componente inicio no siguió bien la convención.
+
+  Cómo se manejan los estilos en el proyecto
+
+  No es "Tailwind o CSS" — es un sistema híbrido en capas con una única fuente
+  de verdad (--app-*). El reparto de responsabilidades es:
+
+  ┌───────────────┬───────────────────────────────┬─────────────────────────┐
+  │     Capa      │           Para qué            │          Dónde          │
+  ├───────────────┼───────────────────────────────┼─────────────────────────┤
+  │ Tokens        │ Fuente única de verdad        │ src/styles/tokens/      │
+  │ --app-*       │ (color, spacing, radius…)     │                         │
+  ├───────────────┼───────────────────────────────┼─────────────────────────┤
+  │               │ Layout y utilidades en la     │                         │
+  │ Tailwind v4   │ plantilla (flex, grid, gap,   │ class="..." en el HTML  │
+  │               │ mb-8, responsive)             │                         │
+  ├───────────────┼───────────────────────────────┼─────────────────────────┤
+  │ Clases        │ Texto (text-heading-xl,       │ definidas en            │
+  │ tipográficas  │ text-overline)                │ typography/             │
+  ├───────────────┼───────────────────────────────┼─────────────────────────┤
+  │               │ Piezas repetidas con          │                         │
+  │ Patterns      │ decisiones de marca (.card,   │ patterns/_patterns.scss │
+  │               │ .field, .status-badge)        │                         │
+  ├───────────────┼───────────────────────────────┼─────────────────────────┤
+  │ styles del    │ Solo lo que Tailwind NO cubre │                         │
+  │ componente    │  bien (gradientes,            │ scoped en el .ts        │
+  │               │ @keyframes, pseudo-elementos) │                         │
+  └───────────────┴───────────────────────────────┴─────────────────────────┘
+
+  Y Tailwind v4 está configurado CSS-first: no hay tailwind.config.js, todo se
+  mapea con @theme inline en tailwind.css, conectando las utilidades a tus
+  tokens. Incluso hay una regla explícita en patterns.scss:
+
+  ▎ "Regla: si Tailwind ya lo cubre con utilidades simples, NO se hace patrón."
+
+  La prueba está en gestionar-novedades.component.html, que usa puro Tailwind
+  para layout:
+  class="flex flex-wrap items-center justify-between gap-4 mb-8"
+  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5
+  gap-y-5"
+
+  El problema con mi inicio
+
+  Tienes razón: metí ~130 líneas de CSS cuando gran parte (flex, grid, gap,
+  padding, columnas responsive, order) debería ser Tailwind en la plantilla.
+  Solo lo que Tailwind no hace limpio —el gradiente radial, el @keyframes de
+  flotación, el halo con pseudo-elemento, el drop-shadow— justifica vivir en
+  styles.
+
+  ¿Quiero refactorizarlo para que siga la convención del repo? Lo dejaría así:
+
+⏺ Bash(sed -n '20,42p' src/styles/patterns/_patterns.scss)
+  ⎿    .card {
+         background-color: var(--app-surface-0);
+         border: 1px solid var(--app-surface-200);
+     … +23 lines (ctrl+o to expand)
+
+⏺ Voy a refactorizar inicio para que siga la convención: layout y utilidades con
+  Tailwind en la plantilla (mapeadas a tus tokens), tipografía con las clases
+  nombradas, y dejar en styles solo lo que Tailwind no hace limpio (gradiente
+  radial, halo, @keyframes).
+
+⏺ Write(src/app/presentation/inicio/inicio.component.ts)
+  ⎿  Added 47 lines, removed 103 lines
+       3  
+       4  /**
+       5   * Página de inicio (Home). Pantalla de bienvenida con la masco
+          ta de Sura.
+       6 - * Construida con tokens del design system; sin lógica de negoc
+         -io.                                                            
+       6 + *                                                             
+       7 + * Convención de estilos del proyecto:                         
+       8 + *   - Layout y utilidades → Tailwind en la plantilla (mapeado 
+         +a los tokens --app-*).                                         
+       9 + *   - Texto → clases tipográficas nombradas (.text-*).        
+      10 + *   - `styles` scoped → SOLO lo que Tailwind no cubre bien: gr
+         +adiente radial de la                                           
+      11 + *     tarjeta, halo decorativo (pseudo-elemento) y la animació
+         +n de flotación.                                                
+      12   */
+      13  @Component({
+      14    selector: 'app-inicio',
+      15    changeDetection: ChangeDetectionStrategy.OnPush,
+      16    imports: [NgOptimizedImage],
+      17    template: `
+      13 -    <section class="inicio">                                   
+      14 -      <div class="inicio__card">                               
+      15 -        <div class="inicio__copy">                             
+      16 -          <span class="text-overline inicio__eyebrow">Plataform
+         -a domiciliaria</span>                                          
+      17 -          <h1 class="text-display-md inicio__title">           
+      18 -            Bienvenido a <span class="inicio__title-accent">Sal
+         -ud en Casa</span>                                              
+      18 +    <section class="flex justify-center px-4 py-6">            
+      19 +      <div                                                     
+      20 +        class="inicio-card grid grid-cols-1 items-center gap-6 
+         +w-full max-w-5xl p-6                                           
+      21 +               border border-surface-200 rounded-xl shadow-xl  
+      22 +               lg:grid-cols-[1.15fr_0.85fr] lg:p-10"           
+      23 +      >                                                        
+      24 +        <!-- Texto -->                                         
+      25 +        <div class="flex flex-col gap-3 order-2 lg:order-1">   
+      26 +          <span class="text-overline text-primary-600">Platafor
+         +ma domiciliaria</span>                                         
+      27 +          <h1 class="text-display-md text-text-primary m-0">   
+      28 +            Bienvenido a <span class="text-primary-700">Salud e
+         +n Casa</span>                                                  
+      29            </h1>
+      20 -          <p class="text-body-lg inicio__subtitle">            
+      30 +          <p class="text-body-lg text-text-secondary max-w-lg">
+      31              Tu hogar es nuestro centro de atención. Gestiona no
+          vedades, pacientes
+      32              y notificaciones desde un solo lugar, con el respal
+          do de Sura.
+      33            </p>
+      34  
+      25 -          <ul class="inicio__highlights">                      
+      26 -            <li class="inicio__highlight">                     
+      27 -              <i class="pi pi-heart-fill" aria-hidden="true"></
+         -i>                                                             
+      35 +          <ul class="flex flex-col gap-3 mt-3 m-0 p-0 list-none
+         +">                                                             
+      36 +            <li class="flex items-center gap-3 text-text-second
+         +ary">                                                          
+      37 +              <i class="inicio-ico pi pi-heart-fill" aria-hidde
+         +n="true"></i>                                                  
+      38                <span class="text-body-md">Cuidado cercano y huma
+          no</span>
+      39              </li>
+      30 -            <li class="inicio__highlight">                     
+      31 -              <i class="pi pi-shield" aria-hidden="true"></i>  
+      40 +            <li class="flex items-center gap-3 text-text-second
+         +ary">                                                          
+      41 +              <i class="inicio-ico pi pi-shield" aria-hidden="t
+         +rue"></i>                                                      
+      42                <span class="text-body-md">Información segura y c
+          entralizada</span>
+      43              </li>
+      34 -            <li class="inicio__highlight">                     
+      35 -              <i class="pi pi-bolt" aria-hidden="true"></i>    
+      44 +            <li class="flex items-center gap-3 text-text-second
+         +ary">                                                          
+      45 +              <i class="inicio-ico pi pi-bolt" aria-hidden="tru
+         +e"></i>                                                        
+      46                <span class="text-body-md">Gestión ágil de tu día
+           a día</span>
+      47              </li>
+      48            </ul>
+      49          </div>
+      50  
+      41 -        <figure class="inicio__art">                           
+      51 +        <!-- Ilustración -->                                   
+      52 +        <figure class="inicio-art relative m-0 flex justify-cen
+         +ter order-1 lg:order-2">                                       
+      53            <img
+      54              ngSrc="tigre_sura.png"
+      55              width="500"
+      56              height="500"
+      57              priority
+      58              alt="Mascota de Sura dándote la bienvenida"
+      48 -            class="inicio__tiger"                              
+      59 +            class="inicio-tiger relative z-[1] w-full max-w-sm 
+         +h-auto"                                                        
+      60            />
+      61          </figure>
+      62        </div>
+     ...
+       67        display: block;
+       68      }
+       69  
+       59 -    .inicio {                                                 
+       60 -      display: flex;                                          
+       61 -      justify-content: center;                                
+       62 -      padding: var(--app-space-6) var(--app-space-4);         
+       70 +    /* Gradiente radial de marca sobre la tarjeta (Tailwind no
+          + lo cubre limpio). */                                         
+       71 +    .inicio-card {                                            
+       72 +      background:                                             
+       73 +        radial-gradient(                                      
+       74 +          120% 140% at 100% 0%,                               
+       75 +          var(--app-primary-50) 0%,                           
+       76 +          transparent 55%                                     
+       77 +        ),                                                    
+       78 +        var(--app-surface-0);                                 
+       79      }
+       80  
+       65 -    .inicio__card {                                           
+       66 -      display: grid;                                          
+       67 -      grid-template-columns: 1fr;                             
+       68 -      gap: var(--app-space-6);                                
+       69 -      align-items: center;                                    
+       70 -      width: 100%;                                            
+       71 -      max-width: 64rem;                                       
+       72 -      padding: var(--app-space-8) var(--app-space-6);         
+       73 -    }                                                         
+       74 -                                                              
+       75 -    @media (min-width: 900px) {                               
+       76 -      .inicio__card {                                         
+       77 -        grid-template-columns: 1.15fr 0.85fr;                 
+       78 -        padding: var(--app-space-10, 4rem) var(--app-space-8);
+       79 -      }                                                       
+       80 -    }                                                         
+       81 -                                                              
+       82 -    /* ---- Texto ---- */                                     
+       83 -    .inicio__copy {                                           
+       84 -      display: flex;                                          
+       85 -      flex-direction: column;                                 
+       86 -      gap: var(--app-space-3);                                
+       87 -      order: 2;                                               
+       88 -    }                                                         
+       89 -    @media (min-width: 900px) {                               
+       90 -      .inicio__copy {                                         
+       91 -        order: 1;                                             
+       92 -      }                                                       
+       93 -    }                                                         
+       94 -                                                              
+       95 -    .inicio__eyebrow {                                        
+       96 -      color: var(--app-primary-600);                          
+       97 -    }                                                         
+       98 -    .inicio__title {                                          
+       99 -      color: var(--app-text-primary);                         
+      100 -      margin: 0;                                              
+      101 -    }                                                         
+      102 -    .inicio__title-accent {                                   
+      103 -      color: var(--app-primary-700);                          
+      104 -    }                                                         
+      105 -    .inicio__subtitle {                                       
+      106 -      color: var(--app-text-secondary);                       
+      107 -      max-width: 34rem;                                       
+      108 -    }                                                         
+      109 -                                                              
+      110 -    .inicio__highlights {                                     
+      111 -      list-style: none;                                       
+      112 -      margin: var(--app-space-3) 0 0;                         
+      113 -      padding: 0;                                             
+      114 -      display: flex;                                          
+      115 -      flex-direction: column;                                 
+      116 -      gap: var(--app-space-3);                                
+      117 -    }                                                         
+      118 -    .inicio__highlight {                                      
+      119 -      display: flex;                                          
+      120 -      align-items: center;                                    
+      121 -      gap: var(--app-space-3);                                
+      122 -      color: var(--app-text-secondary);                       
+      123 -    }                                                         
+      124 -    .inicio__highlight i {                                    
+       81 +    /* Chip de ícono: caso de pseudo-fondo + color de marca; l
+          +o dejamos como clase                                          
+       82 +       puntual en vez de repetir 5 utilidades por cada <i>. */
+       83 +    .inicio-ico {                                             
+       84        display: inline-flex;
+       85        align-items: center;
+       86        justify-content: center;
+       87        width: 2rem;
+       88        height: 2rem;
+      130 -      border-radius: var(--app-radius-full, 9999px);          
+       89 +      border-radius: var(--app-radius-full);                  
+       90        background: var(--app-primary-50);
+       91        color: var(--app-primary-600);
+       92        font-size: 0.9rem;
+       93      }
+       94  
+      136 -    /* ---- Ilustración ---- */                               
+      137 -    .inicio__art {                                            
+      138 -      order: 1;                                               
+      139 -      margin: 0;                                              
+      140 -      display: flex;                                          
+      141 -      justify-content: center;                                
+      142 -      position: relative;                                     
+      143 -    }                                                         
+      144 -    @media (min-width: 900px) {                               
+      145 -      .inicio__art {                                          
+      146 -        order: 2;                                             
+      147 -      }                                                       
+      148 -    }                                                         
+      149 -    .inicio__art::before {                                    
+       95 +    /* Halo difuso detrás de la mascota (pseudo-elemento → no 
+          +es utilidad). */                                              
+       96 +    .inicio-art::before {                                     
+       97        content: '';
+       98        position: absolute;
+       99        inset: 12% 8% 6% 8%;
+     ...
+      105        filter: blur(4px);
+      106        z-index: 0;
+      107      }
+      161 -    .inicio__tiger {                                          
+      162 -      position: relative;                                     
+      163 -      z-index: 1;                                             
+      164 -      width: 100%;                                            
+      165 -      max-width: 22rem;                                       
+      166 -      height: auto;                                           
+      108 +                                                              
+      109 +    /* Sombra proyectada + flotación suave (drop-shadow custom
+          + + keyframes). */                                             
+      110 +    .inicio-tiger {                                           
+      111        filter: drop-shadow(0 18px 24px rgb(2 6 23 / 0.18));
+      112        animation: inicio-float 6s ease-in-out infinite;
+      113      }
+     ...
+      123      }
+      124  
+      125      @media (prefers-reduced-motion: reduce) {
+      182 -      .inicio__tiger {                                        
+      126 +      .inicio-tiger {                                         
+      127          animation: none;
+      128        }
+      129      }
+
+⏺ Bash(npx ng build --configuration development 2>&1 | tail -6)
+  ⎿  chunk-VA6ZBN5H.js   | notificaciones-routes          | 357 bytes |
+
+     Application bundle generation complete. [2.256 seconds] - 2026-06-03T0
+     … +4 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+⏺ Compila bien. Refactor hecho.
+
+  Resumen
+
+  Tu instinto era correcto. El proyecto usa un sistema híbrido donde Tailwind sí
+  debe llevar el layout, y mi primera versión abusó del CSS scoped.
+
+  Qué cambió en inicio.component.ts:
+  - Layout → Tailwind en la plantilla: grid, grid-cols-1 
+  lg:grid-cols-[1.15fr_0.85fr], gap-6, items-center, flex flex-col, order-2 
+  lg:order-1, max-w-5xl, p-6 lg:p-10, rounded-xl, shadow-xl, border 
+  border-surface-200. Todas mapeadas a tus tokens vía @theme inline.
+  - Color y tipografía → utilidades/clases del design system: text-text-primary,
+  text-text-secondary, text-primary-600/700, text-display-md, text-body-lg,
+  text-overline. Cero style= inline, cero colores hardcodeados.
+  - styles scoped → solo lo que Tailwind no hace limpio: el gradiente radial de
+  la tarjeta, el halo con pseudo-elemento ::before, el @keyframes de flotación
+  con su drop-shadow y el prefers-reduced-motion. El chip de ícono lo dejé como
+  clase puntual (.inicio-ico) para no repetir 5 utilidades en cada <i>.
+
+  El bloque de CSS pasó de ~130 líneas a ~55, y todas las que quedan están
+  justificadas (Tailwind genuinamente no las cubre bien).
+
+  La regla mental del repo, para futuras pantallas:
+  1. ¿Es layout/spacing/responsive? → Tailwind en la plantilla.
+  2. ¿Es texto? → clase tipográfica (text-*).
+  3. ¿Se repite con decisiones de marca en varias pantallas? → pattern (.card,
+  .field…).
+  4. ¿Gradiente, @keyframes, pseudo-elemento, algo que Tailwind no expresa
+  limpio? → styles scoped con tokens.
+
+  ¿Quieres que revise los otros componentes que creé (usuario-menu, el header)
+  con el mismo criterio, por si también conviene mover layout a Tailwind?
+
+✻ Cogitated for 2m 3s
+
+※ recap: Goal: build out the Sura home platform UI. We added a header logo, user menu, and a welcome Home page with the tiger image, then refactored its styles to use Tailwind per project convention. Next: optionally apply the same Tailwind cleanup to the user-menu and header components.
+
+❯ los pattenr que hacen no lo entiendo bien, tengo una idea del de card pero    
+  por ejemoplo el de field no tengo ni idea                                     
+⏺ Vamos a entender bien los patterns, sobre todo field. Déjame leer la
+  definición completa.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Te explico qué es un pattern y luego desmenuzo field con un ejemplo real, que
+  es el que no te cuadra.
+
+  Qué es un "pattern" (y por qué existe)
+
+  Un pattern es una receta de CSS con nombre, reutilizable, para una pieza de UI
+  que se repite por toda la app con las mismas decisiones de diseño (color de
+  marca, accesibilidad, estructura interna).
+
+  Es el punto medio entre dos extremos:
+
+  ┌───────────────────────────────────┬─────────────────────────────────────┐
+  │              Opción               │              Problema               │
+  ├───────────────────────────────────┼─────────────────────────────────────┤
+  │ Repetir 8 utilidades Tailwind     │ Te equivocas en una, y los          │
+  │ cada vez (flex flex-col gap-2     │ formularios quedan inconsistentes   │
+  │ ...)                              │                                     │
+  ├───────────────────────────────────┼─────────────────────────────────────┤
+  │ Crear un componente Angular       │ Sobreingeniería: es CSS puro, sin   │
+  │ <app-field>                       │ lógica                              │
+  ├───────────────────────────────────┼─────────────────────────────────────┤
+  │ Pattern (.field) ✅               │ Una clase, decisión tomada una vez, │
+  │                                   │  idéntica en todos lados            │
+  └───────────────────────────────────┴─────────────────────────────────────┘
+
+  La regla del repo lo dice: "si Tailwind ya lo cubre con utilidades simples, NO
+  se hace patrón". Solo se vuelve pattern cuando combina varias decisiones que 
+  deben repetirse exactas.
+
+  field = un campo de formulario completo
+
+  Un "field" no es el <input>. Es todo el grupo: la etiqueta + el control + el
+  mensaje de error/ayuda. Visualmente:
+
+  Número identificación *        ← .field__label  (+ .field__required para el *)
+  ┌──────────────────────────┐
+  │  38478cd848b5            │   ← el control (un <input> de PrimeNG)
+  └──────────────────────────┘
+  ⚠ Este campo es obligatorio   ← .field__error  (o .field__hint para ayuda)
+
+  En HTML se ve así:
+
+  <div class="field">
+    <label class="field__label" for="ident">
+      Número identificación
+      <span class="field__required">*</span>
+    </label>
+
+    <input pInputText id="ident" />
+
+    <!-- Slot que SIEMPRE reserva el alto de una línea -->
+    <span class="field__message-slot">
+      @if (form.controls.ident.invalid) {
+        <span class="field__error">Este campo es obligatorio</span>
+      }
+    </span>
+  </div>
+
+  Qué resuelve cada pieza
+
+  - .field → solo apila verticalmente label/control/mensaje con un gap
+  (flex-direction: column; gap). Nada más.
+  - .field__label → fija la tipografía de TODAS las etiquetas (tamaño sm, peso
+  medium, color de texto). Así todos los formularios tienen labels idénticas.
+  - .field__required → el asterisco en rojo de marca (--app-error). Una
+  decisión, un color, en todos lados.
+  - .field__hint → texto de ayuda en tono muted.
+  - .field__error → mensaje de error en rojo + un ícono ⚠ automático vía
+  ::before (el content: '\e90c' es el triángulo de primeicons). No tienes que
+  poner el ícono a mano.
+
+  La parte clave: .field__message-slot
+
+  Esta es la razón principal de que field sea un pattern y no utilidades
+  sueltas:
+
+  .field__message-slot {
+    min-height: calc(var(--app-size-sm) * var(--app-leading-snug));
+  }
+
+  Reserva el alto de una línea de mensaje aunque esté vacío. ¿Por qué importa?
+  Sin esto, cuando el usuario envía el formulario y aparece un error, ese texto
+  "empuja" todo lo de abajo y la página da un salto (layout shift). Con el slot
+  reservado, el espacio ya está ahí: el error solo se "rellena", nada se mueve.
+  Eso es accesibilidad + pulido, y es justo el tipo de decisión que debe 
+  repetirse idéntica en cada campo → por eso es pattern.
+
+  Los demás, en una línea cada uno
+
+  - status-badge → la "pastilla" de estado (GESTIONADA, PENDIENTE…). Encapsula
+  el par fondo-claro + texto-oscuro con contraste WCAG verificado por cada color
+  semántico. Lo viste en tu tabla de novedades.
+  - empty-state → el bloque centrado de "no hay resultados" (ícono + título +
+  texto muted).
+  - skeleton → los placeholders grises con animación shimmer mientras carga.
+
+  La regla mental para decidir
+
+  ▎ ¿Esta pieza se repite en varias pantallas y combina color de marca / 
+  ▎ accesibilidad / estructura que debe ser idéntica?
+  ▎ - Sí → pattern (.field, .card…).
+  ▎ - No, es layout de esta pantalla → Tailwind en la plantilla.
+  ▎ - No, pero tiene lógica/estado → componente Angular.
+
+  ¿Quieres que te arme un ejemplo funcional de un formulario usando field (con
+  Reactive Forms y validación) para que veas el pattern "en vivo", o prefieres
+  que te explique otro pattern a fondo?
+
+✻ Worked for 37s
+
+❯ si explicame ejemplo funcional como lo menciona                               
+
+⏺ Déjame ver cómo usa el proyecto los inputs de PrimeNG y el pattern field, para
+  que el ejemplo sea fiel a tus convenciones reales.
+
+⏺ Bash(f=src/app/presentation/novedades/gestionar-novedades.component.ts; echo
+      "=== imports primeng ==="; grep -n "from 'primeng" $f; echo "=== uso de
+      field en plantil…)
+  ⎿  === imports primeng ===
+     12:import { Select } from 'primeng/select';
+     13:import { MultiSelect } from 'primeng/multiselect';
+     … +22 lines (ctrl+o to expand)
+
+⏺ Bash(sed -n '105,135p'
+      src/app/presentation/novedades/gestionar-novedades.component.html)
+  ⎿              <!-- Número identificación -->
+                 <div class="field">
+                   <label class="field__label" for="numeroDocumento">Número
+     … +27 lines (ctrl+o to expand)
+
+⏺ Perfecto. Te armo un ejemplo funcional completo y fiel a tus convenciones: un
+  mini-formulario con Reactive Forms, PrimeNG y el pattern field usando todas
+  sus piezas (incluida la validación con el slot que evita el salto de layout).
+  Lo explico parte por parte.
+
+  El componente completo
+
+  import { ChangeDetectionStrategy, Component, inject, signal } from
+  '@angular/core';
+  import {
+    FormBuilder,
+    ReactiveFormsModule,
+    Validators,
+  } from '@angular/forms';
+  import { InputText } from 'primeng/inputtext';
+  import { Select } from 'primeng/select';
+  import { ButtonModule } from 'primeng/button';
+
+  interface OpcionPrograma {
+    readonly label: string;
+    readonly value: string;
+  }
+
+  @Component({
+    selector: 'app-crear-novedad',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, InputText, Select, ButtonModule],
+    template: `
+      <form
+        class="card max-w-xl mx-auto flex flex-col gap-5"
+        [formGroup]="form"
+        (ngSubmit)="enviar()"
+      >
+        <h2 class="text-heading-md text-text-primary m-0">Crear novedad</h2>
+
+        <!-- ───────── CAMPO 1: requerido + numérico ───────── -->
+        <div class="field">
+          <label class="field__label" for="identificacion">
+            Número de identificación
+            <span class="field__required" aria-hidden="true">*</span>
+          </label>
+
+          <input
+            pInputText
+            id="identificacion"
+            formControlName="identificacion"
+            inputmode="numeric"
+            placeholder="Ej. 1020304050"
+            class="w-full"
+            [attr.aria-invalid]="esInvalido('identificacion')"
+            [attr.aria-describedby]="
+              esInvalido('identificacion') ? 'identificacion-error' : null
+            "
+          />
+
+          <!-- Slot SIEMPRE presente: reserva alto aunque no haya error -->
+          <span class="field__message-slot">
+            @if (esInvalido('identificacion')) {
+              <span class="field__error" id="identificacion-error" role="alert">
+                {{ errorIdentificacion() }}
+              </span>
+            }
+          </span>
+        </div>
+
+        <!-- ───────── CAMPO 2: select requerido ───────── -->
+        <div class="field">
+          <label class="field__label" for="programa">
+            Programa
+            <span class="field__required" aria-hidden="true">*</span>
+          </label>
+
+          <p-select
+            inputId="programa"
+            formControlName="programa"
+            [options]="programas"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Selecciona un programa"
+            styleClass="w-full"
+          />
+
+          <span class="field__message-slot">
+            @if (esInvalido('programa')) {
+              <span class="field__error" id="programa-error" role="alert">
+                Debes seleccionar un programa.
+              </span>
+            }
+          </span>
+        </div>
+
+        <!-- ───────── CAMPO 3: con texto de AYUDA (hint) ───────── -->
+        <div class="field">
+          <label class="field__label" for="observacion">Observación</label>
+
+          <input
+            pInputText
+            id="observacion"
+            formControlName="observacion"
+            class="w-full"
+            aria-describedby="observacion-hint"
+          />
+
+          <!-- hint en lugar de error: contexto, no validación -->
+          <span class="field__hint" id="observacion-hint">
+            Opcional. Máximo 120 caracteres.
+          </span>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <p-button label="Cancelar" severity="secondary" [text]="true" 
+  type="button" />
+          <p-button label="Guardar" icon="pi pi-check" type="submit" />
+        </div>
+
+        @if (enviado()) {
+          <p class="text-body-sm" style="color: var(--app-success-dark)">
+            ✓ Formulario válido y enviado.
+          </p>
+        }
+      </form>
+    `,
+  })
+  export class CrearNovedadComponent {
+    private readonly fb = inject(FormBuilder);
+
+    protected readonly programas: OpcionPrograma[] = [
+      { label: 'Plan de manejo', value: 'PLAN_MANEJO' },
+      { label: 'Laboratorio', value: 'LABORATORIO' },
+      { label: 'Enfermería', value: 'ENFERMERIA' },
+    ];
+
+    protected readonly enviado = signal(false);
+
+    protected readonly form = this.fb.nonNullable.group({
+      identificacion: [
+        '',
+        [Validators.required, Validators.pattern(/^\d+$/)],
+      ],
+      programa: ['', Validators.required],
+      observacion: ['', Validators.maxLength(120)],
+    });
+
+    /** Un control es "inválido visible" solo si ya fue tocado o se intentó 
+  enviar. */
+    protected esInvalido(control: string): boolean {
+      const c = this.form.get(control);
+      return !!c && c.invalid && (c.touched || c.dirty);
+    }
+
+    /** Mensaje de error según qué validador falló. */
+    protected errorIdentificacion(): string {
+      const c = this.form.controls.identificacion;
+      if (c.hasError('required')) return 'Este campo es obligatorio.';
+      if (c.hasError('pattern')) return 'Solo se permiten números.';
+      return '';
+    }
+
+    protected enviar(): void {
+      if (this.form.invalid) {
+        this.form.markAllAsTouched(); // fuerza a mostrar todos los errores
+        return;
+      }
+      this.enviado.set(true);
+      console.info('Novedad:', this.form.getRawValue());
+    }
+  }
+
+  Cómo encaja el pattern field (la parte que querías ver)
+
+  1. Estructura vertical — .field
+  Cada bloque es <div class="field">. El pattern le da display:flex; 
+  flex-direction:column; gap. Tú no escribes layout: label, control y mensaje se
+  apilan solos con el espaciado correcto. Eso es lo que ahorra el pattern
+  frente a repetir flex flex-col gap-2 en cada campo.
+
+  2. La etiqueta — .field__label + .field__required
+  <label class="field__label" for="identificacion">
+    Número de identificación
+    <span class="field__required" aria-hidden="true">*</span>
+  </label>
+  field__label fija tipografía idéntica en TODO el sistema. field__required
+  pinta el * en rojo de marca (--app-error). Si mañana cambian el color del
+  asterisco, se cambia en un solo lugar.
+
+  3. El control
+  Es un componente PrimeNG normal (pInputText, p-select) con formControlName. El
+  pattern no toca el input — eso lo maneja el tema de PrimeNG. El pattern solo
+  organiza lo que está alrededor.
+
+  4. La joya: .field__message-slot + .field__error
+  <span class="field__message-slot">
+    @if (esInvalido('identificacion')) {
+      <span class="field__error" role="alert">{{ errorIdentificacion() }}</span>
+    }
+  </span>
+  - El slot está SIEMPRE en el DOM, vacío o no. Su min-height reserva el alto de
+  una línea. Resultado: cuando el @if muestra el error, nada se mueve — no hay
+  salto de layout. Prueba mental: sin el slot, al aparecer el error el botón
+  "Guardar" saltaría hacia abajo.
+  - field__error pinta el texto rojo y le añade el ícono ⚠ automático vía
+  ::before. No pones el ícono a mano.
+
+  5. Ayuda vs error — .field__hint
+  El campo "Observación" usa field__hint (texto muted) en vez de field__error.
+  Mismo slot, distinto propósito: contexto permanente, no validación.
+
+  El flujo funcional (qué pasa al usarlo)
+
+  1. Cargas el form → los slots ya reservan su espacio, todo cuadrado.
+  2. El usuario sale del campo vacío → touched se vuelve true → esInvalido() da
+  true → aparece "Este campo es obligatorio." sin mover nada.
+  3. Escribe letras → falla el pattern → el mensaje cambia a "Solo se permiten
+  números."
+  4. Click en "Guardar" con errores → markAllAsTouched() revela todos los
+  errores de golpe.
+  5. Todo válido → enviado.set(true) y se procesa.
+
+  Reparto de responsabilidades (la idea central)
+
+  ┌──────────────────┬──────────────────────────────────────────────────────┐
+  │      Quién       │                    Qué hace aquí                     │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Tailwind         │ max-w-xl mx-auto flex flex-col gap-5, w-full,        │
+  │ (plantilla)      │ justify-end — el layout de ESTA pantalla             │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Pattern card     │ superficie + borde + sombra del contenedor           │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Pattern field    │ estructura interna del campo + tipografía label +    │
+  │                  │ estados de error + anti-layout-shift                 │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Clases           │ text-heading-md, text-body-sm                        │
+  │ tipográficas     │                                                      │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Angular (.ts)    │ la lógica: Reactive Forms, validadores, signals,     │
+  │                  │ mensajes                                             │
+  └──────────────────┴──────────────────────────────────────────────────────┘
+
+  Cada uno hace una cosa, y field te garantiza que los 200 formularios de la app
+  se vean y se comporten idénticos sin copiar-pegar CSS.
+
+  ¿Quieres que lo cree como archivo real y una ruta (/crear-novedad) para que lo
+  veas corriendo, o así en explicación es suficiente?
+
+✻ Churned for 1m 1s
+
+❯ si por favor has lo que dices de crear novedad para tenerlo mas claro         
+
+⏺ Voy a crearlo. Primero reviso las rutas de novedades para integrarlo de forma
+  coherente.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Ahora creo el componente:
+
+⏺ Write(src/app/presentation/novedades/crear-novedad.component.ts)
+  ⎿  Wrote 178 lines to
+     src/app/presentation/novedades/crear-novedad.component.ts
+         om '@angular/core';ctionStrategy, Component, inject, signal } fr
+       2 import { FormBuilder, ReactiveFormsModule, Validators } from '@a
+         ngular/forms';
+       3 import { InputText } from 'primeng/inputtext';
+       4 import { Select } from 'primeng/select';
+       6 import { ButtonModule } from 'primeng/button';
+       7 interface OpcionPrograma {
+       8   readonly label: string;
+       9   readonly value: string;
+      10 }
+     … +188 lines (ctrl+o to expand)
+
+⏺ Ahora agrego la ruta y el ítem de menú:
+
+⏺ Update(src/app/presentation/novedades/novedades.routes.ts)
+  ⎿  Added 6 lines
+      16        ),
+      17      title: 'Gestionar novedades',
+      18    },
+      19 +  {                                                            
+      20 +    path: 'crear',                                             
+      21 +    loadComponent: () =>                                       
+      22 +      import('./crear-novedad.component').then((m) => m.CrearNo
+         +vedadComponent),                                               
+      23 +    title: 'Crear novedad',                                    
+      24 +  },                                                           
+      25  ];
+
+⏺ Update(src/app/app.ts)
+  ⎿  Added 1 line
+      37    /** Opciones de navegación del drawer. */
+      38    protected readonly navItems: NavItem[] = [
+      39      { label: 'Inicio', icon: 'pi pi-home', route: '/inicio' },
+      40 +    { label: 'Crear novedad', icon: 'pi pi-plus-circle', route:
+         + '/novedades/crear' },                                         
+      41      { label: 'Gestionar novedades', icon: 'pi pi-file-edit', ro
+          ute: '/novedades' },
+      42      { label: 'Design System', icon: 'pi pi-palette', route: '/d
+          esign-system' },
+      43      { label: 'Arquitectura de estilos', icon: 'pi pi-book', rou
+          te: '/arquitectura-estilos' },
+
+⏺ Bash(npx ng build --configuration development 2>&1 | tail -14)
+  ⎿  chunk-5K2GORBP.js   | gestionar-novedades-component  | 692.75 kB |
+     chunk-RITCYDS5.js   | -                              | 492.32 kB |
+     chunk-42WBQEBI.js   | -                              | 460.56 kB |
+     … +12 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+⏺ Compila sin errores. El componente quedó creado y enrutado.
+
+  Qué creé
+
+  1. Componente src/app/presentation/novedades/crear-novedad.component.ts
+  - Formulario funcional con Reactive Forms (nonNullable.group), 3 campos que
+  muestran el pattern field en sus 3 modos:
+    - Identificación → requerido + numérico (dos validadores, mensaje que cambia
+  según cuál falla).
+    - Programa (p-select) → requerido.
+    - Observación → opcional, usa field__hint en vez de error.
+  - Lógica con signals y métodos esInvalido(), errorIdentificacion(), enviar(),
+  reiniciar().
+
+  2. Ruta en novedades.routes.ts → /novedades/crear (lazy-loaded; mira el chunk
+  crear-novedad-component en el build).
+
+  3. Ítem de menú "Crear novedad" en el drawer (pi pi-plus-circle).
+
+  Para verlo en vivo
+
+  Levanta el server con ! npm start y entra a /novedades/crear (o el ítem del
+  menú). Prueba esto para sentir el pattern:
+
+  1. Sal del campo de identificación vacío → aparece "Este campo es
+  obligatorio." y fíjate que el botón Guardar NO salta: eso es el
+  .field__message-slot reservando la altura.
+  2. Escribe letras → el mensaje cambia a "Solo se permiten números." (mismo
+  validador, distinto error).
+  3. Dale Guardar con todo vacío → markAllAsTouched() revela todos los errores
+  de golpe, y el ⚠ de cada uno lo pone solo el ::before de .field__error.
+  4. Llena todo bien y Guardar → sale el status-badge verde (otro pattern) y el
+  valor en consola.
+
+  Una nota menor: el ítem "Gestionar novedades" (ruta /novedades) quedará
+  resaltado también cuando estés en /novedades/crear, porque comparten prefijo.
+  Si te molesta, le agrego [routerLinkActiveOptions]="{ exact: true }" a ese
+  enlace. ¿Quieres que lo ajuste?
+
+✻ Crunched for 1m 10s
+
+※ recap: You're building the Salud en Casa Angular UI with a token-based Tailwind/PrimeNG design system. I just created a working `crear-novedad` demo form at `/novedades/crear` to illustrate the `field` pattern. Next: run `npm start` and view it, optionally adding `routerLinkActiveOptions exact` to the nav.
+
+❯ el uso de css de la clase que tiene cada componente propio debe ser poco      
+  cierto, en que casos?                                                         
+
+⏺ Buena pregunta. Déjame ver qué tiene el .scss que tienes abierto, para
+  aterrizar la respuesta en un ejemplo real del repo.
+⏺ Bash(f=src/app/presentation/novedades/gestionar-novedades.component.scss; echo
+      "líneas: $(wc -l < $f)"; echo "=== selectores ==="; grep -nE "^\s*[.&:@]"
+      $f | head -5…)
+  ⎿  líneas:       19
+     === selectores ===
+     4::host {
+     … +2 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Exacto, tu intuición es correcta: el CSS scoped del componente debe ser el 
+  último recurso, y mínimo. El propio repo lo demuestra — mira el .scss que
+  tienes abierto: después de toda la pantalla de gestionar-novedades, el equipo
+  solo necesitó 19 líneas (y la mitad es comentario).
+
+  El orden de decisión (de lo que más debes usar a lo último)
+
+  1. Tailwind en la plantilla   ← layout, spacing, responsive  (lo más
+  frecuente)
+  2. Clase tipográfica          ← texto (text-heading-md, …)
+  3. Pattern                    ← pieza repetida con marca (.card, .field, …)
+  4. Tema PrimeNG               ← si es override de un componente de PrimeNG
+          ↓
+  5. CSS scoped del componente  ← SOLO lo que nada de lo anterior resuelve
+
+  El CSS scoped es el escalón 5: si llegas ahí, primero pregúntate si no debería
+  ser un escalón anterior.
+
+  Cuándo SÍ está justificado el CSS scoped
+
+  Hay 4 casos legítimos, y todos comparten una cosa: Tailwind/patterns/tema no 
+  lo expresan limpio Y es específico de este componente (no se repite en otras
+  pantallas).
+
+  1. Lo que Tailwind no expresa bien
+  - @keyframes y animaciones propias (tu inicio-float).
+  - Gradientes complejos (el radial de la tarjeta de inicio).
+  - Pseudo-elementos ::before / ::after decorativos (el halo del tigre).
+  - filter, clip-path, mask, drop-shadow con valores custom.
+
+  2. Reset/normalización de un elemento nativo
+  - El .filtros-toggle que tienes abierto: es un <button> nativo al que hay que
+  quitarle border/background y darle cursor. Eso es "domar" un elemento, no
+  diseño reutilizable.
+
+  3. :host
+  - Casi siempre :host { display: block; }. Angular hace los componentes inline
+  por defecto; esto lo arregla. Es la línea de CSS scoped más común y legítima.
+
+  4. Selectores que dependen de estructura/estado interno
+  - Reaccionar a :hover/:focus-within de un contenedor, o estilar un hijo según
+  un estado que solo vive en este componente.
+
+  Cuándo NO (señales de que te equivocaste de escalón)
+
+  - Escribiste display:flex; gap; padding → eso es Tailwind (flex gap-3 p-4).
+  Fue justo mi error en la primera versión de inicio.
+  - Pusiste un color hardcodeado (color: #2563eb) → usa el token
+  (text-primary-600 o var(--app-primary-600)).
+  - Lo mismo aparece en 2+ componentes → es un pattern, súbelo a
+  patterns/_patterns.scss.
+  - Estás sobrescribiendo un componente de PrimeNG (.p-button, .p-select) → va
+  en themes/_primeng-theme.scss (@layer sp-theme), NO en el componente. El
+  propio .scss que tienes abierto lo dice en su comentario de la línea 1-2.
+
+  La pregunta de bolsillo
+
+  Antes de escribir una regla en el .scss del componente:
+
+  ▎ "¿Esto lo cubre Tailwind, una clase tipográfica, un pattern o el tema de 
+  ▎ PrimeNG?"
+  ▎ - Si sí → muévelo ahí.
+  ▎ - Si no, y solo pasa en este componente → entonces sí, CSS scoped.
+
+  Y un buen termómetro: si el bloque styles de un componente pasa de ~30-40
+  líneas, probablemente hay layout o colores que deberían haber sido
+  Tailwind/tokens (como me pasó con inicio, que bajó de 130 a ~55 al aplicar
+  esto).
+
+  ¿Quieres que revisemos juntos el styles de usuario-menu con este filtro? Es el
+  que más CSS scoped tiene de lo que creamos, y seguro hay cosas que bajan a
+  Tailwind.
+
+✻ Churned for 35s
+
+※ recap: We've been building out the Angular header, a home page, and a crear-novedad demo while explaining the project's styling conventions. Next action: optionally review usuario-menu's scoped CSS to move layout into Tailwind.
+
+❯ como se maneja el tema de la responsividad?                                   
+
+⏺ Buena pregunta. Déjame revisar las piezas reales de responsividad en el repo
+  antes de explicarte.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Ahora miro cómo se aplica en las plantillas reales y en el shell:
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Ya tengo todo. Así se maneja la responsividad en tu proyecto: es mobile-first,
+  manejada por Tailwind en las plantillas, con una única fuente de verdad de
+  breakpoints compartida con el SCSS.
+
+  1. Los breakpoints están definidos UNA vez (y duplicados a propósito)
+
+  Mismos valores en dos sitios, alineados 1:1:
+
+  ┌────────┬────────┬───────────────────┐
+  │ Nombre │ Ancho  │       Para        │
+  ├────────┼────────┼───────────────────┤
+  │ xs     │ 475px  │ móviles grandes   │
+  ├────────┼────────┼───────────────────┤
+  │ sm     │ 640px  │ móvil → tablet    │
+  ├────────┼────────┼───────────────────┤
+  │ md     │ 768px  │ tablet            │
+  ├────────┼────────┼───────────────────┤
+  │ lg     │ 1024px │ desktop           │
+  ├────────┼────────┼───────────────────┤
+  │ xl     │ 1280px │ desktop ancho     │
+  ├────────┼────────┼───────────────────┤
+  │ 2xl    │ 1536px │ monitores grandes │
+  └────────┴────────┴───────────────────┘
+
+  - En tailwind.css (@theme inline) → para usarlos como prefijos en el HTML.
+  - En abstracts/_responsive.scss (mapa Sass) → para usarlos dentro del SCSS.
+
+  Que coincidan es clave: el HTML y el SCSS "rompen" en los mismos puntos, nunca
+  se desfasan.
+
+  2. En las plantillas → prefijos de Tailwind (lo normal, el 90%)
+
+  Es mobile-first: la clase sin prefijo es el estado móvil, y el prefijo
+  significa "desde este ancho hacia arriba".
+
+  Ejemplo real de tu repo (gestionar-novedades):
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 
+  gap-5">
+  Se lee: 1 columna en móvil → 2 desde sm → 3 desde lg → 4 desde xl. No defines
+  "móvil" con media queries; el base ya ES móvil.
+
+  Y en inicio que hicimos:
+  class="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] ... lg:p-10"
+  class="order-2 lg:order-1"   <!-- imagen arriba en móvil, texto-izq en desktop
+  -->
+
+  3. En el SCSS → mixins (solo cuando ya estás en CSS)
+
+  Cuando un estilo vive en SCSS (un pattern, un componente con CSS justificado),
+  Tailwind no aplica ahí, así que se usan los mixins:
+
+  @use '../abstracts/responsive' as *;
+
+  .algo {
+    @include respond-to(md)    { ... }  // min-width: 768px  (mobile-first)
+    @include respond-below(lg) { ... }  // max-width: 1023.98px (desktop-first)
+  }
+
+  La regla del propio archivo lo dice: mixins SOLO en SCSS; en el HTML usa los 
+  prefijos de Tailwind. Nunca mezclas.
+
+  Lo viste en el shell (app.scss): el drawer empuja el contenido solo en
+  desktop, y en móvil queda como overlay:
+  @media (min-width: 1024px) {
+    &.app-main--drawer-open { padding-left: var(--app-drawer-width); }
+  }
+
+  4. Los contenedores resuelven el ancho/padding responsivo por ti
+
+  En vez de teclear max-w-* mx-auto px-4 md:px-6 lg:px-8 en cada página, hay
+  clases de layout (@layer layout) que ya lo encapsulan:
+
+  ┌──────────────────┬─────────┬────────────────────────────────────────────┐
+  │      Clase       │ Ancho   │                    Para                    │
+  │                  │   máx   │                                            │
+  ├──────────────────┼─────────┼────────────────────────────────────────────┤
+  │ container-app    │ 1280px  │ páginas normales                           │
+  ├──────────────────┼─────────┼────────────────────────────────────────────┤
+  │ container-fluid  │ 1920px  │ pantallas densas (tablas, filtros) ← la    │
+  │                  │         │ usa crear-novedad y novedades              │
+  ├──────────────────┼─────────┼────────────────────────────────────────────┤
+  │ container-narrow │ 768px   │ formularios / lectura                      │
+  ├──────────────────┼─────────┼────────────────────────────────────────────┤
+  │ section          │ —       │ ritmo vertical (py) que crece en md        │
+  └──────────────────┴─────────┴────────────────────────────────────────────┘
+
+  El padding lateral de estos contenedores ya crece con el viewport (4 → 6 → 8
+  en md/lg). Por eso en las plantillas ves class="section container-fluid" y no
+  una ristra de utilidades de padding.
+
+  5. Patrón a nivel de componente
+
+  Componentes también adaptan piezas con prefijos. Ejemplo en usuario-menu: el
+  nombre/rol se oculta en móvil y solo se ve el avatar (@media (min-width: 
+  640px)), para no saturar el header en pantallas pequeñas.
+
+  La regla de bolsillo
+
+  ¿Responsividad en una PLANTILLA?  → prefijos Tailwind (sm: md: lg:),
+  mobile-first
+  ¿Responsividad dentro de SCSS?    → mixins respond-to() / respond-below()
+  ¿Solo es ancho máx + padding?     → usa un container-* (no reinventes)
+
+  Y siempre mobile-first: diseña el estado chico primero, y agrega md:/lg: para
+  mejorar hacia arriba — no al revés.
+
+  ¿Quieres que probemos la responsividad en vivo (te levanto la app y vemos
+  inicio o el formulario a distintos anchos), o que revisemos si alguna pantalla
+  actual tiene un comportamiento raro en móvil?
+
+✻ Baked for 43s
+
+※ recap: Estás aprendiendo la arquitectura de estilos del proyecto Angular mientras construimos UI (header, menú usuario, página inicio, formulario crear-novedad demo). Acabo de explicar cómo se maneja la responsividad. El siguiente paso es lo que decidas: revisar algo en vivo o seguir con otra pantalla.
+
+❯ podrias darme un dibujo o lo mas didacticamente para entender todo el tema de 
+  estilos de lo que hemos venido hablando, como se comunican que hace cada una  
+  de esas capas al final quien las llama, todo muy bien detallado a fondo,      
+  puede ser en otra seccion en un html, el main.scss que hace, dame de la mejor 
+  manera que me la puedad explicar                                              
+
+⏺ Voy a hacerte una página HTML didáctica, autocontenida y visual que explique
+  todo el sistema de estilos a fondo. Primero miro qué hay ya en docs/ y en el
+  doc existente del proyecto para ser consistente.
+
+  Listed 1 directory (ctrl+o to expand)
+
+⏺ Reviso el cierre del circuito: cómo se cargan los estilos (angular.json) y el
+  orden de capas en PrimeNG (app.config.ts).
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(sed -n '69,80p' src/app/app.config.ts)
+  ⎿            cssLayer: {
+                 name: 'primeng',
+                 order: 'reset, base, primeng, sp-theme, layout, components
+     … +8 lines (ctrl+o to expand)
+
+⏺ Tengo todo el circuito mapeado. Voy a crear una página HTML autocontenida,
+  visual y a fondo que puedes abrir directo en el navegador. Incluye diagramas,
+  el flujo completo, qué hace main.scss, el orden de capas y quién llama a
+  quién.
+
+⏺ Write(docs/sistema-de-estilos.html)
+  ⎿  Wrote 552 lines to docs/sistema-de-estilos.html
+       2 <html lang="es">
+       3 <head>
+       4 <meta charset="UTF-8" />
+       5 <meta name="viewport" content="width=device-width, initial-scale
+         =1.0" />
+       6 <title>Sistema de Estilos · Plataforma Domiciliaria</title>
+       7 <style>
+       8   :root {
+       9     --blue-50:  #eff6ff;
+      10     --blue-100: #dbeafe;
+     … +808 lines (ctrl+o to expand)
+
+⏺ Listo. Creé una página HTML autocontenida (sin dependencias, se abre directo
+  en el navegador) con todo el sistema de estilos explicado visualmente.
+
+  Ábrela así:
+  ! open docs/sistema-de-estilos.html
+
+  Qué contiene (10 secciones con diagramas)
+
+  ┌─────┬─────────────────┬─────────────────────────────────────────────────┐
+  │  #  │     Sección     │             Qué explica visualmente             │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 00  │ La idea central │ Los tokens --app-* como única fuente de verdad  │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 01  │ ¿Quién lo       │ angular.json → las 3 puertas de entrada de CSS, │
+  │     │ carga?          │  en orden (diagrama de flujo)                   │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 02  │ main.scss       │ El orquestador: el orden de @use comentado, con │
+  │     │                 │  la analogía del "índice del libro"             │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │     │                 │ El concepto clave: la pila de capas coloreada   │
+  │ 03  │ @layer          │ mostrando quién gana en la cascada y por qué    │
+  │     │                 │ sp-theme vence a PrimeNG sin !important         │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 04  │ Tokens →        │ Cómo @theme inline convierte un token en        │
+  │     │ Tailwind        │ utilidad (flujo de 3 pasos)                     │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │     │                 │ El truco --p-* = var(--app-*) y por qué el      │
+  │ 05  │ Puente PrimeNG  │ orden de cssLayer en app.config.ts debe         │
+  │     │                 │ coincidir                                       │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 06  │ Escalera de     │ Los 5 escalones (Tailwind → tipografía →        │
+  │     │ decisión        │ pattern → tema → CSS scoped) como peldaños      │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 07  │ Anatomía real   │ Un <form> real con cada clase coloreada según   │
+  │     │                 │ su "proveedor" + tabla                          │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 08  │ Responsividad   │ Mobile-first, prefijos vs mixins, tabla de      │
+  │     │                 │ breakpoints                                     │
+  ├─────┼─────────────────┼─────────────────────────────────────────────────┤
+  │ 09  │ Flujo completo  │ Diagrama de punta a punta: del token al píxel   │
+  │     │                 │ en pantalla                                     │
+  └─────┴─────────────────┴─────────────────────────────────────────────────┘
+
+  Detalles didácticos que incluí
+
+  - Diagramas con cajas y flechas para los flujos (no solo texto).
+  - Pila de capas coloreada (de menor a mayor prioridad) — es lo más difícil de
+  "ver" y ahora es literal.
+  - Callouts diferenciados: azul (nota), ámbar (cuidado/regla crítica), verde
+  (consecuencia práctica).
+  - Código con sintaxis resaltada y comentarios, citando los valores reales de
+  tu repo.
+  - Tabla de anatomía que conecta cada clase con su capa y @layer.
+
+  Todo está basado en los archivos reales (_layers.scss, main.scss,
+  tailwind.css, app.config.ts, _responsive.scss), así que es fiel a tu proyecto,
+  no genérico.
+
+  ¿Quieres que además la integre como una ruta dentro de la app (en la sección
+  de documentación, junto a "Arquitectura de estilos") para que quede accesible
+  desde el menú, o la dejas como archivo standalone en docs/?
+
+✻ Cogitated for 3m 23s
+
+※ recap: We've been building UI and explaining the styling system for your Angular platform. Just created docs/sistema-de-estilos.html, a self-contained visual guide to the layers, main.scss, and cascade. Next: open it in your browser to review, or integrate it as an in-app docs route.
+
+❯ el sp-theme entiendo que como esra despues de prime pues gana, pero no        
+  entiendo por ejemplo este var(--app-primary-50); de donde sale ese color,     
+  como se relacion con el app.config?                                           
+  ⎿  ⧉ Selected 1 lines from src/styles/themes/_primeng-theme.scss in Visual Studio Code
+
+⏺ Buena duda — es justo donde se cruzan dos mundos. Déjame mostrarte los tres
+  archivos involucrados para explicarlo con tu código real.
+⏺ Bash(echo "=== 1) DÓNDE NACE --app-primary-50  (tokens/_colors.scss) ===";
+      grep -n "app-primary-50\|app-primary-100\|app-primary-600"
+      src/styles/tokens/_colors.scss;…)
+  ⎿  === 1) DÓNDE NACE --app-primary-50  (tokens/_colors.scss) ===
+     22:  --app-primary-50: #eff6ff;
+     23:  --app-primary-100: #dbeafe;
+     … +78 lines (ctrl+o to expand)
+
+⏺ Perfecto, aquí está el punto que falta encajar: var(--app-primary-50) NO sale 
+  de app.config.ts. Son dos cosas paralelas que resuelven lo mismo en momentos
+  distintos. Te lo desarmo.
+
+  ¿De dónde sale el color --app-primary-50?
+
+  De tokens/_colors.scss, línea 22 — ahí nace, y solo ahí:
+
+  :root {
+    --app-primary-50: #eff6ff;   // ← LA fuente de verdad
+  }
+
+  La línea que seleccionaste no define el color, solo lo lee:
+
+  // _primeng-theme.scss (la línea 21 que marcaste)
+  --p-primary-50: var(--app-primary-50);
+  //   ▲ variable de PrimeNG     ▲ lee el token de _colors.scss
+
+  Eso se traduce a: "oye PrimeNG, tu --p-primary-50 ahora vale lo que diga mi 
+  token --app-primary-50". Es un puente, no una definición.
+
+  La cadena completa de ese color
+
+  tokens/_colors.scss          _primeng-theme.scss              Componente
+  PrimeNG
+  ─────────────────────        ───────────────────────
+  ──────────────────
+  --app-primary-50: #eff6ff  →  --p-primary-50: var(--app-primary-50)  →  un
+  <p-button> tenue
+     (nace aquí)                  (lo conecta, @layer sp-theme)            lo
+  usa
+
+  Cambias #eff6ff en _colors.scss → cambia el token → cambia --p-primary-50 →
+  cambian todos los componentes PrimeNG. Un solo lugar.
+
+  Entonces, ¿qué pinta app.config.ts?
+
+  Aquí está la clave de tu pregunta. app.config.ts es una copia paralela en hex 
+  literal, que existe por una limitación técnica:
+
+  definePreset(Lara, {
+    semantic: { primary: { 50: '#eff6ff', ... } }   // ← HEX directo, NO var()
+  })
+
+  definePreset es TypeScript que corre en el arranque (bootstrap), antes de que
+  el navegador procese el SCSS. En ese contexto no puede usar var(--app-*) — esa
+  sintaxis es CSS, no existe en JS. Por eso pone el hex a pelo.
+
+  ¿Por qué dos sitios para el mismo color? (el "doble registro")
+
+  Es deliberado, y resuelve el momento del arranque:
+
+  ┌────────────┬───────────────────────────┬────────────────────────────────┐
+  │            │  app.config.ts (preset)   │  _primeng-theme.scss (@layer   │
+  │            │                           │           sp-theme)            │
+  ├────────────┼───────────────────────────┼────────────────────────────────┤
+  │ Qué pone   │ hex literal '#eff6ff'     │ var(--app-primary-50)          │
+  ├────────────┼───────────────────────────┼────────────────────────────────┤
+  │ Cuándo     │ en el bootstrap, primero  │ cuando carga el SCSS, después  │
+  │ actúa      │                           │                                │
+  ├────────────┼───────────────────────────┼────────────────────────────────┤
+  │            │ estado inicial correcto   │ el vínculo real a la fuente de │
+  │ Para qué   │ (sin "flash" de color     │  verdad                        │
+  │            │ malo)                     │                                │
+  ├────────────┼───────────────────────────┼────────────────────────────────┤
+  │ Quién gana │ —                         │ este, porque sp-theme va       │
+  │  al final  │                           │ encima de primeng en @layer    │
+  └────────────┴───────────────────────────┴────────────────────────────────┘
+
+  Secuencia en el tiempo:
+  1. Arranca la app → el preset genera --p-primary-50: #eff6ff (hex). PrimeNG ya
+  se ve bien de inmediato.
+  2. Carga el SCSS → _primeng-theme.scss reescribe --p-primary-50: 
+  var(--app-primary-50). Ahora apunta al token.
+  3. Como sp-theme tiene más prioridad de capa, gana esta segunda versión.
+
+  La relación con app.config, en una frase
+
+  No hay una referencia entre la línea que seleccionaste y app.config.ts: son
+  dos definiciones independientes del mismo valor. El hex del preset es solo el
+  "estado inicial de cortesía", y debe coincidir con el token (#eff6ff =
+  #eff6ff) para que no se vea un parpadeo de color antes de que el SCSS tome el
+  control y conecte todo a la fuente única de verdad.
+
+  ▎ Regla práctica: si cambias un color de marca, tócalo en tokens/_colors.scss 
+  ▎ (el real) y también en el preset de app.config.ts (para que el arranque 
+  ▎ coincida). Esos son los dos únicos lugares con hex de la rampa primary.
+
+  ¿Quieres que verifiquemos que los hex del preset y los tokens están
+  sincronizados hoy (a veces se desfasan), o seguimos con otra parte?
+
+✻ Cooked for 42s
+
+※ recap: Estábamos explicando el sistema de estilos del proyecto. Acabamos de aclarar que `--app-primary-50` nace en tokens/_colors.scss y que app.config.ts solo tiene una copia hex paralela para el arranque. Lo siguiente que ofrecí: verificar que esos hex sigan sincronizados con los tokens.
+
+❯ listo ya entendi gran parte de donde sale el color y que funcion tiene        
+  app.config pero como sabe que por ejemplo con este color   --p-primary-50:    
+  var(--app-primary-50); cambia los colores de prime ng?                        
+  ⎿  ⧉ Selected 1 lines from src/styles/themes/_primeng-theme.scss in Visual Studio Code
+
+⏺ Excelente pregunta — esto es el último eslabón. La respuesta corta: PrimeNG 
+  escribió sus propios componentes leyendo variables --p-*, y las CSS variables
+  se resuelven heredando desde :root. Te lo demuestro con evidencia real del
+  build.
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      css=$(ls dist/plataforma-domiciliaria/browser/styles*.css 2>/dev/null |
+      hea…)
+  ⎿  archivo: dist/plataforma-domiciliaria/browser/styles.css
+
+     === ¿PrimeNG genera reglas que LEEN --p-primary-*? (ejemplos) ===
+     … +15 lines (ctrl+o to expand)
+
+⏺ El CSS estático muestra solo parte; PrimeNG inyecta la mayoría de sus reglas 
+  en runtime vía JavaScript. Déjame buscar la evidencia en el motor de temas de
+  PrimeNG para mostrarte el mecanismo real.
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      echo "=== prefijo de variables que usa PrimeNG (variablePrefix) ==="…)
+  ⎿  === prefijo de variables que usa PrimeNG (variablePrefix) ===
+     (eval):4: no matches found: node_modules/@primeng/themes/fesm2022/*.mj
+     s
+     … +9 lines (ctrl+o to expand)
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      echo "=== estructura real de @primeng/themes ==="…)
+  ⎿  === estructura real de @primeng/themes ===
+     node_modules/@primeng/themes/index.mjs
+     node_modules/@primeng/themes/nora/index.mjs
+     … +7 lines (ctrl+o to expand)
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      echo "=== ¿cómo referencia el botón de Lara el color primary? ==="…)
+  ⎿  === ¿cómo referencia el botón de Lara el color primary? ===
+
+     === contexto: una línea del componente button con primary ===
+     … +4 lines (ctrl+o to expand)
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      echo "=== tamaño/estructura lara ==="; ls -la
+      node_modules/@primeng/themes/…)
+  ⎿  === tamaño/estructura lara ===
+     total 48
+     drwxr-xr-x@ 94 jesusdavidceballoscastillo  staff   3008 May 28 23:19 .
+     … +19 lines (ctrl+o to expand)
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      echo "=== contenido de un componente del tema (button) ==="…)
+  ⎿  === contenido de un componente del tema (button) ===
+     node_modules/@primeng/themes/lara/button/index.mjs.map
+     node_modules/@primeng/themes/lara/button/index.mjs
+     … +6 lines (ctrl+o to expand)
+
+⏺ El contenido real vive en @primeuix/themes. Vamos ahí — esta es la prueba
+  definitiva:
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      echo "=== cómo el BOTÓN de Lara referencia el color primary ==="…)
+  ⎿  === cómo el BOTÓN de Lara referencia el color primary ===
+       19 primary.color
+        6 primary.contrast.color
+     … +147 lines (ctrl+o to expand)
+
+⏺ Encontré la prueba definitiva. Mira lo que devolvió el último comando, al
+  final del archivo del motor de temas:
+
+  S = { defaults: { variable: { prefix: "p", selector: ":root,:host", ... } } }
+
+  Y que el botón de PrimeNG se define así internamente:
+  background: "{primary.color}"   // ← y usa primary.50, primary.100, etc.
+
+  Con eso, ya puedo cerrarte el círculo completo. La respuesta corta es: PrimeNG
+  no "sabe" nada especial. Solo lee var(--p-primary-50), y las CSS variables se
+  resuelven heredando desde :root. Tú cambias ese valor en :root, y la herencia
+  hace el resto.
+
+  El mecanismo, paso a paso
+
+  1. PrimeNG escribió sus componentes usando tokens, no colores fijos.
+  En @primeuix/themes, el botón no dice background: #2563eb. Dice background: 
+  "{primary.color}". Es una referencia simbólica.
+
+  2. El motor de temas compila eso a CSS variables con prefijo p.
+  El engine (prefix: "p", selector: ":root,:host") hace dos cosas al arrancar:
+
+  - Toma los valores del preset (los de app.config.ts) y los emite como
+  variables en :root:
+  :root { --p-primary-50: #eff6ff; --p-primary-color: #2563eb; ... }
+  - Convierte las referencias de los componentes en var(--p-...):
+  .p-button { background: var(--p-primary-color); }
+  .p-button:hover { background: var(--p-primary-hover-color); }
+
+  ▎ {primary.color} → var(--p-primary-color). El {...} se vuelve var(--p-...). 
+  ▎ Ese es el "traductor".
+
+  3. Aquí está el truco que no se ve: las CSS variables se HEREDAN.
+  Una var(--p-primary-50) no tiene valor propio. Cuando el navegador la
+  encuentra en .p-button, busca hacia arriba en los ancestros hasta encontrar
+  quién definió --p-primary-50. Como está en :root (el ancestro de TODO), todos
+  los componentes la ven.
+
+  4. Tu _primeng-theme.scss redefine esa misma variable en :root... pero en una 
+  capa más alta.
+  @layer sp-theme {        /* ← capa por encima de 'primeng' */
+    :root {
+      --p-primary-50: var(--app-primary-50);   /* la línea que marcaste */
+    }
+  }
+  Ahora hay dos definiciones de --p-primary-50 en :root:
+  - la del preset (capa primeng): #eff6ff
+  - la tuya (capa sp-theme): var(--app-primary-50)
+
+  Como sp-theme gana en la cascada de capas, el valor efectivo de --p-primary-50
+  pasa a ser var(--app-primary-50).
+
+  5. El componente, sin enterarse de nada, ahora muestra TU color.
+  La cadena de resolución cuando se pinta un botón:
+
+  .p-button  →  var(--p-primary-50)
+                     ↓ (resuelve en :root, gana sp-theme)
+                var(--app-primary-50)
+                     ↓ (resuelve en :root, tokens/_colors.scss)
+                #eff6ff
+
+  Por qué esto "cambia los colores de PrimeNG"
+
+  Porque redefinir una CSS variable que ya está siendo consumida cambia, en 
+  vivo, todo lo que la lee — sin tocar ni una regla de los componentes. PrimeNG
+  escribió var(--p-primary-50) en 100 sitios; tú cambiaste a qué apunta
+  --p-primary-50 en un solo lugar (:root), y los 100 sitios se actualizan solos
+  por herencia.
+
+  No hay magia ni "PrimeNG detecta el cambio". Es el comportamiento normal de
+  las custom properties: valor resuelto en tiempo de uso + herencia desde el
+  ancestro.
+
+  La analogía
+
+  Piensa en --p-primary-50 como un interruptor central de la luz:
+  - PrimeNG cableó 100 bombillas (var(--p-primary-50)) a ese interruptor.
+  - El preset de app.config.ts puso el interruptor en "azul #eff6ff" al
+  arrancar.
+  - Tu _primeng-theme.scss reconecta el interruptor a tu red eléctrica
+  (var(--app-primary-50)), y como tu reconexión tiene prioridad, manda la tuya.
+  - Las 100 bombillas no saben nada: solo siguen el interruptor.
+
+  En una frase
+
+  PrimeNG cambia de color porque sus componentes leen var(--p-primary-*), esas
+  variables viven en :root, y tu @layer sp-theme redefine su valor con más 
+  prioridad → por herencia, todos los componentes resuelven al token --app-*,
+  que termina en el hex de _colors.scss.
+
+  ¿Quieres que lo veamos en vivo en el navegador (inspeccionar un botón y ver
+  cómo --p-primary-color resuelve a --app-primary-600 → hex), o agrego esta
+  explicación del "puente PrimeNG" a la página HTML de documentación que
+  creamos?
+
+✻ Brewed for 2m 9s
+
+❯ y por ultimo que es un @layer sp-theme?                                       
+  ⎿  ⧉ Selected 1 lines from src/styles/themes/_primeng-theme.scss in Visual Studio Code
+
+⏺ Buena última pregunta, porque @layer es el pegamento de todo lo que hemos
+  hablado. Te lo explico desde cero.
+
+  Primero: ¿qué es @layer en CSS? (la función nativa)
+
+  @layer es una característica nativa de CSS (no de Sass ni de Angular) llamada
+  cascade layers / capas de cascada. Sirve para controlar quién gana cuando dos 
+  reglas chocan, agrupando el CSS en "capas" con un orden de prioridad
+  explícito.
+
+  Lo normal en CSS es que gane la regla más específica (un #id gana a una
+  .clase, etc.). Eso genera las clásicas guerras de !important. @layer cambia
+  esa lógica:
+
+  ▎ Entre capas distintas, gana la capa declarada DESPUÉS — sin importar la 
+  ▎ especificidad.
+
+  Ejemplo mínimo:
+  @layer base, tema;   /* declaro el orden: base primero, tema después */
+
+  @layer base {
+    .boton { color: red; }          /* específico */
+  }
+  @layer tema {
+    div .boton.x.y.z { color: blue; }  /* muchísimo más específico */
+  }
+  Aquí gana azul, aunque red venga de un selector que normalmente perdería,
+  porque tema está después de base en el orden de capas. La capa manda sobre la
+  especificidad.
+
+  Segundo: ¿qué es sp-theme?
+
+  sp-theme es simplemente el nombre de una de esas capas. No es una palabra
+  reservada: lo eligió tu equipo (probablemente "Salud en casa / Sura Platform 
+  theme"). Podría llamarse mi-tema y funcionaría igual.
+
+  Lo importante no es el nombre, sino su posición en el orden que se declara en
+  abstracts/_layers.scss:
+
+  @layer reset, base, primeng, sp-theme, layout, components, utilities;
+  //                  ▲ antes    ▲ sp-theme va JUSTO después de primeng
+
+  Como sp-theme está después de primeng, todo lo que escribas dentro de @layer 
+  sp-theme { ... } gana a los estilos de PrimeNG, sin !important y sin pelear
+  especificidad.
+
+  Tercero: por qué eso resuelve tu caso
+
+  Por eso el archivo _primeng-theme.scss envuelve sus reglas en @layer sp-theme:
+
+  @layer sp-theme {
+    :root {
+      --p-primary-50: var(--app-primary-50);   /* gana a la del preset de 
+  PrimeNG */
+    }
+  }
+
+  Recuerda del paso anterior: PrimeNG define --p-primary-50: #eff6ff en su capa
+  primeng. Tú lo redefines en sp-theme. Las dos están en :root (misma
+  especificidad), así que el desempate lo decide la capa → gana sp-theme porque
+  va después.
+
+  Si no usaras la capa (CSS suelto), tu regla y la de PrimeNG tendrían la misma
+  especificidad y el resultado dependería del orden de carga — frágil. Con
+  @layer, el ganador está garantizado por diseño.
+
+  La pieza que conecta con app.config.ts
+
+  Para que esto funcione, PrimeNG debe inyectar sus estilos dentro de la capa 
+  primeng. Eso se le dice en app.config.ts:
+
+  providePrimeNG({
+    theme: { options: { cssLayer: {
+      name: 'primeng',
+      order: 'reset, base, primeng, sp-theme, layout, components, utilities',
+    }}}
+  })
+
+  Ese order debe ser idéntico al de _layers.scss. Si difieren, PrimeNG queda
+  "fuera de capa" y toda la prioridad se rompe. Por eso hay un comentario que lo
+  advierte en ambos archivos.
+
+  Resumen en 3 frases
+
+  1. @layer es CSS nativo para ordenar prioridades por capas, no por
+  especificidad: gana la capa declarada de último.
+  2. sp-theme es el nombre de la capa de overrides de tu proyecto, colocada
+  justo encima de primeng para ganarle siempre.
+  3. Por eso, redefinir --p-primary-50 dentro de @layer sp-theme vence a la
+  definición de PrimeNG de forma garantizada, sin !important.
+
+  ▎ Analogía: las capas son como pisos de un edificio. La especificidad decide 
+  ▎ quién manda dentro de un piso; pero entre pisos, siempre manda el piso de 
+  ▎ arriba. utilities (Tailwind) es la azotea (máxima prioridad), sp-theme está 
+  ▎ un piso por encima de primeng, y reset es el sótano.
+
+  Con esto cierras el modelo completo: tokens (la verdad) → @theme/var() (los
+  conectores) → @layer (quién gana) → main.scss/angular.json (quién carga y
+  ordena). ¿Quieres que agregue esta explicación de @layer sp-theme a la página
+  HTML de documentación para tenerlo todo junto?
+
+✻ Sautéed for 29s
+❯ a que cosas exactamenre sobreescribe sp-theme sobre prime ng y que no?        
+
+⏺ Buena pregunta concreta. Déjame leer el archivo completo para decirte
+  exactamente qué reescribe y qué no — no de memoria, sino de tu código real.
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/salud-en-casa/plataforma-d
+      omiciliaria
+      f=src/styles/themes/_primeng-theme.scss…)
+  ⎿  total líneas:      276
+     === TODAS las variables --p-* que reescribe (agrupadas) ===
+       20 select
+     … +205 lines (ctrl+o to expand)
+
+⏺ Con la lista completa (son ~175 variables --p-*), te puedo decir exactamente
+  qué reescribe y qué no. La clave es entender que sp-theme solo cambia VALORES 
+  de tokens, nunca la estructura de los componentes, y que hay dos niveles de
+  override.
+
+  Lo que SÍ reescribe
+
+  Nivel 1 — La rampa global (afecta a TODO PrimeNG)
+
+  Estas son las que re-pintan todos los componentes de golpe, incluso los que no
+  aparecen en la lista:
+
+  ┌────────────┬──────────────────────────────────────────┬─────────────────┐
+  │   Grupo    │                Variables                 │     Efecto      │
+  ├────────────┼──────────────────────────────────────────┼─────────────────┤
+  │ primary    │ --p-primary-50…950, --p-primary-color,   │ El azul de      │
+  │ (15)       │ -hover, -active, -contrast               │ marca en TODO   │
+  ├────────────┼──────────────────────────────────────────┼─────────────────┤
+  │ surface    │ --p-surface-0…900                        │ Fondos, bordes, │
+  │ (11)       │                                          │  superficies    │
+  ├────────────┼──────────────────────────────────────────┼─────────────────┤
+  │ text (2)   │ --p-text-color, --p-text-muted-color     │ Color de texto  │
+  │            │                                          │ base            │
+  ├────────────┼──────────────────────────────────────────┼─────────────────┤
+  │            │                                          │ El anillo de    │
+  │ focus (4)  │ --p-focus-ring-color/width/style/offset  │ foco            │
+  │            │                                          │ (accesibilidad) │
+  ├────────────┼──────────────────────────────────────────┼─────────────────┤
+  │ transition │ --p-transition-duration                  │ Velocidad de    │
+  │  (1)       │                                          │ animaciones     │
+  └────────────┴──────────────────────────────────────────┴─────────────────┘
+
+  ▎ Por esto un componente que no está en la lista (un accordion, un tab) igual 
+  ▎ sale con tu azul: internamente lee var(--p-primary-*) y var(--p-surface-*), 
+  ▎ que sí reescribiste.
+
+  Nivel 2 — Tokens por componente (ajuste fino)
+
+  Aquí afina detalles que la rampa global no cubre, componente por componente:
+
+  - Formularios: form-field-*, inputtext-*, textarea-*, select-*, multiselect-*,
+  checkbox-*, radiobutton-*, toggleswitch-*, datepicker-* → border-radius,
+  padding, color de borde en hover/focus/inválido, fondos de opciones, sombras
+  de overlay.
+  - Botón: button-primary-*, button-secondary-*, button-padding-*,
+  button-border-radius.
+  - Datos: datatable-* (bordes, header, hover de fila).
+  - Feedback: message-* (success/info/warn/error con sus tints).
+  - Overlays: overlay-modal-*, overlay-popover-*, overlay-select-* (fondo,
+  borde, sombra, radio).
+  - Otros: tooltip-*, content-*, password-icon, anchor-gutter.
+
+  En resumen, reescribe colores, border-radius, padding, sombras, colores de 
+  borde por estado y el focus ring de unos ~20 componentes + la rampa global.
+
+  Lo que NO reescribe (y no puede, por diseño)
+
+  1. La estructura/geometría/comportamiento del componente.
+  sp-theme solo reasigna tokens de tema. No puede mover el icono del dropdown,
+  cambiar el markup interno, alterar cómo se posiciona un overlay o reescribir
+  la lógica de animación. Eso no son variables --p-*, son reglas CSS reales de
+  PrimeNG. Para tocarlas necesitarías CSS de verdad (no reasignación de token).
+
+  2. Lo que no esté expuesto como token --p-*.
+  Si PrimeNG no expuso una variable para cierto detalle, sp-theme no lo alcanza.
+  Tendrías que escribir una regla específica (idealmente también dentro de
+  @layer sp-theme, pero ya como CSS, no como token).
+
+  3. Detalles específicos de componentes que no están en la lista.
+  Un componente ausente (ej. tabs, dialog salvo sus tokens de overlay) hereda el
+  color de marca por la rampa global, pero sus detalles propios (paddings,
+  radios particulares) se quedan con los valores del preset de Lara definido en
+  app.config.ts. No están "rotos", solo usan el default de Lara para esos
+  matices.
+
+  4. El origen del color.
+  sp-theme no define colores; los toma de tokens/_colors.scss vía var(--app-*).
+  Si quieres cambiar el azul, vas a _colors.scss, no aquí.
+
+  5. Nada fuera de PrimeNG.
+  No toca Tailwind, ni los patterns (.card, .field), ni el CSS de tus
+  componentes. Su único universo son las variables --p-*.
+
+  La frase que lo resume
+
+  ▎ sp-theme reescribe los valores de tema (color, radio, padding, sombra, foco)
+  ▎ que PrimeNG expone como tokens --p-* — globalmente vía la rampa 
+  ▎ primary/surface, y con ajuste fino en ~20 componentes. No reescribe la 
+  ▎ estructura, el comportamiento, ni nada que PrimeNG no haya expuesto como 
+  ▎ token; para eso harían falta reglas CSS reales.
+
+  Regla práctica para ti:
+  - ¿Cambiar un color/radio/padding/sombra de PrimeNG? → hay un token --p-*, va
+  en _primeng-theme.scss.
+  - ¿Cambiar cómo está construido un componente (posición, tamaño de una parte
+  interna, markup)? → ya no es token; es una regla CSS dirigida (.p-...) dentro
+  de @layer sp-theme, o reconsiderar si lo necesitas.
+
+  ¿Quieres que te muestre un ejemplo concreto de algo del nivel 2 (por ejemplo
+  cómo --p-button-border-radius cambia solo los botones) o cómo se vería tener
+  que tocar algo que NO es token?
+
+✻ Cooked for 55s
+
+※ recap: You're learning how the project's styling system works, most recently what `@layer sp-theme` overrides on PrimeNG. We just finished explaining that it reassigns `--p-*` token values, not component structure. Next, optionally show a concrete example or add it to the docs page.

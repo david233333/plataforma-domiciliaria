@@ -22,7 +22,7 @@
     [attr.aria-expanded]="drawerVisible()"
     (onClick)="toggleDrawer()"
   />
-  <a routerLink="/novedades" class="app-brand" aria-label="Sura — Plataforma Domiciliaria">
+  <a routerLink="/inicio" class="app-brand" aria-label="Sura — Plataforma Domiciliaria">
     <img
       ngSrc="logo-sura.svg"
       width="139"
@@ -38,7 +38,6 @@
   <!-- Acciones del extremo derecho: notificaciones + usuario en sesión. -->
   <div class="ml-auto flex items-center gap-2">
     <!-- Badge de notificaciones: lee el estado compartido del NotificacionesFacade. -->
-    <app-notificaciones-badge />
     <span class="app-header__sep" aria-hidden="true"></span>
     <app-usuario-menu />
   </div>

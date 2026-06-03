@@ -4,7 +4,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Drawer } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { routeFadeAnimation } from './core/animations/animations';
-import { NotificacionesBadgeComponent } from './presentation/notificaciones/notificaciones-badge.component';
 import { UsuarioMenuComponent } from './presentation/usuario/usuario-menu.component';
 
 interface NavItem {
@@ -23,7 +22,6 @@ interface NavItem {
     NgOptimizedImage,
     Drawer,
     ButtonModule,
-    NotificacionesBadgeComponent,
     UsuarioMenuComponent,
   ],
   templateUrl: './app.html',
@@ -38,8 +36,8 @@ export class App {
 
   /** Opciones de navegación del drawer. */
   protected readonly navItems: NavItem[] = [
+    { label: 'Inicio', icon: 'pi pi-home', route: '/inicio' },
     { label: 'Gestionar novedades', icon: 'pi pi-file-edit', route: '/novedades' },
-    { label: 'Notificaciones', icon: 'pi pi-bell', route: '/notificaciones' },
     { label: 'Design System', icon: 'pi pi-palette', route: '/design-system' },
     { label: 'Arquitectura de estilos', icon: 'pi pi-book', route: '/arquitectura-estilos' },
   ];

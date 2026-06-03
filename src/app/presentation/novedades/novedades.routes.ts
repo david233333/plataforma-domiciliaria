@@ -15,5 +15,5 @@ export const NOVEDADES_ROUTES: Routes = [
         (m) => m.GestionarNovedadesComponent,
       ),
     title: 'Gestionar novedades',
-  },
+  }
 ];

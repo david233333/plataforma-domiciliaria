@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sistema de Estilos · Plataforma Domiciliaria</title>
+<style>
+  :root {
+    --blue-50:  #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-200: #bfdbfe;
+    --blue-300: #93c5fd;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --blue-800: #1e40af;
+    --blue-900: #1e3a8a;
+    --ink:      #0f172a;
+    --ink-2:    #334155;
+    --ink-3:    #64748b;
+    --line:     #e2e8f0;
+    --surface:  #ffffff;
+    --bg:       #f8fafc;
+    --amber:    #f59e0b;
+    --amber-bg: #fffbeb;
+    --green:    #16a34a;
+    --green-bg: #dcfce7;
+    --radius:   14px;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    color: var(--ink);
+    background:
+      radial-gradient(140% 90% at 100% 0%, var(--blue-50) 0%, transparent 45%),
+      var(--bg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 120px; }
+
+  /* ---------- HERO ---------- */
+  header.hero {
+    text-align: center;
+    padding: 72px 24px 48px;
+  }
+  .hero .eyebrow {
+    display: inline-block;
+    font-size: 12px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--blue-600);
+    background: var(--blue-50); border: 1px solid var(--blue-200);
+    padding: 6px 14px; border-radius: 999px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px); line-height: 1.1; margin: 20px 0 12px;
+    letter-spacing: -.02em;
+    background: linear-gradient(90deg, var(--blue-800), var(--blue-500));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p { font-size: 18px; color: var(--ink-2); max-width: 640px; margin: 0 auto; }
+
+  /* ---------- SECTIONS ---------- */
+  section { margin-top: 64px; }
+  .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--blue-600); color: #fff; font-weight: 800; font-size: 16px;
+    box-shadow: 0 6px 14px -6px var(--blue-600);
+  }
+  h2 {
+    display: flex; align-items: center; gap: 14px;
+    font-size: 26px; letter-spacing: -.01em; margin: 0 0 6px;
+  }
+  .lead { color: var(--ink-2); font-size: 16.5px; margin: 0 0 22px; padding-left: 48px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 26px;
+    box-shadow: 0 1px 2px rgb(2 6 23 / .04);
+  }
+  .card + .card { margin-top: 16px; }
+
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+  p code, li code, td code {
+    background: var(--blue-50); color: var(--blue-800);
+    padding: 1px 6px; border-radius: 6px; border: 1px solid var(--blue-100);
+    white-space: nowrap;
+  }
+  pre {
+    margin: 0; background: #0b1220; color: #e2e8f0;
+    border-radius: 12px; padding: 18px 20px; overflow-x: auto;
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.7;
+    border: 1px solid #1e293b;
+  }
+  pre .c { color: #64748b; font-style: italic; }      /* comentario */
+  pre .k { color: #93c5fd; }                          /* keyword */
+  pre .s { color: #86efac; }                          /* string */
+  pre .t { color: #fbbf24; }                          /* token/tag */
+  pre .m { color: #f9a8d4; }                          /* mixin/at */
+
+  /* ---------- callouts ---------- */
+  .note {
+    border-left: 4px solid var(--blue-500); background: var(--blue-50);
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 16px; font-size: 15px;
+  }
+  .warn {
+    border-left: 4px solid var(--amber); background: var(--amber-bg);
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 16px; font-size: 15px;
+  }
+  .good {
+    border-left: 4px solid var(--green); background: var(--green-bg);
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 16px; font-size: 15px;
+  }
+  .note b, .warn b, .good b { font-weight: 700; }
+
+  /* ---------- flow boxes ---------- */
+  .flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+  .box {
+    background: var(--surface); border: 2px solid var(--blue-200);
+    border-radius: 12px; padding: 14px 18px;
+  }
+  .box .b-title { font-weight: 700; color: var(--blue-800); }
+  .box .b-sub { font-size: 13.5px; color: var(--ink-3); }
+  .arrow {
+    align-self: center; color: var(--blue-400); font-size: 22px;
+    line-height: 1; padding: 6px 0; color: var(--blue-500);
+  }
+
+  /* ---------- layer stack ---------- */
+  .stack { display: flex; flex-direction: column-reverse; gap: 6px; }
+  .layer {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .layer .lname { font-family: var(--mono); font-weight: 700; min-width: 120px; }
+  .layer .ldesc { font-size: 14px; color: var(--ink-2); }
+  .layer .prio { margin-left: auto; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+  .layer.l0 { background:#f1f5f9; }
+  .layer.l1 { background:#eef2ff; }
+  .layer.l2 { background:#e0e7ff; }
+  .layer.l3 { background:#dbeafe; border-color: var(--blue-300); }
+  .layer.l4 { background:#e0f2fe; }
+  .layer.l5 { background:#cffafe; }
+  .layer.l6 { background:#bfdbfe; border-color: var(--blue-400); }
+  .stack-legend { display:flex; justify-content: space-between; font-size: 13px; color: var(--ink-3); margin: 8px 2px 0; }
+
+  /* ---------- ladder ---------- */
+  .ladder { counter-reset: rung; display: grid; gap: 12px; }
+  .rung {
+    display: grid; grid-template-columns: 40px 1fr; gap: 16px; align-items: start;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .rung .r-badge {
+    display:flex; align-items:center; justify-content:center;
+    width: 40px; height: 40px; border-radius: 10px;
+    font-weight: 800; color:#fff; background: var(--blue-600);
+  }
+  .rung h4 { margin: 2px 0 4px; font-size: 16.5px; }
+  .rung p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
+  .rung.last .r-badge { background: var(--amber); }
+
+  /* ---------- table ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin-top: 8px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--ink-3); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  tbody tr:hover { background: var(--bg); }
+
+  /* ---------- anatomy ---------- */
+  .tag { display:inline-block; font-family: var(--mono); font-size: 12px; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+  .tag.tw { background: #ecfeff; color:#0e7490; border:1px solid #a5f3fc; }
+  .tag.ty { background: #faf5ff; color:#7e22ce; border:1px solid #e9d5ff; }
+  .tag.pa { background: #eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+  .tag.pn { background: #fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+  .tag.cs { background: #f1f5f9; color:#334155; border:1px solid #cbd5e1; }
+
+  .toc {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 10px; margin-top: 28px;
+  }
+  .toc a {
+    text-decoration: none; color: var(--ink-2); font-size: 14.5px; font-weight: 500;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; display:flex; gap: 10px; align-items:center;
+    transition: .15s;
+  }
+  .toc a:hover { border-color: var(--blue-300); color: var(--blue-700); transform: translateY(-1px); }
+  .toc a b { color: var(--blue-600); font-family: var(--mono); }
+
+  footer { text-align:center; color: var(--ink-3); font-size: 13px; margin-top: 80px; }
+  hr.soft { border:0; border-top:1px dashed var(--line); margin: 28px 0; }
+  .two { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px){ .two { grid-template-columns: 1fr; } .lead{padding-left:0} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Guía interna · Frontend</span>
+  <h1>Cómo funciona el sistema de estilos</h1>
+  <p>Una sola fuente de verdad, cinco capas que cooperan y un orden de cascada
+     explícito. Aquí está todo el circuito: quién carga qué, qué hace
+     <code>main.scss</code> y cómo decides dónde escribir cada estilo.</p>
+
+  <nav class="toc">
+    <a href="#idea"><b>00</b> La idea central</a>
+    <a href="#quien"><b>01</b> ¿Quién lo carga?</a>
+    <a href="#main"><b>02</b> main.scss</a>
+    <a href="#layers"><b>03</b> @layer (la cascada)</a>
+    <a href="#tokens"><b>04</b> Tokens → Tailwind</a>
+    <a href="#primeng"><b>05</b> Puente PrimeNG</a>
+    <a href="#ladder"><b>06</b> Escalera de decisión</a>
+    <a href="#anatomy"><b>07</b> Anatomía real</a>
+    <a href="#resp"><b>08</b> Responsividad</a>
+    <a href="#full"><b>09</b> El flujo completo</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============================================================= -->
+<section id="idea">
+  <h2><span class="step-num">00</span> La idea central: una sola fuente de verdad</h2>
+  <p class="lead">Antes de las capas, entiende la regla que las une todas: <b>cada
+     decisión de diseño (color, espacio, radio, sombra) se define UNA vez</b> como
+     un <i>token</i> <code>--app-*</code>. Todo lo demás solo lo consume.</p>
+
+  <div class="card">
+    <p>Los tokens viven en <code>src/styles/tokens/</code> como variables CSS en <code>:root</code>:</p>
+    <pre><span class="c">/* tokens/_spacing.scss y _colors.scss → :root */</span>
+<span class="t">--app-primary-600</span>: #2563eb;   <span class="c">/* azul de marca */</span>
+<span class="t">--app-space-4</span>:     1rem;      <span class="c">/* 16px */</span>
+<span class="t">--app-radius-md</span>:   0.375rem;  <span class="c">/* 6px — radio por defecto */</span>
+<span class="t">--app-shadow-xs</span>:   ...;       <span class="c">/* sombra sutil de card */</span></pre>
+    <div class="note">¿Por qué importa? Si mañana el azul de marca cambia, lo
+      tocas en <b>un solo archivo</b> y se actualizan Tailwind, los componentes de
+      PrimeNG, los patterns y el CSS de cada componente <b>a la vez</b>. Nadie
+      hardcodea <code>#2563eb</code> en ningún lado.</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="quien">
+  <h2><span class="step-num">01</span> ¿Quién carga todo, al final?</h2>
+  <p class="lead">El que “llama” a los estilos no es Angular ni un componente: es
+     <code>angular.json</code>. Ahí se declara, <b>en orden</b>, qué CSS entra al bundle.</p>
+
+  <div class="card">
+    <pre><span class="c">// angular.json → architect.build.options.styles[]</span>
+<span class="s">"styles"</span>: [
+  <span class="s">"node_modules/primeicons/primeicons.css"</span>,  <span class="c">// 1º  íconos pi-*</span>
+  <span class="s">"src/styles/tailwind.css"</span>,                <span class="c">// 2º  Tailwind + @theme</span>
+  <span class="s">"src/styles/main.scss"</span>                    <span class="c">// 3º  nuestro orquestador</span>
+]</pre>
+
+    <p style="margin-top:20px">Ese orden produce este flujo de entrada al navegador:</p>
+    <div class="flow">
+      <div class="box"><div class="b-title">1 · primeicons.css</div><div class="b-sub">La tipografía de íconos <code>pi pi-home</code>, <code>pi pi-bell</code>…</div></div>
+      <div class="arrow">▼</div>
+      <div class="box"><div class="b-title">2 · tailwind.css <span style="font-weight:400;color:var(--ink-3)">(es .css a propósito)</span></div><div class="b-sub"><code>@import "tailwindcss"</code> + el plugin de PrimeUI + <code>@theme inline</code> que conecta los tokens. Aquí Tailwind emite su <code>@layer base</code> y <code>@layer utilities</code>.</div></div>
+      <div class="arrow">▼</div>
+      <div class="box" style="border-color:var(--blue-500)"><div class="b-title">3 · main.scss</div><div class="b-sub">Declara el orden de capas y “rellena” tokens, reset, tipografía, tema PrimeNG, layout, patterns y animaciones.</div></div>
+    </div>
+    <div class="warn"><b>¿Por qué <code>tailwind.css</code> es <code>.css</code> y no <code>.scss</code>?</b>
+      Porque <code>@import "tailwindcss"</code> es una directiva de PostCSS, no de Sass.
+      Si la procesara el compilador Sass, rompería la build.</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="main">
+  <h2><span class="step-num">02</span> Qué hace <code>main.scss</code> (el orquestador)</h2>
+  <p class="lead">No contiene estilos visuales propios: su trabajo es <b>cargar todo
+     en el orden correcto</b> con <code>@use</code>. El orden es crítico — un token
+     debe existir antes de que alguien escriba <code>var(--app-*)</code>.</p>
+
+  <div class="card">
+    <pre><span class="m">@use</span> <span class="s">'abstracts/layers'</span>;        <span class="c">// 1. Declara @layer ANTES que nada</span>
+<span class="m">@use</span> <span class="s">'tokens/colors'</span>;           <span class="c">// 2. Tokens en :root (la fuente de verdad)</span>
+<span class="m">@use</span> <span class="s">'tokens/typography'</span>;       <span class="c">//    ...deben existir antes de usarse</span>
+<span class="m">@use</span> <span class="s">'tokens/spacing'</span>;
+<span class="m">@use</span> <span class="s">'tokens/elevation'</span>;
+<span class="m">@use</span> <span class="s">'tokens/motion'</span>;
+<span class="m">@use</span> <span class="s">'base/reset'</span>;             <span class="c">// 3. Reset mínimo (@layer reset)</span>
+<span class="m">@use</span> <span class="s">'base/base'</span>;              <span class="c">//    defaults globales</span>
+<span class="m">@use</span> <span class="s">'typography/typography'</span>;   <span class="c">// 4. Clases .text-* (@layer components)</span>
+<span class="m">@use</span> <span class="s">'themes/primeng-theme'</span>;    <span class="c">// 5. --p-* = var(--app-*) (@layer sp-theme)</span>
+<span class="m">@use</span> <span class="s">'layout/containers'</span>;       <span class="c">// 6. container-*, section (@layer layout)</span>
+<span class="m">@use</span> <span class="s">'patterns/patterns'</span>;       <span class="c">// 7. .card .field .status-badge (@layer components)</span>
+<span class="m">@use</span> <span class="s">'utilities/animations'</span>;    <span class="c">// 8. keyframes fadeIn / shimmer (@layer utilities)</span></pre>
+
+    <div class="note">Piensa en <code>main.scss</code> como el <b>índice de un libro</b>:
+      no cuenta la historia, pero define en qué orden se leen los capítulos para
+      que todo tenga sentido. Si pones el capítulo de tokens después de quien los
+      usa, el libro no se entiende (los <code>var(--app-*)</code> saldrían vacíos).</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="layers">
+  <h2><span class="step-num">03</span> <code>@layer</code>: el orden de la cascada</h2>
+  <p class="lead">Este es el concepto que hace que todo conviva sin guerras de
+     <code>!important</code>. Una capa <b>posterior siempre gana</b> sobre una anterior,
+     <i>sin importar la especificidad del selector</i>.</p>
+
+  <div class="card">
+    <p>El orden se declara en una sola línea (<code>abstracts/_layers.scss</code>),
+       y es <b>la primera línea de CSS que llega al navegador</b>:</p>
+    <pre><span class="m">@layer</span> reset, base, primeng, sp-theme, layout, components, utilities;</pre>
+
+    <p style="margin-top:22px">Visto como prioridad (abajo = más fuerte):</p>
+    <div class="stack">
+      <div class="layer l0"><span class="lname">reset</span><span class="ldesc">Normalizaciones mínimas propias</span><span class="prio">— menor prioridad</span></div>
+      <div class="layer l1"><span class="lname">base</span><span class="ldesc">Aquí aterriza el <i>preflight</i> de Tailwind (el nombre coincide a propósito)</span><span class="prio"></span></div>
+      <div class="layer l2"><span class="lname">primeng</span><span class="ldesc">Los estilos de los componentes de PrimeNG</span><span class="prio"></span></div>
+      <div class="layer l3"><span class="lname">sp-theme</span><span class="ldesc">Nuestros overrides <code>--p-* = var(--app-*)</code> → ganan a PrimeNG sin <code>!important</code></span><span class="prio">⬅ por eso va encima</span></div>
+      <div class="layer l4"><span class="lname">layout</span><span class="ldesc"><code>container-*</code>, <code>section</code></span><span class="prio"></span></div>
+      <div class="layer l5"><span class="lname">components</span><span class="ldesc">Los patterns: <code>.card .field .status-badge</code></span><span class="prio"></span></div>
+      <div class="layer l6"><span class="lname">utilities</span><span class="ldesc">Aquí aterrizan las utilidades de Tailwind → <b>máxima prioridad</b></span><span class="prio">⬅ mayor prioridad</span></div>
+    </div>
+    <div class="stack-legend"><span>↑ gana en la cascada</span><span>la primera capa pierde ↓</span></div>
+
+    <div class="good" style="margin-top:22px"><b>Consecuencia práctica:</b> como
+      <code>utilities</code> (Tailwind) es la capa más alta, si pones
+      <code>class="p-2"</code> en un <code>.card</code> (que define <code>padding</code> en
+      <code>components</code>), <b>Tailwind gana</b> y ajusta el padding. Por eso el layout
+      puntual siempre puede sobrescribir al pattern desde la plantilla.</div>
+
+    <div class="warn"><b>El detalle que no se puede romper:</b> este mismo orden se
+      repite en <code>app.config.ts</code> →
+      <code>providePrimeNG({ cssLayer: { order: 'reset, base, primeng, sp-theme, layout, components, utilities' }})</code>.
+      Si los dos órdenes difieren, PrimeNG inyecta fuera de capa y se rompe toda la cascada.</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="tokens">
+  <h2><span class="step-num">04</span> Cómo los tokens se vuelven utilidades de Tailwind</h2>
+  <p class="lead">Tailwind v4 es <i>CSS-first</i>: <b>no hay <code>tailwind.config.js</code></b>.
+     La configuración vive en <code>tailwind.css</code> con <code>@theme inline</code>,
+     que mapea los tokens a las utilidades.</p>
+
+  <div class="card">
+    <pre><span class="c">/* tailwind.css */</span>
+<span class="m">@theme inline</span> {
+  <span class="t">--color-text-secondary</span>: <span class="k">var</span>(<span class="t">--app-text-secondary</span>);
+  <span class="t">--spacing-4</span>:            <span class="k">var</span>(<span class="t">--app-space-4</span>);
+  <span class="t">--radius-xl</span>:            <span class="k">var</span>(<span class="t">--app-radius-xl</span>);
+}</pre>
+    <p style="margin-top:18px">Eso hace que estas utilidades existan <b>conectadas al token</b>:</p>
+    <div class="flow">
+      <div class="box"><div class="b-title">Escribes en el HTML</div><div class="b-sub mono">class="text-text-secondary p-4 rounded-xl"</div></div>
+      <div class="arrow">▼</div>
+      <div class="box"><div class="b-title">Tailwind genera CSS que apunta al token</div><div class="b-sub mono">color: var(--app-text-secondary); padding: var(--app-space-4); …</div></div>
+      <div class="arrow">▼</div>
+      <div class="box" style="border-color:var(--blue-500)"><div class="b-title">Resultado en pantalla</div><div class="b-sub">El valor real del token. Cambia el token → cambia la utilidad.</div></div>
+    </div>
+    <div class="note"><code>inline</code> es la palabra clave: hace que Tailwind
+      <b>no</b> cree sus propias variables, sino que inyecte directamente
+      <code>var(--app-*)</code>. Así nunca hay dos fuentes de verdad ni referencias circulares.</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="primeng">
+  <h2><span class="step-num">05</span> El puente con PrimeNG</h2>
+  <p class="lead">Los componentes de PrimeNG (botones, selects, drawer…) se estilan
+     con <b>sus</b> variables <code>--p-*</code>. El truco: hacemos que
+     <code>--p-* = var(--app-*)</code>, así heredan nuestra marca automáticamente.</p>
+
+  <div class="card">
+    <div class="two">
+      <div>
+        <p><b>1. Estado inicial</b> — en <code>app.config.ts</code> se define un
+           preset (basado en Lara) con valores HEX directos, para que PrimeNG ya
+           se vea bien <i>antes</i> de que cargue el SCSS.</p>
+        <pre><span class="c">// app.config.ts</span>
+<span class="k">definePreset</span>(Lara, {
+  semantic: { primary: {
+    600: <span class="s">'#2563eb'</span>, ...
+  }}
+})</pre>
+      </div>
+      <div>
+        <p><b>2. Vínculo real</b> — en <code>_primeng-theme.scss</code>
+           (<code>@layer sp-theme</code>) re-apuntamos cada <code>--p-*</code> al token.
+           Como <code>sp-theme</code> va encima de <code>primeng</code>, gana sin
+           <code>!important</code>.</p>
+        <pre><span class="c">// themes/_primeng-theme.scss</span>
+<span class="t">--p-primary-color</span>: <span class="k">var</span>(<span class="t">--app-primary-600</span>);
+<span class="t">--p-button-...</span>:   <span class="k">var</span>(<span class="t">--app-...</span>);</pre>
+      </div>
+    </div>
+    <div class="warn" style="margin-top:18px"><b>Regla:</b> si necesitas cambiar el
+      aspecto de un componente PrimeNG (<code>.p-button</code>, <code>.p-select</code>),
+      <b>NO</b> lo hagas en el <code>styles</code> del componente Angular → va en
+      <code>_primeng-theme.scss</code>, dentro de <code>@layer sp-theme</code>.</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="ladder">
+  <h2><span class="step-num">06</span> La escalera de decisión</h2>
+  <p class="lead">Cuando vas a estilar algo, bajas por esta escalera y te detienes
+     en el <b>primer</b> escalón que resuelva tu caso. El CSS scoped es el último recurso.</p>
+
+  <div class="ladder">
+    <div class="rung"><div class="r-badge">1</div><div>
+      <h4>Tailwind en la plantilla <span class="tag tw">90% de las veces</span></h4>
+      <p>Layout, spacing, responsive: <code>flex</code>, <code>grid</code>, <code>gap-4</code>, <code>mb-8</code>, <code>lg:grid-cols-3</code>. Mapeado a tokens.</p>
+    </div></div>
+    <div class="rung"><div class="r-badge">2</div><div>
+      <h4>Clase tipográfica <span class="tag ty">texto</span></h4>
+      <p>Todo lo que sea texto: <code>text-heading-xl</code>, <code>text-body-lg</code>, <code>text-overline</code>. Empaquetan tamaño + peso + color.</p>
+    </div></div>
+    <div class="rung"><div class="r-badge">3</div><div>
+      <h4>Pattern <span class="tag pa">pieza repetida</span></h4>
+      <p>Algo que se repite en varias pantallas con decisiones de marca/accesibilidad: <code>.card</code>, <code>.field</code>, <code>.status-badge</code>, <code>.empty-state</code>, <code>.skeleton</code>.</p>
+    </div></div>
+    <div class="rung"><div class="r-badge">4</div><div>
+      <h4>Tema PrimeNG <span class="tag pn">override de PrimeNG</span></h4>
+      <p>Cambiar un componente de la librería → <code>_primeng-theme.scss</code> (<code>@layer sp-theme</code>). Nunca en el componente.</p>
+    </div></div>
+    <div class="rung last"><div class="r-badge">5</div><div>
+      <h4>CSS scoped del componente <span class="tag cs">último recurso</span></h4>
+      <p>SOLO lo que nada de lo anterior cubre <b>y</b> es exclusivo de este componente: <code>@keyframes</code>, gradientes, pseudo-elementos <code>::before</code>, <code>:host</code>, reset de un elemento nativo.</p>
+    </div></div>
+  </div>
+
+  <div class="warn"><b>Termómetro:</b> si el bloque <code>styles</code> de un componente
+    pasa de ~30–40 líneas, casi seguro hay layout o colores que debían ser Tailwind/tokens.</div>
+</section>
+
+<!-- ============================================================= -->
+<section id="anatomy">
+  <h2><span class="step-num">07</span> Anatomía de un componente real</h2>
+  <p class="lead">Un mismo bloque de HTML mezcla las capas. Cada clase viene de un
+     “proveedor” distinto, y todas conviven gracias al orden de <code>@layer</code>.</p>
+
+  <div class="card">
+    <pre><span class="k">&lt;form</span> class=<span class="s">"<span style="color:#7dd3fc">card</span> <span style="color:#fbbf24">max-w-xl flex flex-col gap-5</span>"</span><span class="k">&gt;</span>
+
+  <span class="k">&lt;div</span> class=<span class="s">"<span style="color:#7dd3fc">field</span>"</span><span class="k">&gt;</span>
+    <span class="k">&lt;label</span> class=<span class="s">"<span style="color:#7dd3fc">field__label</span>"</span><span class="k">&gt;</span>
+      Identificación <span class="k">&lt;span</span> class=<span class="s">"<span style="color:#7dd3fc">field__required</span>"</span><span class="k">&gt;</span>*<span class="k">&lt;/span&gt;</span>
+    <span class="k">&lt;/label&gt;</span>
+    <span class="k">&lt;input</span> pInputText class=<span class="s">"<span style="color:#fbbf24">w-full</span>"</span> <span class="k">/&gt;</span>   <span class="c">&lt;!-- estilo del input: tema PrimeNG --&gt;</span>
+    <span class="k">&lt;span</span> class=<span class="s">"<span style="color:#7dd3fc">field__message-slot</span>"</span><span class="k">&gt;</span> … <span class="k">&lt;/span&gt;</span>
+  <span class="k">&lt;/div&gt;</span>
+
+  <span class="k">&lt;h2</span> class=<span class="s">"<span style="color:#c4b5fd">text-heading-md</span> <span style="color:#fbbf24">m-0</span>"</span><span class="k">&gt;</span>Crear novedad<span class="k">&lt;/h2&gt;</span>
+<span class="k">&lt;/form&gt;</span></pre>
+
+    <table>
+      <thead><tr><th>Clase</th><th>Proveedor</th><th>Qué aporta</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag pa">card</span> <span class="tag pa">field</span> <span class="tag pa">field__*</span></td><td>Pattern (<code>@layer components</code>)</td><td>Superficie/borde, estructura del campo, anti-layout-shift</td></tr>
+        <tr><td><span class="tag tw">flex flex-col gap-5 w-full m-0 max-w-xl</span></td><td>Tailwind (<code>@layer utilities</code>)</td><td>Layout y spacing de ESTA pantalla</td></tr>
+        <tr><td><span class="tag ty">text-heading-md</span></td><td>Tipografía (<code>@layer components</code>)</td><td>Tamaño + peso + color del título</td></tr>
+        <tr><td><span class="tag pn">pInputText</span></td><td>Tema PrimeNG (<code>@layer sp-theme</code>)</td><td>Aspecto del input con la marca</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="resp">
+  <h2><span class="step-num">08</span> Responsividad</h2>
+  <p class="lead"><b>Mobile-first</b>, manejada por Tailwind en la plantilla, con
+     breakpoints definidos una vez y compartidos con el SCSS.</p>
+
+  <div class="card">
+    <div class="two">
+      <div>
+        <p><b>En la plantilla → prefijos Tailwind.</b> Sin prefijo = móvil; el prefijo es “desde este ancho hacia arriba”.</p>
+        <pre>class=<span class="s">"grid grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-3
+  xl:grid-cols-4"</span></pre>
+        <p style="font-size:14px;color:var(--ink-3)">1 col en móvil → 2 en sm → 3 en lg → 4 en xl.</p>
+      </div>
+      <div>
+        <p><b>En el SCSS → mixins.</b> Cuando ya estás en CSS y Tailwind no aplica.</p>
+        <pre><span class="m">@include</span> <span class="k">respond-to</span>(md) { … }
+  <span class="c">/* min-width: 768px */</span>
+<span class="m">@include</span> <span class="k">respond-below</span>(lg) { … }
+  <span class="c">/* max-width: 1023.98px */</span></pre>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>bp</th><th>ancho</th><th>uso típico</th></tr></thead>
+      <tbody>
+        <tr><td><code>xs</code></td><td>475px</td><td>móvil grande</td></tr>
+        <tr><td><code>sm</code></td><td>640px</td><td>móvil → tablet</td></tr>
+        <tr><td><code>md</code></td><td>768px</td><td>tablet</td></tr>
+        <tr><td><code>lg</code></td><td>1024px</td><td>desktop</td></tr>
+        <tr><td><code>xl</code></td><td>1280px</td><td>desktop ancho</td></tr>
+        <tr><td><code>2xl</code></td><td>1536px</td><td>monitor grande</td></tr>
+      </tbody>
+    </table>
+    <div class="note">Los contenedores (<code>container-app</code>,
+      <code>container-fluid</code>, <code>container-narrow</code>) ya encapsulan el
+      ancho máximo + el padding lateral que crece con el viewport. No teclees esa
+      ristra de utilidades cada vez.</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<section id="full">
+  <h2><span class="step-num">09</span> El flujo completo, de punta a punta</h2>
+  <p class="lead">Juntando todo: desde que defines un token hasta que un píxel
+     aparece en pantalla.</p>
+
+  <div class="card">
+    <div class="flow">
+      <div class="box"><div class="b-title">① tokens/_*.scss</div><div class="b-sub">Defines <code>--app-primary-600</code> una sola vez en <code>:root</code>.</div></div>
+      <div class="arrow">▼</div>
+      <div class="box"><div class="b-title">② Dos consumidores leen el token</div><div class="b-sub"><b>a)</b> <code>tailwind.css</code> vía <code>@theme inline</code> → utilidades. &nbsp; <b>b)</b> <code>_primeng-theme.scss</code> → <code>--p-* = var(--app-*)</code>.</div></div>
+      <div class="arrow">▼</div>
+      <div class="box"><div class="b-title">③ angular.json carga el CSS en orden</div><div class="b-sub">primeicons → tailwind.css → main.scss.</div></div>
+      <div class="arrow">▼</div>
+      <div class="box"><div class="b-title">④ main.scss orquesta con @use</div><div class="b-sub">Declara <code>@layer</code> y rellena reset, tokens, tipografía, tema, layout, patterns.</div></div>
+      <div class="arrow">▼</div>
+      <div class="box"><div class="b-title">⑤ @layer resuelve los conflictos</div><div class="b-sub">utilities (Tailwind) gana al pattern; sp-theme gana a PrimeNG. Sin <code>!important</code>.</div></div>
+      <div class="arrow">▼</div>
+      <div class="box" style="border-color:var(--blue-600);background:var(--blue-50)"><div class="b-title">⑥ El componente combina capas</div><div class="b-sub"><code>class="card flex gap-5"</code> + <code>field</code> + <code>text-heading-md</code> + un poco de CSS scoped si hace falta.</div></div>
+      <div class="arrow">▼</div>
+      <div class="box" style="border-color:var(--green);background:var(--green-bg)"><div class="b-title">✓ Píxel en pantalla</div><div class="b-sub">Coherente, accesible y con la marca — y si cambias el token, todo se actualiza solo.</div></div>
+    </div>
+  </div>
+
+  <div class="good" style="margin-top:24px"><b>Resumen en una frase:</b> los
+    <i>tokens</i> son la verdad, <code>angular.json</code> los carga,
+    <code>main.scss</code> los ordena, <code>@layer</code> decide quién gana, y tú
+    solo eliges el escalón correcto (Tailwind → tipografía → pattern → tema → CSS scoped).</div>
+</section>
+
+<footer>
+  Documento generado para la Plataforma Domiciliaria · Sistema de estilos<br>
+  Ábrelo en el navegador · <code>docs/sistema-de-estilos.html</code>
+</footer>
+
+</div>
+</body>
+</html>
