@@ -18,6 +18,39 @@
   padding-inline: var(--app-space-4);
   background: var(--app-surface-0);
   border-bottom: 1px solid var(--app-surface-200);
+
+  // Separador vertical entre las acciones de la derecha.
+  &__sep {
+    width: 1px;
+    height: 1.5rem;
+    background: var(--app-surface-200);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// MARCA (logo + separador + nombre) en el header.
+// -----------------------------------------------------------------------------
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-3);
+  text-decoration: none;
+
+  &__logo {
+    display: block;
+    height: 2rem; // 32px — escala manteniendo proporción
+    width: auto;
+  }
+
+  &__divider {
+    width: 1px;
+    height: 1.75rem;
+    background: var(--app-surface-200);
+  }
+
+  &__name {
+    color: var(--app-text-primary);
+  }
 }
 
 // El contenido arranca debajo del header fijo.

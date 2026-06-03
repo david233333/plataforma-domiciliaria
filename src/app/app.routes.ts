@@ -11,17 +11,23 @@ import { environment } from '../environments/environment';
 export const routes: Routes = [
   {
     path: 'novedades',
-    loadComponent: () =>
-      import(
-        './features/novedades/gestionar-novedades.component'
-      ).then((m) => m.GestionarNovedadesComponent),
-    title: 'Gestionar novedades',
+    loadChildren: () =>
+      import('./presentation/novedades/novedades.routes').then(
+        (m) => m.NOVEDADES_ROUTES,
+      ),
+  },
+  {
+    path: 'notificaciones',
+    loadChildren: () =>
+      import('./presentation/notificaciones/notificaciones.routes').then(
+        (m) => m.NOTIFICACIONES_ROUTES,
+      ),
   },
   {
     path: 'arquitectura-estilos',
     loadComponent: () =>
       import(
-        './features/documentacion/arquitectura-estilos.component'
+        './presentation/documentacion/arquitectura-estilos.component'
       ).then((m) => m.ArquitecturaEstilosComponent),
     title: 'Arquitectura de estilos',
   },
@@ -30,7 +36,7 @@ export const routes: Routes = [
         {
           path: 'design-system',
           loadComponent: () =>
-            import('./features/design-system/design-system.component').then(
+            import('./presentation/design-system/design-system.component').then(
               (m) => m.DesignSystemComponent,
             ),
           title: 'Design System',
