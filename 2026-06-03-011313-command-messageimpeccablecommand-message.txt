@@ -1,0 +1,566 @@
+╭─── Claude Code v2.1.161 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                    Welcome back!                   │ started                 │
+│                                                    │ Run /init to create a … │
+│                       ▐▛███▜▌                      │ ─────────────────────── │
+│                      ▝▜█████▛▘                     │ What's new              │
+│                        ▘▘ ▝▝                       │ `OTEL_RESOURCE_ATTRIBU… │
+│  Opus 4.8 · Claude Pro · jdceballos@unac.edu.co's  │ `claude agents` rows n… │
+│  Organization                                      │ `/mcp` now collapses c… │
+│  ~/Documents/salud-en-casa/plataforma-domiciliaria │ /release-notes for more │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+❯ /skills 
+  ⎿  Skills dialog dismissed
+
+❯ /impeccable audit                                                             
+
+⏺ I'll start by running the impeccable setup steps for the audit command.
+
+⏺ Bash(node .agents/skills/impeccable/scripts/context.mjs 2>&1 || echo "---EXIT
+      $?---")
+  ⎿  NO_PRODUCT_MD: This project has no PRODUCT.md yet. Stop the current ta
+     sk, load reference/init.md, and follow its instructions to write PRODU
+     CT.md before resuming.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ The context script reports there's no PRODUCT.md yet. The skill requires I set
+  that up first. Let me read the init reference and explore the project in
+  parallel.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+⏺ This is an Angular 21 + PrimeNG + Tailwind home-healthcare platform with a
+  real design system already in place. It's clearly a product register. The
+  skill requires PRODUCT.md before the audit. Let me read the product register
+  reference and ground myself in the existing design system before asking you a
+  couple of quick questions.
+
+  Read 3 files (ctrl+o to expand)
+
+⏺ I have a clear picture: a light-mode, WCAG-AA-conscious home-healthcare
+  product (Angular 21 + PrimeNG + Tailwind 4), enterprise blue, Inter, with a
+  documented token system. The current branch is feature/informes. Before I
+  write the required PRODUCT.md and run the audit, let me confirm a few things I
+  can't infer from the code.
+
+⏺ User answered Claude's questions:
+  ⎿  · This reads as a product surface (task-driven healthcare app: solicitudes,
+     novedades, informes, auth, nav). Confirm the register so PRODUCT.md and 
+     the audit's anti-pattern checks are calibrated correctly? → Product 
+     (Recommended)
+     · What should the audit cover? You're on the feature/informes branch. → 
+     Informes modules
+     · In 3 words, what personality should this interface project? (drives 
+     anti-reference & copy checks) → Clinical, trustworthy, calm
+
+⏺ Confirmed: product, scope = informes modules, personality =
+  clinical/trustworthy/calm. Let me write PRODUCT.md (required by the skill),
+  then deep-read the informes modules for the audit.
+
+⏺ Write(PRODUCT.md)
+  ⎿  Wrote 36 lines to PRODUCT.md
+      2 # Product
+      4 ## Register
+      6 product
+      8 ## Users
+      9 Internal clinical and operations staff at a home-healthcare provi
+        o tracks: **hospitalario** (hospital-linked patients) and **no-ho
+         are in a task: triaging solicitudes (care requests), gestionar n
+        sulting informes (operational reports). Context is a desk or work
+        r time pressure with patient-facing consequences. Spanish-languag
+        e UI.
+     … +63 lines (ctrl+o to expand)
+
+  Read 3 files (ctrl+o to expand)
+
+⏺ Now the no-hospitalario informes module, plus the typography classes and .card
+  definitions they depend on.
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ Now the shared patterns (.card, .field), the animation referenced, and how
+  these screens are framed by the app shell.
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ Let me verify the elevation/radius/motion token values so my findings are
+  precise, and confirm focus styles exist in base.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+⏺ I now have a complete, grounded picture of the informes modules and the design
+  system they sit on. Here's the audit.
+
+  ---
+  $impeccable audit — Informes modules (informes-h, informes-nh)
+
+  Scope: presentation/hospitalario/informes-h/** and 
+  presentation/no-hospitalario/informes-nh/**, evaluated against the --app-* 
+  token system and PRODUCT.md (product register, clinical/trustworthy/calm).
+
+  ▎ Note: I wrote a PRODUCT.md at the repo root first (required setup) — 
+  ▎ register product, WCAG AA target. Every future $impeccable command will read
+  ▎ it.
+
+  Audit Health Score
+
+  ┌───────┬────────────────┬───────┬────────────────────────────────────────┐
+  │   #   │   Dimension    │ Score │              Key Finding               │
+  ├───────┼────────────────┼───────┼────────────────────────────────────────┤
+  │       │                │       │ Form gives no per-field error          │
+  │ 1     │ Accessibility  │ 3/4   │ identification; invalid state          │
+  │       │                │       │ communicated only by a disabled submit │
+  ├───────┼────────────────┼───────┼────────────────────────────────────────┤
+  │       │                │       │ OnPush + signals, interval cleaned on  │
+  │ 2     │ Performance    │ 4/4   │ destroy, appendTo="body",              │
+  │       │                │       │ NgOptimizedImage in shell              │
+  ├───────┼────────────────┼───────┼────────────────────────────────────────┤
+  │       │ Responsive     │       │ Sound fluid container +                │
+  │ 3     │ Design         │ 3/4   │ md:grid-cols-2; chip multiselects      │
+  │       │                │       │ untested on the narrowest widths       │
+  ├───────┼────────────────┼───────┼────────────────────────────────────────┤
+  │       │                │       │ Excellent tokens, but informes-h       │
+  │ 4     │ Theming        │ 3/4   │ reinvents the existing .empty-state    │
+  │       │                │       │ pattern; one raw inline style          │
+  ├───────┼────────────────┼───────┼────────────────────────────────────────┤
+  │       │                │       │ Mostly clean; uppercase tracked        │
+  │ 5     │ Anti-Patterns  │ 3/4   │ eyebrow on both pages + an             │
+  │       │                │       │ inconsistent numbered step badge       │
+  ├───────┼────────────────┼───────┼────────────────────────────────────────┤
+  │ Total │                │ 16/20 │ Good — address the weak spots, no      │
+  │       │                │       │ overhaul needed                        │
+  └───────┴────────────────┴───────┴────────────────────────────────────────┘
+
+  Anti-Patterns Verdict — PASS (with two subtle tells)
+
+  This does not look AI-generated. No gradient text, no glassmorphism, no
+  hero-metric block, no side-stripe borders, no over-rounding (cards at 6px), no
+  ghost-card shadow (xs shadow is 0 1px 2px / 0.05, paired correctly with a 1px
+  border). The token discipline is genuinely strong and the motion budget is
+  deliberately contained. Two mild tells keep it from a 4:
+
+  1. Uppercase tracked eyebrow above every page heading. <span 
+  class="text-overline text-primary-600">Hospitalario</span> / No hospitalario
+  sits above the <h1> on both screens (informes-h.component.html:3,
+  informes-nh.component.html:4). This is the 2023-era kicker trope. The drawer
+  already establishes which ámbito you're in, so it's near-redundant context
+  rendered as decoration.
+  2. A numbered step marker used once. informes-nh shows a 1 badge on
+  "Selecciona un informe" (.informes-nh__step), but the commented "PASO 2" (the
+  filters card) has no 2. A numbered sequence that numbers only its first item
+  reads as scaffolding, not a real sequence.
+
+  Executive Summary
+
+  - Health Score: 16/20 (Good)
+  - Issues: 0 P0 · 1 P1 · 4 P2 · 3 P3
+  - Top issues:
+    a. [P1] Required fields produce no error text; the only invalidity signal is
+  a disabled "Descargar" button — a screen-reader user gets no reason it's
+  blocked (WCAG 3.3.1).
+    b. [P2] informes-h hand-rolls an empty state inside a .card instead of using
+  the project's dedicated .empty-state pattern.
+    c. [P2] The cross-field date error has role="alert" but isn't
+  programmatically tied to the date inputs (aria-describedby).
+    d. [P2] Empty state copy ("Aún no hay informes disponibles") doesn't teach
+  the interface — product register expects empty states to orient, not just
+  report absence.
+
+  Detailed Findings by Severity
+
+  [P1] Form invalidity is communicated only by a disabled submit
+
+  - Location: informes-nh.component.html:196-199 ([disabled]="filtros.invalid");
+  required controls at :60-94 (servicios, ciudades) have no error block.
+  - Category: Accessibility / UX
+  - Impact: When servicios, ciudades, fechaDesde, or fechaHasta are empty, no
+  per-field message renders and the submit is disabled — so the user (especially
+  keyboard/SR) can neither submit nor learn what is missing. The .field pattern
+  even ships a reserved .field__message-slot for exactly this, unused here.
+  - WCAG: 3.3.1 Error Identification (A), 3.3.3 Error Suggestion (AA)
+  - Recommendation: Prefer keeping the submit enabled and validating on submit:
+  on invalid, render per-field field__error messages (tied via
+  aria-describedby/aria-invalid) and move focus to the first invalid control. If
+  the disabled-button pattern stays, add visible "campo obligatorio" messages
+  on blur/dirty so the requirement is discoverable.
+  - Suggested command: $impeccable harden
+
+  [P2] Empty state bypasses the design system's .empty-state pattern
+
+  - Location: informes-h.component.html:10-15 (a .card with a bespoke
+  .informes__icon)
+  - Category: Theming / Consistency
+  - Impact: _patterns.scss:132-156 defines .empty-state + __icon/__title/__body
+  with tuned muted tones and rhythm. Reinventing it inline means this empty
+  state will drift from every other one in the app — exactly the "consistency
+  over surprise" principle this product depends on.
+  - Recommendation: Replace the inline card with .empty-state, dropping the
+  one-off informes__icon SCSS.
+  - Suggested command: $impeccable distill
+
+  [P2] Cross-field date error not programmatically associated
+
+  - Location: informes-nh.component.html:134-141 (form-level fechaInvalida /
+  rangoInvalido alert), date inputs at :100-129
+  - Category: Accessibility
+  - Impact: role="alert" announces the message once when it appears, but the two
+  p-datepickers aren't marked aria-invalid nor linked to the message, so a user
+  navigating back to the fields gets no persistent association.
+  - WCAG: 1.3.1 Info & Relationships (A), 3.3.1 (A)
+  - Recommendation: Give the error a stable id, set aria-describedby on both
+  date pickers, and toggle aria-invalid when the group error is active.
+  - Suggested command: $impeccable harden
+
+  [P2] Empty state copy reports absence instead of orienting
+
+  - Location: informes-h.component.html:13-14 ("Aún no hay informes disponibles
+  en este ámbito.")
+  - Category: Anti-Pattern (product register) / Copy
+  - Impact: Product empty states should teach what the surface will do or what
+  to do next. This is a dead end with no next action — and it's the whole
+  screen, so first impression of the module is "nothing here."
+  - Recommendation: Say what informes will appear here and when, or point to
+  where reports are generated. Mirror the informes-nh voice.
+  - Suggested command: $impeccable onboard
+
+  [P2] Numbered step marker applied to only one of two steps
+
+  - Location: informes-nh.component.html:15-16 (badge 1); the filters card
+  (:39-203) has no 2
+  - Category: Anti-Pattern / Consistency
+  - Impact: A one-item "sequence" reads as leftover scaffolding. Either commit
+  to a real 2-step affordance or drop the number.
+  - Recommendation: Either add a matching 2 to the filters card header (and let
+  it sequence), or remove .informes-nh__step and let the heading stand alone.
+  Given the flow is genuinely select→filter, a consistent 1/2 is defensible; an
+  orphaned 1 is not.
+  - Suggested command: $impeccable layout
+
+  [P3] Uppercase tracked eyebrow on both page headers
+
+  - Location: informes-h.component.html:3, informes-nh.component.html:4
+  - Category: Anti-Pattern
+  - Impact: Mild AI-grammar tell; redundant with the drawer's ámbito context.
+  - Recommendation: Drop the eyebrow, or convert ámbito context into a
+  breadcrumb in the shell so it carries real navigational meaning rather than
+  decoration.
+  - Suggested command: $impeccable typeset
+
+  [P3] Raw inline style instead of a token-mapped utility
+
+  - Location: informes-nh.component.html:152 (style="border-top: 1px solid 
+  var(--app-surface-200)")
+  - Category: Theming / Consistency
+  - Impact: One-off inline style bypasses the Tailwind-mapped utility convention
+  the rest of the template follows; easy to miss in a future token refactor.
+  - Recommendation: Use a border utility bound to the surface token (border-t 
+  border-[color:var(--app-surface-200)]) or a small pattern class, matching how
+  the rest of the file styles dividers.
+  - Suggested command: $impeccable polish
+
+  [P3] No focus move when the filters form reveals
+
+  - Location: informes-nh.component.ts:181-185 (onInformeChange), form rendered
+  via @if (informeSeleccionado())
+  - Category: Accessibility
+  - Impact: After selecting an informe, the filters form fades in below but
+  focus stays on the select; keyboard users must tab blindly into newly-revealed
+  content.
+  - Recommendation: Move focus to the form heading or first field on reveal
+  (respecting that the animate.enter fade already honors reduced motion).
+  - Suggested command: $impeccable harden
+
+  Patterns & Systemic Issues
+
+  - Validation feedback is the recurring gap. Both the missing per-field errors
+  (P1) and the unlinked cross-field error (P2) point to the same root: the form
+  leans on [disabled] submit as its entire error strategy. The .field pattern
+  was clearly designed for richer messaging (__error, __required, reserved
+  __message-slot) — it's just under-used here. Fixing the form's error model
+  resolves three findings at once.
+  - The design system is ahead of the screens. .empty-state, .field__error,
+  .status-badge, .skeleton all exist and are documented, but the informes
+  screens reach past them (custom empty state, inline border). The system isn't
+  the weak link; adoption is.
+
+  Positive Findings (keep doing this)
+
+  - Token discipline is exemplary — per-pair WCAG ratios are documented inline
+  in _colors.scss, and the screens consume semantic tokens rather than hex.
+  - Performance hygiene is real: OnPush + signals + computed, the progress
+  setInterval is torn down via DestroyRef.onDestroy, overlays use
+  appendTo="body" (correctly escaping overflow clipping), and the CSV download
+  revokes its object URL.
+  - Motion is deliberately contained — a single fadeIn that honors
+  prefers-reduced-motion, with an explicit comment banning slide/scale/bounce.
+  Exactly right for this register.
+  - Strong baseline a11y: skip link in the shell, :focus-visible global outline
+  (2px primary, offset), role="status" aria-live="polite" on the download
+  progress, labels bound via for/inputId, aria-hidden on decorative icons.
+
+  Recommended Actions (priority order)
+
+  1. [P1] $impeccable harden — Fix the form's error model: per-field required
+  messages, aria-invalid/aria-describedby on the date inputs,
+  focus-to-first-error on submit, and focus-on-reveal. Resolves the P1 and two
+  P2/P3 a11y findings together.
+  2. [P2] $impeccable onboard — Rework the informes-h empty state to orient the
+  user (what appears here, what to do), using the existing .empty-state pattern.
+  3. [P2] $impeccable layout — Resolve the orphaned step 1: commit to a real 1/2
+  sequence or remove the badge.
+  4. [P3] $impeccable typeset — Reconsider the uppercase eyebrows across both
+  headers.
+  5. [P3] $impeccable polish — Final pass: the inline border → token utility,
+  and a sweep for any remaining drift before ship.
+
+  ▎ You can ask me to run these one at a time, all at once, or in any order you 
+  ▎ prefer.
+  ▎
+  ▎ Re-run $impeccable audit after fixes to see your score improve.
+
+✻ Brewed for 3m 47s
+
+❯ dame la respuesta en español para entender                                    
+
+⏺ $impeccable audit — Módulos de Informes (informes-h, informes-nh)
+
+  Alcance: presentation/hospitalario/informes-h/** y 
+  presentation/no-hospitalario/informes-nh/**, evaluados contra el sistema de 
+  tokens --app-* y PRODUCT.md (registro de producto; clínico/confiable/calmado).
+
+  ▎ Nota: primero escribí un PRODUCT.md en la raíz del repo (paso obligatorio 
+  ▎ del setup) — registro product, objetivo WCAG AA. Todo comando $impeccable 
+  ▎ futuro lo leerá.
+
+  Puntaje de Salud del Audit
+
+  ┌───────┬───────────────┬─────────┬───────────────────────────────────────┐
+  │   #   │   Dimensión   │ Puntaje │            Hallazgo clave             │
+  ├───────┼───────────────┼─────────┼───────────────────────────────────────┤
+  │       │               │         │ El formulario no identifica errores   │
+  │ 1     │ Accesibilidad │ 3/4     │ por campo; la invalidez solo se       │
+  │       │               │         │ comunica con un botón de envío        │
+  │       │               │         │ deshabilitado                         │
+  ├───────┼───────────────┼─────────┼───────────────────────────────────────┤
+  │       │               │         │ OnPush + signals, el intervalo se     │
+  │ 2     │ Rendimiento   │ 4/4     │ limpia en destroy, appendTo="body",   │
+  │       │               │         │ NgOptimizedImage en el shell          │
+  ├───────┼───────────────┼─────────┼───────────────────────────────────────┤
+  │       │               │         │ Contenedor fluido sólido +            │
+  │ 3     │ Diseño        │ 3/4     │ md:grid-cols-2; los multiselect de    │
+  │       │ Responsivo    │         │ chips sin probar en los anchos más    │
+  │       │               │         │ estrechos                             │
+  ├───────┼───────────────┼─────────┼───────────────────────────────────────┤
+  │       │               │         │ Tokens excelentes, pero informes-h    │
+  │ 4     │ Theming       │ 3/4     │ reinventa el patrón .empty-state      │
+  │       │               │         │ existente; un estilo inline crudo     │
+  ├───────┼───────────────┼─────────┼───────────────────────────────────────┤
+  │       │               │         │ Mayormente limpio; eyebrow en         │
+  │ 5     │ Anti-patrones │ 3/4     │ mayúsculas en ambas páginas + un      │
+  │       │               │         │ badge de paso numerado inconsistente  │
+  ├───────┼───────────────┼─────────┼───────────────────────────────────────┤
+  │ Total │               │ 16/20   │ Bueno — atender los puntos débiles,   │
+  │       │               │         │ no requiere reescritura               │
+  └───────┴───────────────┴─────────┴───────────────────────────────────────┘
+
+  Veredicto de Anti-patrones — APROBADO (con dos señales sutiles)
+
+  Esto no parece generado por IA. Sin texto con degradado, sin glassmorphism,
+  sin bloque hero-métrica, sin bordes laterales de acento, sin sobre-redondeo
+  (cards a 6px), sin sombra "ghost-card" (la sombra xs es 0 1px 2px / 0.05,
+  correctamente acompañada de un borde de 1px). La disciplina de tokens es
+  genuinamente fuerte y el presupuesto de movimiento es deliberadamente
+  contenido. Dos señales leves lo dejan en 3 y no en 4:
+
+  1. Eyebrow en mayúsculas con tracking encima de cada título de página. <span 
+  class="text-overline text-primary-600">Hospitalario</span> / No hospitalario
+  va encima del <h1> en ambas pantallas (informes-h.component.html:3,
+  informes-nh.component.html:4). Es el tropo del "kicker" estilo 2023. El drawer
+  ya establece en qué ámbito estás, así que es contexto casi redundante
+  renderizado como decoración.
+  2. Un marcador de paso numerado usado una sola vez. informes-nh muestra un
+  badge 1 en "Selecciona un informe" (.informes-nh__step), pero el "PASO 2"
+  comentado (la card de filtros) no tiene 2. Una secuencia que numera solo su
+  primer elemento se lee como andamiaje, no como una secuencia real.
+
+  Resumen Ejecutivo
+
+  - Puntaje de Salud: 16/20 (Bueno)
+  - Problemas: 0 P0 · 1 P1 · 4 P2 · 3 P3
+  - Problemas principales:
+    a. [P1] Los campos obligatorios no producen texto de error; la única señal
+  de invalidez es el botón "Descargar" deshabilitado — un usuario de lector de
+  pantalla no recibe ninguna razón de por qué está bloqueado (WCAG 3.3.1).
+    b. [P2] informes-h arma a mano un estado vacío dentro de una .card en lugar
+  de usar el patrón dedicado .empty-state del proyecto.
+    c. [P2] El error de fechas (validación cruzada) tiene role="alert" pero no
+  está asociado programáticamente a los inputs de fecha (aria-describedby).
+    d. [P2] El texto del estado vacío ("Aún no hay informes disponibles") no
+  enseña la interfaz — el registro de producto espera que los estados vacíos
+  orienten, no solo reporten ausencia.
+
+  Hallazgos Detallados por Severidad
+
+  [P1] La invalidez del formulario se comunica solo con un envío deshabilitado
+
+  - Ubicación: informes-nh.component.html:196-199
+  ([disabled]="filtros.invalid"); los controles obligatorios en :60-94
+  (servicios, ciudades) no tienen bloque de error.
+  - Categoría: Accesibilidad / UX
+  - Impacto: Cuando servicios, ciudades, fechaDesde o fechaHasta están vacíos,
+  no se renderiza ningún mensaje por campo y el envío queda deshabilitado — así
+  que el usuario (especialmente teclado/lector de pantalla) no puede ni enviar
+  ni saber qué falta. El patrón .field incluso incluye un .field__message-slot
+  reservado para exactamente esto, sin usar aquí.
+  - WCAG: 3.3.1 Identificación de Errores (A), 3.3.3 Sugerencia ante Errores
+  (AA)
+  - Recomendación: Es preferible mantener el envío habilitado y validar al
+  enviar: si es inválido, renderizar mensajes field__error por campo (ligados
+  vía aria-describedby/aria-invalid) y mover el foco al primer control inválido.
+  Si se mantiene el patrón del botón deshabilitado, agregar mensajes visibles
+  de "campo obligatorio" en blur/dirty para que el requisito sea descubrible.
+  - Comando sugerido: $impeccable harden
+
+  [P2] El estado vacío ignora el patrón .empty-state del sistema de diseño
+
+  - Ubicación: informes-h.component.html:10-15 (una .card con un .informes__icon
+  a medida)
+  - Categoría: Theming / Consistencia
+  - Impacto: _patterns.scss:132-156 define .empty-state + __icon/__title/__body
+  con tonos muted afinados y ritmo. Reinventarlo inline significa que este
+  estado vacío se desviará de todos los demás en la app — justo lo contrario del
+  principio "consistencia sobre sorpresa" del que depende este producto.
+  - Recomendación: Reemplazar la card inline por .empty-state, eliminando el
+  informes__icon puntual del SCSS.
+  - Comando sugerido: $impeccable distill
+
+  [P2] Error de fechas no asociado programáticamente
+
+  - Ubicación: informes-nh.component.html:134-141 (alerta a nivel de formulario
+  fechaInvalida / rangoInvalido), inputs de fecha en :100-129
+  - Categoría: Accesibilidad
+  - Impacto: role="alert" anuncia el mensaje una vez cuando aparece, pero los
+  dos p-datepicker no quedan marcados con aria-invalid ni vinculados al mensaje,
+  así que un usuario que vuelve a los campos no obtiene asociación persistente.
+  - WCAG: 1.3.1 Información y Relaciones (A), 3.3.1 (A)
+  - Recomendación: Dar al error un id estable, poner aria-describedby en ambos
+  datepickers y alternar aria-invalid cuando el error de grupo esté activo.
+  - Comando sugerido: $impeccable harden
+
+  [P2] El texto del estado vacío reporta ausencia en lugar de orientar
+
+  - Ubicación: informes-h.component.html:13-14 ("Aún no hay informes disponibles
+  en este ámbito.")
+  - Categoría: Anti-patrón (registro de producto) / Copy
+  - Impacto: Los estados vacíos de producto deberían enseñar qué hará la
+  pantalla o qué hacer a continuación. Esto es un callejón sin salida sin acción
+  siguiente — y es la pantalla completa, así que la primera impresión del
+  módulo es "no hay nada aquí".
+  - Recomendación: Decir qué informes aparecerán aquí y cuándo, o apuntar a
+  dónde se generan los reportes. Reflejar la voz de informes-nh.
+  - Comando sugerido: $impeccable onboard
+
+  [P2] Marcador de paso numerado aplicado a solo uno de dos pasos
+
+  - Ubicación: informes-nh.component.html:15-16 (badge 1); la card de filtros
+  (:39-203) no tiene 2
+  - Categoría: Anti-patrón / Consistencia
+  - Impacto: Una "secuencia" de un solo elemento se lee como andamiaje sobrante.
+  O comprometerse con una afordancia real de 2 pasos o quitar el número.
+  - Recomendación: O agregar un 2 correspondiente al header de la card de
+  filtros (y dejar que secuencie), o quitar .informes-nh__step y dejar que el
+  título quede solo. Dado que el flujo es genuinamente seleccionar→filtrar, un
+  1/2 consistente es defendible; un 1 huérfano no.
+  - Comando sugerido: $impeccable layout
+
+  [P3] Eyebrow en mayúsculas con tracking en ambos headers de página
+
+  - Ubicación: informes-h.component.html:3, informes-nh.component.html:4
+  - Categoría: Anti-patrón
+  - Impacto: Señal leve de gramática-IA; redundante con el contexto de ámbito
+  del drawer.
+  - Recomendación: Quitar el eyebrow, o convertir el contexto de ámbito en un
+  breadcrumb en el shell para que cargue significado navegacional real en lugar
+  de decoración.
+  - Comando sugerido: $impeccable typeset
+
+  [P3] Estilo inline crudo en lugar de una utilidad mapeada a token
+
+  - Ubicación: informes-nh.component.html:152 (style="border-top: 1px solid 
+  var(--app-surface-200)")
+  - Categoría: Theming / Consistencia
+  - Impacto: Un estilo inline puntual evita la convención de utilidades
+  Tailwind-mapeadas que sigue el resto de la plantilla; fácil de pasar por alto
+  en un futuro refactor de tokens.
+  - Recomendación: Usar una utilidad de borde ligada al token de superficie
+  (border-t border-[color:var(--app-surface-200)]) o una pequeña clase de
+  patrón, igual que el resto del archivo estiliza divisores.
+  - Comando sugerido: $impeccable polish
+
+  [P3] No se mueve el foco cuando el formulario de filtros aparece
+
+  - Ubicación: informes-nh.component.ts:181-185 (onInformeChange), formulario
+  renderizado vía @if (informeSeleccionado())
+  - Categoría: Accesibilidad
+  - Impacto: Tras seleccionar un informe, el formulario de filtros aparece con
+  fade debajo pero el foco se queda en el select; los usuarios de teclado deben
+  tabular a ciegas hacia el contenido recién revelado.
+  - Recomendación: Mover el foco al título del formulario o al primer campo al
+  revelarse (respetando que el animate.enter fade ya honra reduced motion).
+  - Comando sugerido: $impeccable harden
+
+  Patrones y Problemas Sistémicos
+
+  - El feedback de validación es la brecha recurrente. Tanto los errores por
+  campo faltantes (P1) como el error cruzado no vinculado (P2) apuntan a la
+  misma raíz: el formulario apoya toda su estrategia de error en el envío
+  [disabled]. El patrón .field claramente fue diseñado para mensajería más rica
+  (__error, __required, __message-slot reservado) — simplemente está
+  subutilizado aquí. Arreglar el modelo de error del formulario resuelve tres
+  hallazgos a la vez.
+  - El sistema de diseño va por delante de las pantallas. .empty-state,
+  .field__error, .status-badge, .skeleton existen y están documentados, pero las
+  pantallas de informes los esquivan (estado vacío a medida, borde inline). El
+  sistema no es el eslabón débil; la adopción sí.
+
+  Hallazgos Positivos (seguir haciendo esto)
+
+  - La disciplina de tokens es ejemplar — los ratios WCAG por par están
+  documentados inline en _colors.scss, y las pantallas consumen tokens
+  semánticos en lugar de hex.
+  - La higiene de rendimiento es real: OnPush + signals + computed, el
+  setInterval de progreso se desmonta vía DestroyRef.onDestroy, los overlays
+  usan appendTo="body" (escapando correctamente el clipping por overflow), y la
+  descarga CSV revoca su object URL.
+  - El movimiento es deliberadamente contenido — un único fadeIn que honra
+  prefers-reduced-motion, con un comentario explícito que prohíbe
+  slide/scale/bounce. Exactamente lo correcto para este registro.
+  - Base de a11y fuerte: skip link en el shell, outline global :focus-visible
+  (2px primary, con offset), role="status" aria-live="polite" en el progreso de
+  descarga, labels ligados vía for/inputId, aria-hidden en íconos decorativos.
+
+  Acciones Recomendadas (en orden de prioridad)
+
+  1. [P1] $impeccable harden — Arreglar el modelo de error del formulario:
+  mensajes de obligatorio por campo, aria-invalid/aria-describedby en los inputs
+  de fecha, foco-al-primer-error al enviar, y foco-al-revelar. Resuelve el P1 y
+  dos hallazgos P2/P3 de a11y juntos.
+  2. [P2] $impeccable onboard — Rehacer el estado vacío de informes-h para
+  orientar al usuario (qué aparece aquí, qué hacer), usando el patrón
+  .empty-state existente.
+  3. [P2] $impeccable layout — Resolver el 1 de paso huérfano: comprometerse con
+  una secuencia real 1/2 o quitar el badge.
+  4. [P3] $impeccable typeset — Reconsiderar los eyebrows en mayúsculas en ambos
+  headers.
+  5. [P3] $impeccable polish — Pasada final: el borde inline → utilidad de
+  token, y un barrido por cualquier desviación restante antes de publicar.
+
+  ▎ Puedes pedirme que ejecute estos uno por uno, todos a la vez, o en el orden 
+  ▎ que prefieras.
+  ▎
+  ▎ Vuelve a correr $impeccable audit después de los arreglos para ver subir tu 
+  ▎ puntaje.
+✻ Worked for 54s

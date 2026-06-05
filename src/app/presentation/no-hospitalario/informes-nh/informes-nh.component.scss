@@ -2,20 +2,6 @@
   display: block;
 }
 
-// Numerito de paso junto al título de la sección.
-.informes-nh__step {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--app-radius-full);
-  background: var(--app-primary-50);
-  color: var(--app-primary-700);
-  font-size: var(--app-size-xs);
-  font-weight: var(--app-weight-bold);
-}
-
 // -----------------------------------------------------------------------------
 // RESUMEN del informe elegido (cabecera de la tarjeta de filtros)
 // -----------------------------------------------------------------------------
@@ -46,6 +32,10 @@
     border-radius: var(--app-radius-full);
   }
 
+  // El relleno es position:absolute dentro del track: animar `width` aquí es el
+  // caso legítimo del progress bar (no provoca reflow de hermanos), no el thrash
+  // de layout genérico. Duración corta para seguir el ritmo de los ticks; bajo
+  // prefers-reduced-motion el reset global de _base.scss la neutraliza.
   ::ng-deep .descarga__barra .p-progressbar-value {
     border-radius: var(--app-radius-full);
     transition: width var(--app-duration-fast) var(--app-ease-out);

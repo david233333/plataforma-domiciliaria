@@ -1,16 +1,243 @@
-<section class="flex flex-col gap-4 w-full max-w-5xl mx-auto px-4 py-6">
+<section class="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-6">
+  <!-- ============================ ENCABEZADO ============================ -->
   <header class="flex flex-col gap-1">
-    <span class="text-overline text-primary-600">Hospitalario</span>
-    <h1 class="text-display-md text-text-primary m-0">Informes</h1>
-    <p class="text-body-lg text-text-secondary max-w-2xl">
-      Consulta y descarga los informes del ámbito hospitalario.
+    <h1 class="text-heading-lg text-text-primary text-balance m-0">
+      Informes hospitalarios
+    </h1>
+    <p class="text-body-lg text-text-secondary text-pretty max-w-2xl">
+      Genera y descarga los informes del ámbito hospitalario.
     </p>
   </header>
 
-  <div class="card flex flex-col items-center gap-3 text-center py-10">
-    <i class="pi pi-chart-bar text-primary-500 informes__icon" aria-hidden="true"></i>
-    <p class="text-body-md text-text-secondary m-0">
-      Aún no hay informes disponibles en este ámbito.
-    </p>
+  <!-- ===================== ELEGIR INFORME ===================== -->
+  <div class="flex flex-col gap-4">
+    <h2 class="text-label-lg text-text-secondary m-0">Selecciona un informe</h2>
+
+    <div class="field max-w-md">
+      <label class="field__label" for="informe">Informe</label>
+      <p-select
+        inputId="informe"
+        [formControl]="informeControl"
+        [options]="informes"
+        optionLabel="nombre"
+        placeholder="Selecciona un informe"
+        [showClear]="true"
+        [filter]="true"
+        filterBy="nombre"
+        styleClass="w-full"
+        appendTo="body"
+        (onChange)="onInformeChange($event.value)"
+        (onClear)="onInformeClear()"
+      />
+      <p class="field__hint flex items-center gap-2">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        Elige un informe para definir su periodo y filtros.
+      </p>
+    </div>
   </div>
+
+  <!-- ===================== FILTROS DEL INFORME ===================== -->
+  @if (informeSeleccionado(); as informe) {
+    <form
+      class="card flex flex-col gap-6"
+      [formGroup]="filtros"
+      [animate.enter]="fadeIn"
+      (ngSubmit)="descargar()"
+    >
+      <!-- Resumen del informe elegido -->
+      <header class="flex items-start gap-3">
+        <span class="informe-summary__icon" aria-hidden="true">
+          <i class="pi {{ informe.icon }}"></i>
+        </span>
+        <div class="flex flex-col gap-1">
+          <h2
+            #resumenHeading
+            tabindex="-1"
+            class="text-heading-sm text-text-primary m-0 outline-none"
+          >
+            {{ informe.nombre }}
+          </h2>
+          <p class="text-body-sm text-text-secondary text-pretty m-0">{{ informe.descripcion }}</p>
+        </div>
+      </header>
+
+      <!-- Campos -->
+      <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+        <div class="field">
+          <label class="field__label" for="servicios">
+            Tipo de servicio <span class="field__required" aria-hidden="true">*</span>
+          </label>
+          <p-multiselect
+            inputId="servicios"
+            formControlName="servicios"
+            [options]="servicios"
+            optionLabel="label"
+            optionValue="value"
+            display="chip"
+            placeholder="Selecciona uno o varios"
+            [filter]="true"
+            [invalid]="mostrarErrorServicios()"
+            styleClass="w-full"
+            appendTo="body"
+          />
+          <div class="field__message-slot">
+            @if (mostrarErrorServicios()) {
+              <p class="field__error" role="alert">
+                Selecciona al menos un tipo de servicio.
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="sedes">
+            Sede hospitalaria <span class="field__required" aria-hidden="true">*</span>
+          </label>
+          <p-multiselect
+            inputId="sedes"
+            formControlName="sedes"
+            [options]="sedes"
+            optionLabel="label"
+            optionValue="value"
+            display="chip"
+            placeholder="Selecciona una o varias"
+            [maxSelectedLabels]="3"
+            [filter]="true"
+            [invalid]="mostrarErrorSedes()"
+            styleClass="w-full"
+            appendTo="body"
+          />
+          <div class="field__message-slot">
+            @if (mostrarErrorSedes()) {
+              <p class="field__error" role="alert">
+                Selecciona al menos una sede.
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="fechaDesde">
+            Fecha de inicio <span class="field__required" aria-hidden="true">*</span>
+          </label>
+          <p-datepicker
+            inputId="fechaDesde"
+            formControlName="fechaDesde"
+            dateFormat="dd/mm/yy"
+            iconDisplay="input"
+            [showIcon]="true"
+            [readonlyInput]="true"
+            [showButtonBar]="true"
+            [invalid]="invalidoFechaDesde()"
+            styleClass="w-full"
+            appendTo="body"
+            placeholder="dd/mm/aaaa"
+          />
+          <div class="field__message-slot">
+            @if (mostrarErrorFechaDesde()) {
+              <p class="field__error" role="alert">
+                Indica la fecha de inicio.
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="fechaHasta">
+            Fecha de fin <span class="field__required" aria-hidden="true">*</span>
+          </label>
+          <p-datepicker
+            inputId="fechaHasta"
+            formControlName="fechaHasta"
+            dateFormat="dd/mm/yy"
+            iconDisplay="input"
+            [showIcon]="true"
+            [readonlyInput]="true"
+            [showButtonBar]="true"
+            [invalid]="invalidoFechaHasta()"
+            styleClass="w-full"
+            appendTo="body"
+            placeholder="dd/mm/aaaa"
+          />
+          <div class="field__message-slot">
+            @if (mostrarErrorFechaHasta()) {
+              <p class="field__error" role="alert">
+                Indica la fecha de fin.
+              </p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje de validación / ayuda del rango -->
+      @if (mostrarErrorOrdenFechas()) {
+        <p class="field__error" role="alert">
+          La fecha de fin no puede ser anterior a la fecha de inicio.
+        </p>
+      } @else if (mostrarErrorRangoFechas()) {
+        <p class="field__error" role="alert">
+          El rango de fechas no puede superar los {{ rangoMaximoDias }} días.
+        </p>
+      } @else {
+        <p class="field__hint flex items-center gap-2">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          El rango máximo de consulta es de {{ rangoMaximoDias }} días.
+        </p>
+      }
+
+      <!-- Acciones / estado de descarga -->
+      <div class="pt-5 border-t border-[color:var(--app-surface-200)]">
+        @if (descargando()) {
+          <!-- Progreso de la descarga + cancelar -->
+          <div class="descarga">
+            <div class="flex items-center justify-between gap-3">
+              <!-- role="status" anuncia el INICIO una sola vez. El % NO va en
+                   región live: cambia cada ~120 ms y anunciarlo en cada tick
+                   satura al lector. Se consulta bajo demanda en la barra. -->
+              <span class="text-label-md text-text-primary flex items-center gap-2" role="status">
+                <i class="pi pi-spin pi-spinner text-primary-600" aria-hidden="true"></i>
+                Descargando «{{ informe.nombre }}»…
+              </span>
+              <span class="text-label-md text-primary-700 tabular-nums">{{ progresoTexto() }}%</span>
+            </div>
+
+            <p-progressbar
+              [value]="progresoTexto()"
+              [showValue]="false"
+              styleClass="descarga__barra"
+              [attr.aria-label]="'Progreso de la descarga: ' + progresoTexto() + '%'"
+            />
+
+            <div class="flex justify-end">
+              <p-button
+                label="Cancelar descarga"
+                icon="pi pi-times"
+                severity="danger"
+                [text]="true"
+                type="button"
+                (onClick)="cancelarDescarga()"
+              />
+            </div>
+          </div>
+        } @else {
+          <!-- Acciones normales -->
+          <div class="flex flex-wrap items-center justify-end gap-3">
+            <p-button
+              label="Limpiar filtros"
+              icon="pi pi-refresh"
+              severity="secondary"
+              [outlined]="true"
+              type="button"
+              (onClick)="limpiarFiltros()"
+            />
+            <p-button
+              label="Descargar informe"
+              icon="pi pi-download"
+              type="submit"
+            />
+          </div>
+        }
+      </div>
+    </form>
+  }
 </section>

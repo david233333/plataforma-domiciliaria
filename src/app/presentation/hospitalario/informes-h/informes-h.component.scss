@@ -2,7 +2,42 @@
   display: block;
 }
 
-// Ícono destacado del estado vacío. Tamaño no cubierto por utilidades.
-.informes__icon {
-  font-size: 2.5rem;
+// -----------------------------------------------------------------------------
+// RESUMEN del informe elegido (cabecera de la tarjeta de filtros)
+// -----------------------------------------------------------------------------
+.informe-summary__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--app-radius-md);
+  background: var(--app-primary-50);
+  color: var(--app-primary-600);
+  font-size: var(--app-size-base);
+}
+
+// -----------------------------------------------------------------------------
+// ESTADO DE DESCARGA (barra de progreso + cancelar)
+// -----------------------------------------------------------------------------
+.descarga {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-3);
+
+  // Altura un poco mayor para que la barra sea claramente visible.
+  ::ng-deep .descarga__barra .p-progressbar {
+    height: 0.625rem;
+    border-radius: var(--app-radius-full);
+  }
+
+  // El relleno es position:absolute dentro del track: animar `width` aquí es el
+  // caso legítimo del progress bar (no provoca reflow de hermanos), no el thrash
+  // de layout genérico. Duración corta para seguir el ritmo de los ticks; bajo
+  // prefers-reduced-motion el reset global de _base.scss la neutraliza.
+  ::ng-deep .descarga__barra .p-progressbar-value {
+    border-radius: var(--app-radius-full);
+    transition: width var(--app-duration-fast) var(--app-ease-out);
+  }
 }

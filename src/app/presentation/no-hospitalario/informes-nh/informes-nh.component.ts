@@ -3,9 +3,13 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
+  ElementRef,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormBuilder,
@@ -172,9 +176,83 @@ export class InformesNhComponent {
     { validators: validarRangoFechas },
   );
 
+  /**
+   * Tick reactivo del estado del formulario. Bajo OnPush los cambios de
+   * validación/touched de Reactive Forms no marcan la vista; este signal
+   * (alimentado por `filtros.events`) es la dependencia que hace recomputar
+   * los signals de error de abajo. Su valor no se usa, solo su emisión.
+   */
+  private readonly filtrosEstado = toSignal(this.filtros.events);
+
+  /** True tras un intento de envío: fuerza mostrar todos los errores. */
+  protected readonly submitted = signal(false);
+
+  // --- Señales de error por campo (visibles tras blur o intento de envío) ---
+  protected readonly mostrarErrorServicios = computed(() =>
+    this.campoInvalido('servicios'),
+  );
+  protected readonly mostrarErrorCiudades = computed(() =>
+    this.campoInvalido('ciudades'),
+  );
+  protected readonly mostrarErrorFechaDesde = computed(() =>
+    this.campoInvalido('fechaDesde'),
+  );
+  protected readonly mostrarErrorFechaHasta = computed(() =>
+    this.campoInvalido('fechaHasta'),
+  );
+
+  // --- Señales de error del rango (validación cruzada del grupo) ---
+  protected readonly mostrarErrorOrdenFechas = computed(() =>
+    this.errorGrupoFechas('fechaInvalida'),
+  );
+  protected readonly mostrarErrorRangoFechas = computed(() =>
+    this.errorGrupoFechas('rangoInvalido'),
+  );
+
+  // --- Estado visual «inválido» de los datepickers (faltante u orden/rango) ---
+  protected readonly invalidoFechaDesde = computed(
+    () =>
+      this.mostrarErrorFechaDesde() ||
+      this.mostrarErrorOrdenFechas() ||
+      this.mostrarErrorRangoFechas(),
+  );
+  protected readonly invalidoFechaHasta = computed(
+    () =>
+      this.mostrarErrorFechaHasta() ||
+      this.mostrarErrorOrdenFechas() ||
+      this.mostrarErrorRangoFechas(),
+  );
+
+  /** Encabezado de la tarjeta de filtros (objetivo de foco al revelarse). */
+  private readonly resumenHeading =
+    viewChild<ElementRef<HTMLElement>>('resumenHeading');
+
   constructor() {
     // Evita fugas si el usuario navega con una descarga en curso.
     inject(DestroyRef).onDestroy(() => this.detenerTemporizador());
+
+    // Al revelarse la tarjeta de filtros, lleva el foco a su encabezado para
+    // que el usuario de teclado/lector no quede «atrás» tras el select.
+    effect(() => this.resumenHeading()?.nativeElement.focus());
+  }
+
+  /** ¿Debe mostrarse el error de un campo? Inválido y ya interactuado. */
+  private campoInvalido(nombre: string): boolean {
+    this.filtrosEstado(); // dependencia para recomputar bajo OnPush
+    const control = this.filtros.get(nombre);
+    return (
+      !!control && control.invalid && (control.touched || this.submitted())
+    );
+  }
+
+  /** ¿Debe mostrarse un error de grupo (rango) de fechas? */
+  private errorGrupoFechas(error: string): boolean {
+    this.filtrosEstado(); // dependencia para recomputar bajo OnPush
+    const interactuado =
+      !!this.filtros.get('fechaDesde')?.touched ||
+      !!this.filtros.get('fechaHasta')?.touched ||
+      this.submitted();
+    return this.filtros.hasError(error) && interactuado;
   }
 
   /** Cambia el informe activo: cancela cualquier descarga y reinicia filtros. */
@@ -194,15 +272,26 @@ export class InformesNhComponent {
   /** Vacía los campos manteniendo el informe seleccionado. */
   protected limpiarFiltros(): void {
     this.filtros.reset({ servicios: [], ciudades: [] });
+    this.submitted.set(false);
   }
 
-  /** Inicia la descarga: arranca la barra de progreso. */
+  /** Inicia la descarga: valida y, si falta algo, lo señala y enfoca. */
   protected descargar(): void {
     const informe = this.informeSeleccionado();
-    if (!informe || this.filtros.invalid || this.descargando()) {
+    if (!informe || this.descargando()) {
       return;
     }
 
+    // El botón permanece habilitado: validamos al enviar para poder explicar
+    // qué falta (en vez de un submit inerte que no dice nada al usuario).
+    if (this.filtros.invalid) {
+      this.filtros.markAllAsTouched();
+      this.submitted.set(true);
+      this.enfocarPrimerError();
+      return;
+    }
+
+    this.submitted.set(false);
     this.descargando.set(true);
     this.progreso.set(0);
 
@@ -215,6 +304,14 @@ export class InformesNhComponent {
         this.finalizarDescarga(informe);
       }
     }, DESCARGA_TICK_MS);
+  }
+
+  /** Lleva el foco al primer campo inválido del formulario (orden visual). */
+  private enfocarPrimerError(): void {
+    const orden = ['servicios', 'ciudades', 'fechaDesde', 'fechaHasta'];
+    const primero =
+      orden.find((nombre) => this.filtros.get(nombre)?.invalid) ?? 'fechaDesde';
+    document.getElementById(primero)?.focus();
   }
 
   /** Cancela una descarga en curso y restablece el estado. */

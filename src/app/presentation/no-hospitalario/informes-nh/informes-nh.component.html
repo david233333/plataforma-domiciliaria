@@ -1,20 +1,17 @@
 <section class="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-6">
   <!-- ============================ ENCABEZADO ============================ -->
   <header class="flex flex-col gap-1">
-    <span class="text-overline text-primary-600">No hospitalario</span>
-    <h1 class="text-display-md text-text-primary m-0">Informes</h1>
-    <p class="text-body-lg text-text-secondary max-w-2xl">
-      Genera y descarga los informes del ámbito no hospitalario. Elige un informe
-      y ajusta los filtros del periodo.
+    <h1 class="text-heading-lg text-text-primary text-balance m-0">
+      Informes no hospitalarios
+    </h1>
+    <p class="text-body-lg text-text-secondary text-pretty max-w-2xl">
+      Genera y descarga los informes del ámbito no hospitalario.
     </p>
   </header>
 
-  <!-- ===================== PASO 1 · ELEGIR INFORME ===================== -->
+  <!-- ===================== ELEGIR INFORME ===================== -->
   <div class="flex flex-col gap-4">
-    <h2 class="text-label-lg text-text-secondary m-0 flex items-center gap-2">
-      <span class="informes-nh__step" aria-hidden="true">1</span>
-      Selecciona un informe
-    </h2>
+    <h2 class="text-label-lg text-text-secondary m-0">Selecciona un informe</h2>
 
     <div class="field max-w-md">
       <label class="field__label" for="informe">Informe</label>
@@ -32,10 +29,14 @@
         (onChange)="onInformeChange($event.value)"
         (onClear)="onInformeClear()"
       />
+      <p class="field__hint flex items-center gap-2">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        Elige un informe para definir su periodo y filtros.
+      </p>
     </div>
   </div>
 
-  <!-- ===================== PASO 2 · FILTROS ===================== -->
+  <!-- ===================== FILTROS DEL INFORME ===================== -->
   @if (informeSeleccionado(); as informe) {
     <form
       class="card flex flex-col gap-6"
@@ -49,8 +50,14 @@
           <i class="pi {{ informe.icon }}"></i>
         </span>
         <div class="flex flex-col gap-1">
-          <h2 class="text-heading-sm text-text-primary m-0">{{ informe.nombre }}</h2>
-          <p class="text-body-sm text-text-secondary m-0">{{ informe.descripcion }}</p>
+          <h2
+            #resumenHeading
+            tabindex="-1"
+            class="text-heading-sm text-text-primary m-0 outline-none"
+          >
+            {{ informe.nombre }}
+          </h2>
+          <p class="text-body-sm text-text-secondary text-pretty m-0">{{ informe.descripcion }}</p>
         </div>
       </header>
 
@@ -69,9 +76,17 @@
             display="chip"
             placeholder="Selecciona uno o varios"
             [filter]="true"
+            [invalid]="mostrarErrorServicios()"
             styleClass="w-full"
             appendTo="body"
           />
+          <div class="field__message-slot">
+            @if (mostrarErrorServicios()) {
+              <p class="field__error" role="alert">
+                Selecciona al menos un tipo de servicio.
+              </p>
+            }
+          </div>
         </div>
 
         <div class="field">
@@ -88,9 +103,17 @@
             placeholder="Selecciona una o varias"
             [maxSelectedLabels]="3"
             [filter]="true"
+            [invalid]="mostrarErrorCiudades()"
             styleClass="w-full"
             appendTo="body"
           />
+          <div class="field__message-slot">
+            @if (mostrarErrorCiudades()) {
+              <p class="field__error" role="alert">
+                Selecciona al menos una ciudad.
+              </p>
+            }
+          </div>
         </div>
 
         <div class="field">
@@ -105,10 +128,18 @@
             [showIcon]="true"
             [readonlyInput]="true"
             [showButtonBar]="true"
+            [invalid]="invalidoFechaDesde()"
             styleClass="w-full"
             appendTo="body"
             placeholder="dd/mm/aaaa"
           />
+          <div class="field__message-slot">
+            @if (mostrarErrorFechaDesde()) {
+              <p class="field__error" role="alert">
+                Indica la fecha de inicio.
+              </p>
+            }
+          </div>
         </div>
 
         <div class="field">
@@ -123,19 +154,27 @@
             [showIcon]="true"
             [readonlyInput]="true"
             [showButtonBar]="true"
+            [invalid]="invalidoFechaHasta()"
             styleClass="w-full"
             appendTo="body"
             placeholder="dd/mm/aaaa"
           />
+          <div class="field__message-slot">
+            @if (mostrarErrorFechaHasta()) {
+              <p class="field__error" role="alert">
+                Indica la fecha de fin.
+              </p>
+            }
+          </div>
         </div>
       </div>
 
       <!-- Mensaje de validación / ayuda del rango -->
-      @if (filtros.hasError('fechaInvalida')) {
+      @if (mostrarErrorOrdenFechas()) {
         <p class="field__error" role="alert">
           La fecha de fin no puede ser anterior a la fecha de inicio.
         </p>
-      } @else if (filtros.hasError('rangoInvalido')) {
+      } @else if (mostrarErrorRangoFechas()) {
         <p class="field__error" role="alert">
           El rango de fechas no puede superar los {{ rangoMaximoDias }} días.
         </p>
@@ -147,19 +186,19 @@
       }
 
       <!-- Acciones / estado de descarga -->
-      <div
-        class="pt-5"
-        style="border-top: 1px solid var(--app-surface-200)"
-      >
+      <div class="pt-5 border-t border-[color:var(--app-surface-200)]">
         @if (descargando()) {
           <!-- Progreso de la descarga + cancelar -->
-          <div class="descarga" role="status" aria-live="polite">
+          <div class="descarga">
             <div class="flex items-center justify-between gap-3">
-              <span class="text-label-md text-text-primary flex items-center gap-2">
+              <!-- role="status" anuncia el INICIO una sola vez. El % NO va en
+                   región live: cambia cada ~120 ms y anunciarlo en cada tick
+                   satura al lector. Se consulta bajo demanda en la barra. -->
+              <span class="text-label-md text-text-primary flex items-center gap-2" role="status">
                 <i class="pi pi-spin pi-spinner text-primary-600" aria-hidden="true"></i>
                 Descargando «{{ informe.nombre }}»…
               </span>
-              <span class="text-label-md text-primary-700">{{ progresoTexto() }}%</span>
+              <span class="text-label-md text-primary-700 tabular-nums">{{ progresoTexto() }}%</span>
             </div>
 
             <p-progressbar
@@ -195,7 +234,6 @@
               label="Descargar informe"
               icon="pi pi-download"
               type="submit"
-              [disabled]="filtros.invalid"
             />
           </div>
         }
