@@ -1,0 +1,405 @@
+❯ /impeccable audit                                                                                                                                                                                                                                                            
+
+⏺ I'll start by following the required setup steps for the impeccable skill.
+  
+⏺ Bash(node .agents/skills/impeccable/scripts/context.mjs)
+  ⎿  # PRODUCT.md
+
+     # Product
+     … +44 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ The register is product. Let me read the product reference and explore the codebase's design system.
+
+  Read 1 file, listed 1 directory (ctrl+o to expand)
+
+⏺ Let me read the design system tokens and the informes components (the focus of this feature/informes branch).
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ This is clearly a carefully-built design system. Let me examine the rest of the informes surface and the shared patterns it relies on.
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ Let me check the motion tokens, the global reduced-motion handling, the route animation, and the PrimeNG theme bridge.
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ Let me verify the elevation tokens (for the card shadow) and the fade-in animation's reduced-motion handling.
+
+  Read 3 files (ctrl+o to expand)
+
+⏺ I've reviewed the informes surface (the focus of this feature/informes branch) and the full token/pattern system it sits on. Here's the audit.
+
+  ---
+  $impeccable audit — Módulo de Informes (H + NH)
+
+  Scope: informes-h and informes-nh components, plus the --app-* token system, patterns, typography, and motion layers they depend on.
+
+  Anti-Patterns Verdict — PASS
+
+  This does not look AI-generated. It reads as a deliberately restrained enterprise tool. Concretely, none of the usual tells are present:
+
+  - No gradient text, no glassmorphism, no hero-metric blocks, no identical icon-card grids.
+  - No tracked-uppercase eyebrows over sections, no 01/02/03 numbered scaffolding.
+  - No side-stripe accent borders.
+  - Card uses 1px border + shadow-xs where shadow-xs = 0 1px 2px / 0.05 (2px blur) — this is not the ghost-card defect (which needs ≥16px blur); it's a legitimate hairline.
+  - Card radius is --app-radius-md (not the 24/28/32px over-round tell).
+  - Hero/heading uses text-heading-lg capping at ~31px — nowhere near the 6rem ceiling.
+  - Single font (Inter), tokenized everything, documented per-pair contrast ratios.
+
+  The token system is genuinely first-rate: single source of truth, WCAG ratios annotated inline, light-mode-only as an explicit decision, reduced-motion enforced globally and per-pattern.
+
+  Audit Health Score
+
+  ┌───────┬───────────────────┬───────┬──────────────────────────────────────────────────────────────────────────────┐
+  │   #   │     Dimension     │ Score │                                 Key Finding                                  │
+  ├───────┼───────────────────┼───────┼──────────────────────────────────────────────────────────────────────────────┤
+  │ 1     │ Accessibility     │ 3     │ Strong labels/focus/ARIA; no completion announcement after download finishes │
+  ├───────┼───────────────────┼───────┼──────────────────────────────────────────────────────────────────────────────┤
+  │ 2     │ Performance       │ 4     │ OnPush + signals, interval cleared on destroy, object URL revoked, no thrash │
+  ├───────┼───────────────────┼───────┼──────────────────────────────────────────────────────────────────────────────┤
+  │ 3     │ Responsive Design │ 3     │ Structural grid + max-width container; touch targets / mobile not verified   │
+  ├───────┼───────────────────┼───────┼──────────────────────────────────────────────────────────────────────────────┤
+  │ 4     │ Theming           │ 4     │ Full --app-* token system, documented contrast, single source of truth       │
+  ├───────┼───────────────────┼───────┼──────────────────────────────────────────────────────────────────────────────┤
+  │ 5     │ Anti-Patterns     │ 4     │ Distinctive restraint, zero AI tells                                         │
+  ├───────┼───────────────────┼───────┼──────────────────────────────────────────────────────────────────────────────┤
+  │ Total │                   │ 18/20 │ Excellent (minor polish)                                                     │
+  └───────┴───────────────────┴───────┴──────────────────────────────────────────────────────────────────────────────┘
+
+  Executive Summary
+
+  - Health Score: 18/20 (Excellent)
+  - Issues by severity: P0: 0 · P1: 0 · P2: 2 · P3: 3
+  - Top issues:
+    a. [P2] informes-h and informes-nh are ~95% duplicated (template, SCSS, and TS logic identical except catalog data and one field label).
+    b. [P2] No accessible confirmation when a download completes — the role="status" region just disappears.
+    c. [P3] PrimeNG default control/button height (~40px) is under the 44×44 touch-target guideline.
+
+  Detailed Findings
+
+  [P2] Near-total duplication between the two informes screens
+
+  - Location: informes-h.component.{ts,html,scss} vs informes-nh.component.{ts,html,scss}
+  - Category: Systemic / Maintainability
+  - Impact: The entire form (validation, date-range logic, download/CSV simulation, focus management, progress UI, SCSS) is copy-pasted. The only real differences are the catalog arrays and one label (Sede hospitalaria vs Ciudad). A fix or a11y improvement applied to one
+  screen will silently not reach the other — which directly threatens the PRODUCT.md principle "same action looks identical everywhere."
+  - Recommendation: Extract a single InformesFormComponent (or a base) that takes the catalog, the second-filter label/options, and field names as input()s. The two route components become thin config wrappers.
+  - Suggested command: $impeccable distill
+
+  [P2] Download completion is not announced to assistive tech
+
+  - Location: informes-*.component.ts → finalizarDescarga(); template descarga block
+  - Category: Accessibility (WCAG 4.1.3 Status Messages)
+  - Impact: The role="status" region announces the start ("Descargando…"), but on completion descargando flips to false, the region unmounts, and the CSV downloads with no spoken confirmation. A screen-reader user is left unsure whether it finished or was cancelled.
+  - Recommendation: Briefly render a role="status" "Descarga completada: «{{nombre}}»" message on success (and ideally "Descarga cancelada" on cancel) before resetting, so the live region fires.
+  - Suggested command: $impeccable harden
+
+  [P3] Touch targets below 44×44px
+
+  - Location: PrimeNG buttons, select, multiselect, datepicker across both screens
+  - Category: Responsive / Accessibility (WCAG 2.5.5, AAA / best practice)
+  - Impact: Default PrimeNG control height is ~40px. Low real-world impact here — PRODUCT.md scopes usage to a desk/workstation — but worth confirming if any tablet use is expected.
+  - Recommendation: If touch contexts matter, bump control min-height to 44px via the PrimeNG theme bridge; otherwise document as an accepted desktop-only trade-off.
+  - Suggested command: $impeccable adapt
+
+  [P3] Auto-focus on card reveal may surprise mouse users
+
+  - Location: informes-*.component.ts:245 → effect(() => this.resumenHeading()?.nativeElement.focus())
+  - Category: Accessibility / Interaction
+  - Impact: Moving focus to the tabindex="-1" heading when the filters card appears is a thoughtful keyboard/SR affordance. The same effect, however, also yanks focus (and can scroll) for a mouse user who just picked an option from the select. Generally acceptable, but
+  verify it doesn't cause an unexpected jump on smaller viewports.
+  - Recommendation: Confirm in-browser; if the scroll is jarring, gate the focus move to keyboard-initiated selection or pair it with scroll-margin-top on the heading.
+  - Suggested command: $impeccable polish
+
+  [P3] Chip-mode multiselect overflow on narrow viewports — verify
+
+  - Location: p-multiselect display="chip" (servicios / sedes / ciudades)
+  - Category: Responsive
+  - Impact: With several long selections, chips should wrap inside the field; on the narrowest breakpoints this is untested. maxSelectedLabels=3 mitigates sedes/ciudades but servicios has no cap.
+  - Recommendation: Test at 320–375px with 4+ selections; add maxSelectedLabels to servicios if chips overflow.
+  - Suggested command: $impeccable adapt
+
+  Patterns & Systemic Issues
+
+  - The only systemic issue is the H/NH duplication. Everything else is one-off polish. The duplication is the thing most likely to cause real drift over time, because the two screens are meant to stay identical by product principle but have no shared code enforcing it.
+
+  Positive Findings (keep doing this)
+
+  - Token discipline is exemplary — zero hardcoded colors; even the one arbitrary Tailwind value (border-[color:var(--app-surface-200)]) points at a token. Contrast ratios are documented per pair.
+  - Performance is clean by construction — OnPush, signals/computed, setInterval cleared via DestroyRef.onDestroy, URL.revokeObjectURL after download, and the one width transition on the progress bar is correctly justified as non-reflowing.
+  - Validation UX is thoughtful — submit stays enabled so errors can be explained, field__message-slot reserves height to prevent layout shift, first invalid field receives focus in visual order.
+  - Reduced motion is honored twice — globally in _base.scss and per-pattern.
+  - Live-region restraint — deliberately not announcing the per-tick % is the correct call and is documented.
+
+  Recommended Actions (priority order)
+
+  1. [P2] $impeccable distill — collapse informes-h / informes-nh into one configurable form component so the two ámbitos can't drift.
+  2. [P2] $impeccable harden — add the download-complete (and cancel) status announcement.
+  3. [P3] $impeccable adapt — verify/raise touch targets and chip wrapping for narrow/tablet viewports.
+  4. [P3] $impeccable polish — validate the auto-focus-on-reveal behavior and close out remaining nits.
+
+  ▎ You can ask me to run these one at a time, all at once, or in any order you prefer.
+  ▎
+  ▎ Re-run $impeccable audit after fixes to see your score improve.
+
+  A note on the 18/20: the two missing points are almost entirely the duplication (a structural risk, not a visual one) and the missing completion feedback. Visually and in craft this surface is already in "minor polish" territory.
+
+✻ Cogitated for 2m 24s
+
+❯ traduceme esto al español                                                                                                                                                                                                                                                    
+
+⏺ $impeccable audit — Módulo de Informes (H + NH)
+
+  Alcance: componentes informes-h e informes-nh, más el sistema de tokens --app-*, los patrones, la tipografía y la capa de motion de los que dependen.
+
+  Veredicto sobre Anti-Patrones — APROBADO
+
+  Esto no parece generado por IA. Se lee como una herramienta empresarial deliberadamente sobria. En concreto, no aparece ninguno de los «tells» habituales:
+
+  - Sin texto con gradiente, sin glassmorphism, sin bloques de hero-métrica, sin rejillas de tarjetas idénticas icono+título+texto.
+  - Sin «eyebrows» en mayúsculas con tracking sobre las secciones, sin numeración decorativa 01/02/03.
+  - Sin bordes laterales de acento (side-stripe).
+  - La card usa border 1px + shadow-xs donde shadow-xs = 0 1px 2px / 0.05 (blur de 2px) — esto no es el defecto «ghost-card» (que requiere blur ≥16px); es una línea de pelo legítima.
+  - El radio de la card es --app-radius-md (no el «tell» del sobre-redondeo 24/28/32px).
+  - El heading principal usa text-heading-lg con tope en ~31px — muy lejos del techo de 6rem.
+  - Fuente única (Inter), todo tokenizado, con ratios de contraste documentados en línea.
+
+  El sistema de tokens es realmente de primer nivel: fuente única de verdad, ratios WCAG anotados en línea, solo light mode como decisión explícita, y reduced-motion forzado tanto a nivel global como por patrón.
+
+  Puntuación de Salud del Audit
+
+  ┌───────┬───────────────────┬─────────┬───────────────────────────────────────────────────────────────────────────────────┐
+  │   #   │     Dimensión     │ Puntaje │                                  Hallazgo clave                                   │
+  ├───────┼───────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────┤
+  │ 1     │ Accesibilidad     │ 3       │ Labels/foco/ARIA sólidos; sin anuncio al completar la descarga                    │
+  ├───────┼───────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────┤
+  │ 2     │ Rendimiento       │ 4       │ OnPush + signals, interval limpiado en destroy, object URL liberado, sin thrash   │
+  ├───────┼───────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────┤
+  │ 3     │ Diseño Responsive │ 3       │ Grid estructural + contenedor con ancho máx.; touch targets / móvil sin verificar │
+  ├───────┼───────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────┤
+  │ 4     │ Theming           │ 4       │ Sistema de tokens --app-* completo, contraste documentado, fuente única de verdad │
+  ├───────┼───────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────┤
+  │ 5     │ Anti-Patrones     │ 4       │ Sobriedad distintiva, cero «tells» de IA                                          │
+  ├───────┼───────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────┤
+  │ Total │                   │ 18/20   │ Excelente (pulido menor)                                                          │
+  └───────┴───────────────────┴─────────┴───────────────────────────────────────────────────────────────────────────────────┘
+
+  Resumen Ejecutivo
+
+  - Puntuación de Salud: 18/20 (Excelente)
+  - Hallazgos por severidad: P0: 0 · P1: 0 · P2: 2 · P3: 3
+  - Hallazgos principales:
+    a. [P2] informes-h e informes-nh están duplicados al ~95% (template, SCSS y lógica TS idénticos salvo los datos del catálogo y una etiqueta de campo).
+    b. [P2] No hay confirmación accesible cuando una descarga termina — la región role="status" simplemente desaparece.
+    c. [P3] La altura por defecto de los controles/botones de PrimeNG (~40px) está por debajo de la guía de touch target de 44×44.
+
+  Hallazgos Detallados
+
+  [P2] Duplicación casi total entre las dos pantallas de informes
+
+  - Ubicación: informes-h.component.{ts,html,scss} vs informes-nh.component.{ts,html,scss}
+  - Categoría: Sistémico / Mantenibilidad
+  - Impacto: Todo el formulario (validación, lógica de rango de fechas, simulación de descarga/CSV, gestión de foco, UI de progreso, SCSS) está copiado y pegado. Las únicas diferencias reales son los arreglos del catálogo y una etiqueta (Sede hospitalaria vs Ciudad). Una
+  corrección o mejora de accesibilidad aplicada a una pantalla no llegará silenciosamente a la otra — lo que amenaza directamente el principio de PRODUCT.md: «una misma acción se ve idéntica en todas partes».
+  - Recomendación: Extraer un único InformesFormComponent (o una base) que reciba el catálogo, la etiqueta/opciones del segundo filtro y los nombres de campo como input()s. Las dos pantallas de ruta quedan como envoltorios finos de configuración.
+  - Comando sugerido: $impeccable distill
+
+  [P2] La finalización de la descarga no se anuncia a la tecnología de asistencia
+
+  - Ubicación: informes-*.component.ts → finalizarDescarga(); bloque descarga del template
+  - Categoría: Accesibilidad (WCAG 4.1.3 Status Messages)
+  - Impacto: La región role="status" anuncia el inicio («Descargando…»), pero al completarse descargando pasa a false, la región se desmonta y el CSV se descarga sin confirmación hablada. Un usuario de lector de pantalla queda sin saber si terminó o se canceló.
+  - Recomendación: Renderizar brevemente un mensaje role="status" «Descarga completada: «{{nombre}}»» en caso de éxito (e idealmente «Descarga cancelada» al cancelar) antes de reiniciar, para que la región live se dispare.
+  - Comando sugerido: $impeccable harden
+
+  [P3] Touch targets por debajo de 44×44px
+
+  - Ubicación: Botones, select, multiselect y datepicker de PrimeNG en ambas pantallas
+  - Categoría: Responsive / Accesibilidad (WCAG 2.5.5, AAA / buena práctica)
+  - Impacto: La altura por defecto del control de PrimeNG es ~40px. Impacto real bajo aquí — PRODUCT.md acota el uso a escritorio/estación de trabajo — pero vale la pena confirmarlo si se espera algún uso en tablet.
+  - Recomendación: Si los contextos táctiles importan, subir el min-height de los controles a 44px vía el puente de tema de PrimeNG; de lo contrario documentarlo como un compromiso aceptado de solo escritorio.
+  - Comando sugerido: $impeccable adapt
+
+  [P3] El auto-foco al revelar la card puede sorprender a usuarios de ratón
+
+  - Ubicación: informes-*.component.ts:245 → effect(() => this.resumenHeading()?.nativeElement.focus())
+  - Categoría: Accesibilidad / Interacción
+  - Impacto: Mover el foco al heading con tabindex="-1" cuando aparece la card de filtros es una decisión cuidada para teclado/lector de pantalla. Sin embargo, ese mismo effect también arrebata el foco (y puede provocar scroll) a un usuario de ratón que acaba de elegir
+  una opción del select. En general es aceptable, pero conviene verificar que no cause un salto inesperado en viewports pequeños.
+  - Recomendación: Confirmarlo en el navegador; si el scroll resulta brusco, condicionar el movimiento de foco a una selección iniciada por teclado o acompañarlo con scroll-margin-top en el heading.
+  - Comando sugerido: $impeccable polish
+
+  [P3] Desbordamiento del multiselect en modo chip en viewports estrechos — verificar
+
+  - Ubicación: p-multiselect display="chip" (servicios / sedes / ciudades)
+  - Categoría: Responsive
+  - Impacto: Con varias selecciones largas, los chips deberían envolverse dentro del campo; en los breakpoints más estrechos esto no está probado. maxSelectedLabels=3 mitiga sedes/ciudades, pero servicios no tiene tope.
+  - Recomendación: Probar a 320–375px con 4+ selecciones; añadir maxSelectedLabels a servicios si los chips se desbordan.
+  - Comando sugerido: $impeccable adapt
+
+  Patrones y Problemas Sistémicos
+
+  - El único problema sistémico es la duplicación H/NH. Todo lo demás es pulido puntual. La duplicación es lo más probable que cause deriva con el tiempo, porque las dos pantallas están pensadas para permanecer idénticas por principio de producto, pero no hay código
+  compartido que lo garantice.
+
+  Hallazgos Positivos (seguir haciendo esto)
+
+  - La disciplina de tokens es ejemplar — cero colores hardcodeados; incluso el único valor arbitrario de Tailwind (border-[color:var(--app-surface-200)]) apunta a un token. Los ratios de contraste están documentados por par.
+  - El rendimiento es limpio por construcción — OnPush, signals/computed, setInterval limpiado vía DestroyRef.onDestroy, y URL.revokeObjectURL tras la descarga; la única transición de width en la barra de progreso está correctamente justificada como no provocadora de
+  reflow.
+  - La UX de validación es cuidada — el submit permanece habilitado para poder explicar los errores, field__message-slot reserva altura para evitar saltos de layout, y el primer campo inválido recibe el foco en orden visual.
+  - Reduced motion se respeta dos veces — globalmente en _base.scss y por patrón.
+  - Sobriedad en la región live — no anunciar el % en cada tick es la decisión correcta y está documentada.
+
+  Acciones Recomendadas (en orden de prioridad)
+
+  1. [P2] $impeccable distill — colapsar informes-h / informes-nh en un único componente de formulario configurable para que los dos ámbitos no puedan derivar.
+  2. [P2] $impeccable harden — añadir el anuncio de estado al completar (y al cancelar) la descarga.
+  3. [P3] $impeccable adapt — verificar/subir los touch targets y el wrapping de chips para viewports estrechos/tablet.
+  4. [P3] $impeccable polish — validar el comportamiento de auto-foco al revelar y cerrar los detalles restantes.
+
+  ▎ Puedes pedirme que ejecute estos uno por uno, todos a la vez, o en el orden que prefieras.
+  ▎
+  ▎ Vuelve a ejecutar $impeccable audit tras las correcciones para ver subir tu puntuación.
+
+  Una nota sobre el 18/20: los dos puntos que faltan son casi en su totalidad la duplicación (un riesgo estructural, no visual) y la ausencia de feedback al completar. Visualmente y en cuanto a calidad de ejecución, esta pantalla ya está en territorio de «pulido menor».
+
+✻ Cooked for 43s
+
+❯ /impeccable audit para el desig system                                                                                                                                                                                                                                       
+
+⏺ Voy a auditar el design system en sí. Ya tengo cargado el contexto (PRODUCT.md, product.md, audit.md) y buena parte de los tokens. Me faltan algunas piezas centrales del sistema; las leo ahora.
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ Ahora leo el resto del sistema: reset, containers, main.scss, app.config.ts (orden de capas PrimeNG), y los componentes de documentación del design system.
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ Veamos los componentes de documentación del design system (la página showcase y la de arquitectura de estilos).
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+⏺ El sistema de tokens cubre color, tipo, spacing, radius, elevación, motion y breakpoints, pero detecto un posible hueco en z-index. Lo confirmo en el chrome de la app.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+⏺ Bash(cd /Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria; echo "=== z-index en todo src (scss/ts/html) ==="; grep -rn "z-index…)
+  ⎿  === z-index en todo src (scss/ts/html) ===
+     src/app/app.scss:16:  z-index: 1101; // por encima del panel del drawer
+     src/app/presentation/inicio/inicio.component.ts:59:            class="inicio-tiger relative z-[1] w-full max-w-sm h-auto"
+     … +13 lines (ctrl+o to expand)
+ 
+⏺ Hay un punto sensible de accesibilidad: el skip-link usa focus:z-50 y el header fijo usa z-index:1101. Si se solapan, el header taparía el skip-link. Reviso el app.html.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ He auditado el design system completo: la cascada de @layer, los seis grupos de tokens (color, tipografía, spacing/radius, elevación, motion, breakpoints), el puente PrimeNG (sp-theme), los patrones, los containers, el reset y el chrome del shell (app.scss / app.html).
+  Este es el informe.
+
+  ---
+  $impeccable audit — Design System (src/styles/ + bridge PrimeNG + shell)
+
+  Veredicto sobre Anti-Patrones — APROBADO
+
+  El sistema no parece generado por IA; es una arquitectura CSS deliberada y disciplinada. Lo destacable de verdad:
+
+  - Una sola fuente de verdad real. :root --app-* alimenta TRES consumidores sin duplicar valores: PrimeNG (--p-* = var(--app-*) en @layer sp-theme), Tailwind (@theme inline) y los patrones SCSS. Cambiar un token se propaga a todo en runtime.
+  - Cascada por capas, no por especificidad. El orden reset, base, primeng, sp-theme, layout, components, utilities está declarado una vez y replicado en app.config.ts → cssLayer.order con un comentario que advierte que deben coincidir. Por eso casi no hay !important (el
+  único uso real es el override de prefers-reduced-motion, que es legítimo).
+  - Radios contenidos (tope 12px), sombras frías y sutiles (xs = blur 2px), fuente única (Inter), sin gradient text, sin glassmorphism. El text-overline existe como estilo nombrado deliberado (cabeceras de sección del drawer), no como «eyebrow» reflejo en cada sección.
+  - Contraste WCAG documentado par por par en los propios tokens.
+
+  Puntuación de Salud del Audit
+
+  ┌───────┬────────────────────────────┬─────────┬─────────────────────────────────────────────────────────────────────────────────────┐
+  │   #   │         Dimensión          │ Puntaje │                                   Hallazgo clave                                    │
+  ├───────┼────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────────────────────┤
+  │ 1     │ Accesibilidad              │ 3       │ El skip-link queda tapado por el header fijo (z-50 vs z-1101)                       │
+  ├───────┼────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────────────────────┤
+  │ 2     │ Rendimiento (arquitectura) │ 4       │ Cascada por capas sin guerra de especificidad ni !important; costo runtime nulo     │
+  ├───────┼────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────────────────────┤
+  │ 3     │ Responsive                 │ 4       │ Breakpoints alineados 1:1 Sass↔Tailwind, mixins con guardas, variantes de container │
+  ├───────┼────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────────────────────┤
+  │ 4     │ Theming                    │ 4       │ Fuente única de verdad ejemplar; falta una escala de z-index                        │
+  ├───────┼────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────────────────────┤
+  │ 5     │ Anti-Patrones              │ 4       │ Sin «tells» de IA; sobriedad enterprise coherente                                   │
+  ├───────┼────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────────────────────┤
+  │ Total │                            │ 19/20   │ Excelente (pulido menor)                                                            │
+  └───────┴────────────────────────────┴─────────┴─────────────────────────────────────────────────────────────────────────────────────┘
+
+  Resumen Ejecutivo
+
+  - Puntuación: 19/20 (Excelente)
+  - Hallazgos por severidad: P0: 0 · P1: 1 · P2: 1 · P3: 2
+  - Lo importante:
+    a. [P1] El skip-link «Saltar al contenido» se renderiza detrás del header fijo opaco.
+    b. [P2] El sistema tokeniza todo (color, tipo, espacio, radio, elevación, motion, breakpoints) menos z-index: hay un número mágico 1101 acoplado al z interno de PrimeNG.
+    c. Todo lo demás es pulido fino.
+
+  Hallazgos Detallados
+
+  [P1] El skip-link queda oculto bajo el header fijo
+
+  - Ubicación: app.html:7-12 (skip-link con focus:z-50) vs app.scss:13-16 (.app-header { position: fixed; z-index: 1101 })
+  - Categoría: Accesibilidad (WCAG 2.4.1 Bypass Blocks / 2.4.7 Focus Visible)
+  - Impacto: Al recibir foco, el skip-link se posiciona en top:16px; left:16px con z-index:50. El header fijo (fondo blanco opaco, z-index:1101) ocupa la franja 0–64px y comparte el stacking context raíz, así que pinta por encima del skip-link. El enlace sigue
+  funcionando al pulsar Enter, pero es invisible para el usuario de teclado vidente: justo el caso que el skip-link existe para resolver.
+  - Por qué pasa: Es el síntoma directo del hueco P2. z-50 (Tailwind) y z-1101 (a mano) se eligieron en escalas distintas sin un sistema que las coordine.
+  - Recomendación: Que el skip-link, al enfocarse, esté por encima del header (p. ej. z-index ≥ el del header, dentro de una escala semántica). Verificar tabulando desde el primer foco de la página.
+  - Comando sugerido: $impeccable harden
+
+  [P2] Falta una escala semántica de z-index en los tokens
+
+  - Ubicación: tokens/ (no existe --app-z-*); usos dispersos: app.scss:16 (1101), app.html:8 (z-50), inicio.component.ts (z-[1], z-index:0)
+  - Categoría: Theming / Sistémico
+  - Impacto: El 1101 está acoplado al z-index interno del drawer/overlay de PrimeNG (~1100). Si PrimeNG cambia ese valor en una actualización, el header se desordena en silencio. Sin una escala (drawer → sticky/header → modal-backdrop → modal → toast → tooltip), cada
+  capa nueva se adivina, que es exactamente cómo nace el bug P1.
+  - Recomendación: Añadir tokens/_zindex.scss con roles nombrados (--app-z-header, --app-z-drawer, --app-z-overlay, --app-z-toast…), alineados con los rangos de PrimeNG, y exponerlos a Tailwind vía @theme inline. Migrar el 1101 y el z-50 a esos tokens.
+  - Comando sugerido: $impeccable harden
+
+  [P3] Token de focus-ring referenciado pero no definido
+
+  - Ubicación: _primeng-theme.scss:95 → var(--app-focus-ring-width, 2px)
+  - Categoría: Theming (consistencia)
+  - Impacto: --app-focus-ring-width no existe como token; siempre cae al fallback 2px. Funciona, pero es una referencia colgante: el resto del archivo (línea 71) usa el literal 2px. Quien quiera cambiar el grosor del foco editará el token «fuente de verdad» y no pasará
+  nada.
+  - Recomendación: Definir --app-focus-ring-width: 2px en un token (junto al motion/elevation) y consumirlo también en _base.scss, o quitar la referencia y dejar el literal. Una sola decisión.
+  - Comando sugerido: $impeccable polish
+
+  [P3] Estilos display con clamp() para una UI de producto
+
+  - Ubicación: typography/_typography.scss (.text-display-*, .text-heading-* usan clamp())
+  - Categoría: Tipografía (preferencia de registro)
+  - Impacto: Bajo. La guía de producto prefiere escala fija en rem (un heading fluido se ve peor en una columna estrecha que uno fijo). Aquí los rangos clamp() son angostos (p. ej. heading-lg ~25→31px) y los display-* se usan en la landing/inicio, que sí justifica
+  display. No es un defecto, solo una nota: si algún heading fluido entra en un panel angosto, fíjalo en rem.
+  - Comando sugerido: $impeccable typeset (solo si se observa el problema)
+
+  Patrones y Problemas Sistémicos
+
+  - El único hueco sistémico real es z-index. El sistema es notablemente consistente en todo lo demás; el z-index es la única dimensión que escapó a la tokenización, y el bug del skip-link (P1) es su consecuencia directa. Cerrar el P2 cierra también el P1 de forma
+  estructural, no con un parche.
+
+  Hallazgos Positivos (mantener y replicar)
+
+  - El puente PrimeNG es exhaustivo y correcto: todos los form controls, overlays, datatable y mensajes mapeados a --app-*; los overlays usan appendTo="body" + --p-*-overlay-shadow tokenizado, evitando recortes por overflow.
+  - El foco accesible es coherente entre mundos: :focus-visible en _base.scss y --p-focus-ring-* en sp-theme usan el mismo color/grosor/offset. El usuario ve el mismo anillo en HTML propio y en PrimeNG.
+  - Guardas de mantenibilidad reales: los mixins responsive lanzan @error ante un breakpoint inexistente; el comentario del cssLayer.order advierte explícitamente del acoplamiento con _layers.scss.
+  - reduced-motion global e idempotente, más respeto por patrón (skeleton, fadeIn).
+  - Reset mínimo y consciente: preserva role="list" para que Safari no deje de anunciar listas al quitar las viñetas. Detalle que casi nadie cuida.
+
+  Acciones Recomendadas (en orden de prioridad)
+
+  1. [P1] $impeccable harden — subir el skip-link por encima del header al enfocarse y verificar el primer Tab de la página.
+  2. [P2] $impeccable harden — introducir tokens/_zindex.scss con una escala semántica y migrar el 1101 / z-50 a esos tokens (cierra estructuralmente el P1).
+  3. [P3] $impeccable polish — definir --app-focus-ring-width como token y resolver la nota tipográfica si aparece.
+
+  ▎ Puedes pedirme que ejecute estas acciones una a una, todas a la vez, o en el orden que prefieras.
+  ▎
+  ▎ Vuelve a ejecutar $impeccable audit tras las correcciones para ver subir tu puntuación.
+
+  Una nota sobre el 19/20: es una de las arquitecturas de tokens más sólidas que se pueden auditar en un proyecto Angular+PrimeNG+Tailwind. El punto que falta es, casi en su totalidad, el z-index sin tokenizar y su síntoma visible (el skip-link). Resolver eso lo deja en
+  territorio de 20/20.

@@ -23,10 +23,14 @@ import {
 import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
-import { ButtonModule } from 'primeng/button';
 import { ProgressBar } from 'primeng/progressbar';
 
 import { routeFadeAnimation } from '../../../core/animations/animations';
+import { FormFieldComponent } from '../../../shared/ui/molecules/form-field/form-field.component';
+import { PageHeaderComponent } from '../../../shared/ui/molecules/page-header/page-header.component';
+import { FeatureIconComponent } from '../../../shared/ui/molecules/feature-icon/feature-icon.component';
+import { FormActionsComponent } from '../../../shared/ui/molecules/form-actions/form-actions.component';
+import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 
 /** Informe disponible en el catálogo (mock — esta pantalla es solo de diseño). */
 interface OpcionInforme {
@@ -89,8 +93,12 @@ function validarRangoFechas(group: AbstractControl): ValidationErrors | null {
     Select,
     MultiSelect,
     DatePicker,
-    ButtonModule,
     ProgressBar,
+    FormFieldComponent,
+    PageHeaderComponent,
+    FeatureIconComponent,
+    FormActionsComponent,
+    ButtonComponent,
   ],
   templateUrl: './informes-h.component.html',
   styleUrl: './informes-h.component.scss',

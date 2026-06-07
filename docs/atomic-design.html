@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atomic Design explicado desde cero</title>
+  <style>
+    /* ===================================================================
+       Estilos de la guía. Todo va inline (un solo archivo) para que puedas
+       abrirla con doble clic, sin servidor ni dependencias.
+    =================================================================== */
+    :root {
+      --azul-900: #0b3a66;
+      --azul-700: #11598f;
+      --azul-500: #2b7fc0;
+      --azul-100: #e4f0fa;
+      --azul-50:  #f2f8fd;
+      --tinta:    #1b2733;
+      --tinta-suave: #4a5a6a;
+      --tinta-tenue: #6b7a8a;
+      --linea:    #dde6ee;
+      --papel:    #ffffff;
+      --fondo:    #f5f8fb;
+      --exito:    #1f7a4d;
+      --exito-bg: #e3f6ec;
+      --aviso:    #9a6700;
+      --aviso-bg: #fdf4e0;
+      --error:    #b3261e;
+      --codigo-bg: #0e1b2a;
+      --codigo-tx: #e6edf3;
+      --radio:    14px;
+      --sombra:   0 1px 2px rgba(11,58,102,.06), 0 8px 24px rgba(11,58,102,.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--tinta);
+      background: var(--fondo);
+      line-height: 1.65;
+      font-size: 17px;
+    }
+
+    /* ---------- Cabecera ---------- */
+    header.hero {
+      background: linear-gradient(135deg, var(--azul-900), var(--azul-500));
+      color: #fff;
+      padding: 64px 24px 72px;
+      text-align: center;
+    }
+    header.hero .kicker {
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .78rem;
+      opacity: .85;
+      font-weight: 600;
+      margin: 0 0 12px;
+    }
+    header.hero h1 {
+      margin: 0 0 14px;
+      font-size: clamp(2rem, 5vw, 3.1rem);
+      line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+    header.hero p {
+      margin: 0 auto;
+      max-width: 640px;
+      font-size: 1.15rem;
+      opacity: .94;
+    }
+
+    /* ---------- Contenedor ---------- */
+    main {
+      max-width: 880px;
+      margin: -40px auto 80px;
+      padding: 0 20px;
+    }
+
+    section.bloque {
+      background: var(--papel);
+      border: 1px solid var(--linea);
+      border-radius: var(--radio);
+      box-shadow: var(--sombra);
+      padding: 36px 32px;
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      font-size: 1.7rem;
+      letter-spacing: -.01em;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    h2 .num {
+      flex: none;
+      display: inline-grid;
+      place-items: center;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--azul-100);
+      color: var(--azul-700);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    h3 { font-size: 1.18rem; margin: 28px 0 8px; color: var(--azul-900); }
+    p  { margin: 12px 0; color: var(--tinta-suave); }
+    strong { color: var(--tinta); }
+
+    a { color: var(--azul-700); }
+
+    /* ---------- Analogía / destacado ---------- */
+    .analogia {
+      background: var(--azul-50);
+      border-left: 5px solid var(--azul-500);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .analogia p { color: var(--tinta); margin: 6px 0; }
+    .analogia .et {
+      font-weight: 700; color: var(--azul-700);
+      font-size: .82rem; text-transform: uppercase; letter-spacing: .08em;
+    }
+
+    /* ---------- Glosario de términos ---------- */
+    dl.glosario { margin: 16px 0 0; }
+    dl.glosario div {
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--linea);
+    }
+    dl.glosario div:last-child { border-bottom: none; }
+    dl.glosario dt {
+      font-weight: 700; color: var(--azul-900);
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: .95rem;
+    }
+    dl.glosario dd { margin: 4px 0 0; color: var(--tinta-suave); }
+
+    /* ---------- Bloque de código ---------- */
+    pre {
+      background: var(--codigo-bg);
+      color: var(--codigo-tx);
+      padding: 18px 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: .88rem;
+      line-height: 1.6;
+      margin: 16px 0;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    }
+    pre .c { color: #7d96ad; font-style: italic; }   /* comentario */
+    pre .t { color: #7ee2b8; }                        /* etiqueta / tipo */
+    pre .a { color: #f0c674; }                        /* atributo */
+    pre .s { color: #9ecbf0; }                        /* valor / string */
+    pre .k { color: #c792ea; }                        /* keyword */
+    code.inline {
+      background: var(--azul-100);
+      color: var(--azul-900);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: .86em;
+    }
+
+    /* ---------- Tarjeta de nivel ---------- */
+    .nivel {
+      border: 1px solid var(--linea);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 18px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .nivel::before {
+      content: "";
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 6px;
+    }
+    .nivel.atomo::before    { background: #2b7fc0; }
+    .nivel.molecula::before { background: #1f9d8f; }
+    .nivel.organismo::before{ background: #8a5cd1; }
+    .nivel.template::before { background: #d98b2b; }
+    .nivel.pagina::before   { background: #c0392b; }
+    .nivel h3 { margin-top: 0; display: flex; align-items: center; gap: 10px; }
+    .nivel .icono {
+      font-size: 1.5rem;
+    }
+    .nivel .tag {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-left: auto;
+    }
+    .atomo .tag    { background:#e4f0fa; color:#11598f; }
+    .molecula .tag { background:#e0f5f1; color:#127a6e; }
+    .organismo .tag{ background:#efe7fb; color:#6a3fb0; }
+    .template .tag { background:#fbf0df; color:#9a6700; }
+    .pagina .tag   { background:#fbe5e2; color:#a3271e; }
+
+    /* ---------- Diagrama de pirámide ---------- */
+    .piramide {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin: 24px 0 8px;
+    }
+    .piramide .capa {
+      color: #fff;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: var(--sombra);
+    }
+    .piramide .c1 { width: 36%; background:#2b7fc0; }
+    .piramide .c2 { width: 52%; background:#1f9d8f; }
+    .piramide .c3 { width: 68%; background:#8a5cd1; }
+    .piramide .c4 { width: 84%; background:#d98b2b; }
+    .piramide .c5 { width: 100%; background:#c0392b; }
+    .piramide small { display:block; font-weight: 400; opacity:.9; font-size:.78rem; }
+
+    /* ---------- Llamada de atención ---------- */
+    .nota {
+      display: flex; gap: 12px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin: 18px 0;
+      font-size: .96rem;
+    }
+    .nota .ico { font-size: 1.3rem; flex: none; }
+    .nota.tip   { background: var(--exito-bg); color: #155c3a; }
+    .nota.ojo   { background: var(--aviso-bg); color: #7a5200; }
+    .nota p { margin: 0; color: inherit; }
+
+    /* ---------- Tabla ---------- */
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: .94rem; }
+    th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+    th { background: var(--azul-50); color: var(--azul-900); font-weight: 700; }
+    tbody tr:hover { background: #fafcfe; }
+
+    /* ---------- Índice ---------- */
+    nav.toc { font-size: .98rem; }
+    nav.toc ol { margin: 8px 0 0; padding-left: 22px; }
+    nav.toc li { margin: 7px 0; }
+    nav.toc a { text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+
+    footer {
+      text-align: center;
+      color: var(--tinta-tenue);
+      font-size: .9rem;
+      padding: 10px 20px 60px;
+    }
+
+    /* mapeo visual */
+    .mapeo { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0; }
+    .mapeo .fila {
+      display: grid; grid-template-columns: 130px 1fr; gap: 14px;
+      align-items: center; padding: 12px 14px;
+      border: 1px solid var(--linea); border-radius: 10px; background:#fafcfe;
+    }
+    .mapeo .lvl { font-weight: 700; }
+    .mapeo .ruta { font-family: "SF Mono", Consolas, monospace; font-size:.85rem; color: var(--azul-700); }
+
+    @media (max-width: 560px) {
+      section.bloque { padding: 26px 20px; }
+      .mapeo .fila { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <p class="kicker">Guía para principiantes</p>
+    <h1>Atomic Design, explicado desde cero</h1>
+    <p>Una forma ordenada de construir interfaces armando piezas pequeñas que se combinan en piezas más grandes. Aquí te explico cada concepto, con sus términos y un ejemplo real de este proyecto.</p>
+  </header>
+
+  <main>
+
+    <!-- ÍNDICE -->
+    <section class="bloque" id="indice" aria-label="Índice">
+      <h2><span class="num">·</span> Qué vas a leer</h2>
+      <nav class="toc">
+        <ol>
+          <li><a href="#que-es">¿Qué es Atomic Design? (y de dónde sale el nombre)</a></li>
+          <li><a href="#vocabulario">Vocabulario mínimo antes de empezar</a></li>
+          <li><a href="#niveles">Los 5 niveles, uno por uno</a></li>
+          <li><a href="#ejemplo">Ejemplo completo: un campo de formulario</a></li>
+          <li><a href="#proyecto">Cómo encaja en este proyecto</a></li>
+          <li><a href="#porque">¿Por qué molestarse en hacer esto?</a></li>
+          <li><a href="#errores">Errores típicos de quien empieza</a></li>
+        </ol>
+      </nav>
+    </section>
+
+    <!-- 1. QUÉ ES -->
+    <section class="bloque" id="que-es">
+      <h2><span class="num">1</span> ¿Qué es Atomic Design?</h2>
+
+      <p><strong>Atomic Design</strong> (en español, “diseño atómico”) es una <strong>metodología</strong> —es decir, una manera ordenada de trabajar— para construir las pantallas de una aplicación. La inventó <strong>Brad Frost</strong>, un diseñador web, en 2013.</p>
+
+      <p>La idea central es muy simple y la usas todos los días sin darte cuenta:</p>
+
+      <div class="analogia">
+        <p class="et">🧱 La analogía de los LEGO</p>
+        <p>Imagina una caja de LEGO. Tienes <strong>piezas sueltas</strong> (un bloque, una rueda). Juntas unas pocas y formas una <strong>parte</strong> (un eje con dos ruedas). Juntas varias partes y formas algo <strong>reconocible</strong> (un carrito). Juntas varios objetos y armas una <strong>escena completa</strong> (una ciudad).</p>
+        <p>Atomic Design es exactamente eso, pero para botones, formularios y pantallas: <strong>empiezas por lo más pequeño y vas combinando hacia arriba</strong>.</p>
+      </div>
+
+      <p>El nombre viene de la <strong>química</strong>, porque Brad Frost notó que la naturaleza ya organiza la materia de pequeño a grande, y copió esos nombres:</p>
+
+      <div class="analogia">
+        <p class="et">⚛️ La analogía de la química (el origen del nombre)</p>
+        <p>En la naturaleza, los <strong>átomos</strong> (lo más pequeño que existe) se unen para formar <strong>moléculas</strong>. Las moléculas se unen para formar <strong>organismos</strong> (seres vivos). Frost tomó prestados esos tres nombres y añadió dos propios para el mundo de las pantallas: <strong>templates</strong> y <strong>páginas</strong>.</p>
+      </div>
+
+      <div class="nota tip">
+        <span class="ico">💡</span>
+        <p><strong>En una frase:</strong> Atomic Design es “no construyas pantallas gigantes de una sola pieza; constrúyelas con piezas pequeñas reutilizables que se van combinando”.</p>
+      </div>
+    </section>
+
+    <!-- 2. VOCABULARIO -->
+    <section class="bloque" id="vocabulario">
+      <h2><span class="num">2</span> Vocabulario mínimo</h2>
+      <p>Antes de los 5 niveles, necesitas entender unas pocas palabras que se repetirán todo el tiempo. No te las saltes: con esto, todo lo demás se entiende solo.</p>
+
+      <dl class="glosario">
+        <div>
+          <dt>Componente</dt>
+          <dd>Una <strong>pieza reutilizable de interfaz</strong>: un botón, un campo, una tarjeta. Tiene su propio código y se puede usar muchas veces en distintos lugares. Es “el ladrillo” con el que construyes. En Angular (la tecnología de este proyecto) un componente es una clase con su plantilla HTML.</dd>
+        </div>
+        <div>
+          <dt>Reutilizable</dt>
+          <dd>Que lo escribes <strong>una vez</strong> y lo usas en <strong>muchos sitios</strong>. Si arreglas un detalle en ese único lugar, se arregla en todos. Eso es lo que ahorra tiempo y evita errores.</dd>
+        </div>
+        <div>
+          <dt>Propiedad / input (entrada)</dt>
+          <dd>Un <strong>dato que le pasas a un componente desde afuera</strong> para configurarlo. Como los botones de un microondas: el mismo aparato (componente) se comporta distinto según lo que le indiques. Ejemplo: a un botón le pasas el texto <code class="inline">"Guardar"</code> y el color <code class="inline">"verde"</code>.</dd>
+        </div>
+        <div>
+          <dt>Evento / output (salida)</dt>
+          <dd>Un <strong>aviso que el componente lanza hacia afuera</strong> cuando pasa algo. Ejemplo: un botón <em>emite</em> el evento “me hicieron clic”, y quien lo usa decide qué hacer con eso.</dd>
+        </div>
+        <div>
+          <dt>Componente “tonto” (presentacional)</dt>
+          <dd>Un componente que <strong>solo se preocupa por verse bien</strong>. Recibe datos, los muestra y avisa de los clics. No sabe de dónde vienen los datos ni qué reglas del negocio existen. Los átomos, moléculas y organismos son tontos.</dd>
+        </div>
+        <div>
+          <dt>Componente “inteligente” (smart / contenedor)</dt>
+          <dd>Un componente que <strong>sí tiene cerebro</strong>: pide datos al servidor, aplica reglas, decide qué mostrar. Suele ser una <em>página</em>. Usa por dentro a los componentes tontos.</dd>
+        </div>
+        <div>
+          <dt>Composición</dt>
+          <dd>El acto de <strong>meter piezas pequeñas dentro de piezas más grandes</strong>. Una molécula se <em>compone</em> de átomos. Una página se <em>compone</em> de organismos. Es el corazón de todo Atomic Design.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- 3. LOS 5 NIVELES -->
+    <section class="bloque" id="niveles">
+      <h2><span class="num">3</span> Los 5 niveles, uno por uno</h2>
+      <p>Atomic Design organiza todo en <strong>5 niveles</strong>, de más pequeño a más grande. Mira primero el dibujo y luego los explico uno a uno.</p>
+
+      <div class="piramide" aria-hidden="true">
+        <div class="capa c1">1 · Átomos<small>botón, etiqueta, icono</small></div>
+        <div class="capa c2">2 · Moléculas<small>campo = etiqueta + input + error</small></div>
+        <div class="capa c3">3 · Organismos<small>formulario completo, cabecera</small></div>
+        <div class="capa c4">4 · Templates<small>el esqueleto de la página, sin datos</small></div>
+        <div class="capa c5">5 · Páginas<small>el template ya con datos reales</small></div>
+      </div>
+
+      <!-- ÁTOMO -->
+      <div class="nivel atomo">
+        <h3><span class="icono">⚛️</span> Nivel 1 · Átomos <span class="tag">lo más pequeño</span></h3>
+        <p>Un <strong>átomo</strong> es la pieza <strong>más pequeña que tiene sentido por sí sola</strong> y que ya no se puede partir en algo más útil. No se compone de otras piezas: es el ladrillo base.</p>
+        <p><strong>Ejemplos:</strong> un botón, una etiqueta de texto (<em>label</em>), un icono, un campo de texto vacío, un mensaje de error suelto.</p>
+        <div class="nota ojo">
+          <span class="ico">👀</span>
+          <p>Un átomo por sí solo muchas veces <strong>no es muy útil</strong> (una etiqueta flotando en el vacío no hace nada), igual que un átomo de oxígeno suelto. Su valor aparece cuando lo combinas.</p>
+        </div>
+      </div>
+
+      <!-- MOLÉCULA -->
+      <div class="nivel molecula">
+        <h3><span class="icono">🧬</span> Nivel 2 · Moléculas <span class="tag">pocos átomos juntos</span></h3>
+        <p>Una <strong>molécula</strong> es un <strong>grupo pequeño de átomos que trabajan juntos para cumplir un propósito concreto</strong>. Ya empieza a ser útil de verdad.</p>
+        <p><strong>Ejemplo clásico:</strong> un <strong>campo de formulario</strong>. Junta tres átomos: la <em>etiqueta</em> (“Correo”), el <em>input</em> (la casilla donde escribes) y el <em>mensaje de error</em> (“correo inválido”). Por separado no sirven de mucho; juntos forman algo con una función clara: “pedir un dato al usuario”.</p>
+      </div>
+
+      <!-- ORGANISMO -->
+      <div class="nivel organismo">
+        <h3><span class="icono">🦠</span> Nivel 3 · Organismos <span class="tag">secciones completas</span></h3>
+        <p>Un <strong>organismo</strong> es una <strong>sección grande y relativamente independiente</strong> de la pantalla, hecha de varias moléculas (y átomos). Ya es algo que reconoces como “una parte” de la página.</p>
+        <p><strong>Ejemplos:</strong> la <em>barra de navegación</em> (logo + menú + botón de usuario), un <em>formulario completo</em> de registro (varios campos + botones), una <em>tarjeta de producto</em> (imagen + título + precio + botón comprar).</p>
+      </div>
+
+      <!-- TEMPLATE -->
+      <div class="nivel template">
+        <h3><span class="icono">📐</span> Nivel 4 · Templates (plantillas) <span class="tag">el esqueleto</span></h3>
+        <p>Un <strong>template</strong> es el <strong>esqueleto o maqueta de una página: define dónde va cada cosa</strong>, pero <strong>todavía sin datos reales</strong>. Es como el plano de una casa: muestra que aquí va la cocina y allá el baño, pero sin muebles ni gente.</p>
+        <p>En la práctica, un template coloca los organismos en su sitio: “arriba la barra de navegación, a la izquierda el menú, en el centro el contenido”. Usa textos de relleno (“Título de ejemplo”) en vez de información verdadera.</p>
+      </div>
+
+      <!-- PÁGINA -->
+      <div class="nivel pagina">
+        <h3><span class="icono">📄</span> Nivel 5 · Páginas <span class="tag">lo que ve el usuario</span></h3>
+        <p>Una <strong>página</strong> es un <strong>template lleno con datos reales</strong>. Es la versión final, la que de verdad ve la persona que usa la app: con su nombre real, sus productos reales, sus errores reales.</p>
+        <p>Siguiendo la analogía: si el template es el plano de la casa, la página es la casa <strong>ya construida y amueblada, con la familia viviendo dentro</strong>.</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>Nivel</th><th>En una frase</th><th>Ejemplo cotidiano</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Átomo</strong></td><td>La pieza más pequeña.</td><td>Un botón.</td></tr>
+          <tr><td><strong>Molécula</strong></td><td>Pocos átomos con un propósito.</td><td>Un campo: etiqueta + input + error.</td></tr>
+          <tr><td><strong>Organismo</strong></td><td>Una sección completa.</td><td>El formulario de registro entero.</td></tr>
+          <tr><td><strong>Template</strong></td><td>El esqueleto sin datos.</td><td>El plano de la pantalla.</td></tr>
+          <tr><td><strong>Página</strong></td><td>El esqueleto con datos reales.</td><td>La pantalla final que ves.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 4. EJEMPLO COMPLETO -->
+    <section class="bloque" id="ejemplo">
+      <h2><span class="num">4</span> Ejemplo completo: un campo de formulario</h2>
+      <p>Vamos a construir, paso a paso, el ejemplo más típico y útil: <strong>un campo de formulario</strong>. Lo bonito es que este ejemplo <strong>existe de verdad en este proyecto</strong>, así que no es teoría: es código que ya está funcionando en la pantalla de Informes.</p>
+
+      <h3>Paso 1 · El átomo “etiqueta”</h3>
+      <p>Lo más pequeño: el textito que dice qué se pide y, si es obligatorio, un asterisco. Recibe por <strong>input</strong> a qué control pertenece (<code class="inline">for</code>) y si es obligatorio (<code class="inline">required</code>).</p>
+      <pre><span class="c">&lt;!-- Átomo: app-field-label --&gt;</span>
+<span class="t">&lt;label</span> <span class="a">class</span>=<span class="s">"field__label"</span> <span class="a">[for]</span>=<span class="s">"for()"</span><span class="t">&gt;</span>
+  Sede hospitalaria
+  <span class="t">&lt;span</span> <span class="a">class</span>=<span class="s">"field__required"</span><span class="t">&gt;</span>*<span class="t">&lt;/span&gt;</span>  <span class="c">&lt;!-- el asterisco de "obligatorio" --&gt;</span>
+<span class="t">&lt;/label&gt;</span></pre>
+
+      <h3>Paso 2 · El átomo “mensaje de error”</h3>
+      <p>Otro ladrillo independiente: el texto rojo que aparece cuando algo está mal. Si no hay error, no muestra nada.</p>
+      <pre><span class="c">&lt;!-- Átomo: app-field-error --&gt;</span>
+<span class="t">&lt;p</span> <span class="a">class</span>=<span class="s">"field__error"</span> <span class="a">role</span>=<span class="s">"alert"</span><span class="t">&gt;</span>
+  Selecciona al menos una sede.
+<span class="t">&lt;/p&gt;</span></pre>
+      <div class="nota tip">
+        <span class="ico">♿</span>
+        <p><code class="inline">role="alert"</code> es una marca de <strong>accesibilidad</strong>: le dice a los lectores de pantalla (programas que leen la web en voz alta para personas ciegas) “esto es importante, anúncialo de inmediato”. Los buenos átomos cuidan estos detalles una sola vez, y todos los que los usan se benefician.</p>
+      </div>
+
+      <h3>Paso 3 · La molécula “campo” (junta los dos átomos)</h3>
+      <p>Ahora combinamos: la molécula <code class="inline">app-form-field</code> toma la <strong>etiqueta</strong> + un <strong>hueco para meter el control</strong> (el desplegable, la casilla, lo que sea) + el <strong>mensaje de error</strong>. Eso ya es una pieza con propósito claro: “pedirle un dato al usuario, bien presentado”.</p>
+      <pre><span class="c">&lt;!-- Molécula: app-form-field = etiqueta (átomo) + control + error (átomo) --&gt;</span>
+<span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"field"</span><span class="t">&gt;</span>
+  <span class="t">&lt;app-field-label</span> <span class="a">[for]</span>=<span class="s">"controlId()"</span> <span class="a">[required]</span>=<span class="s">"required()"</span><span class="t">&gt;</span>
+    {{ label() }}
+  <span class="t">&lt;/app-field-label&gt;</span>
+
+  <span class="t">&lt;ng-content /&gt;</span>          <span class="c">&lt;!-- 👈 el hueco donde entra el control real --&gt;</span>
+
+  <span class="t">&lt;app-field-error</span> <span class="a">[message]</span>=<span class="s">"error()"</span> <span class="t">/&gt;</span>
+<span class="t">&lt;/div&gt;</span></pre>
+      <div class="nota ojo">
+        <span class="ico">🔑</span>
+        <p><code class="inline">&lt;ng-content /&gt;</code> es un “hueco para proyectar contenido”: significa <strong>“aquí va lo que quien me use decida meter dentro”</strong>. Gracias a eso, la misma molécula sirve para un desplegable, un calendario o una casilla de texto. Esa flexibilidad es lo que hace una pieza verdaderamente reutilizable.</p>
+      </div>
+
+      <h3>Paso 4 · La página la usa (y le pasa los datos)</h3>
+      <p>Finalmente, la <strong>página</strong> (componente inteligente) usa la molécula y le pasa por <strong>input</strong> el texto, si es obligatorio y el error (que la página calcula con sus reglas). Mira lo limpio que queda:</p>
+      <pre><span class="c">&lt;!-- Página (pantalla de Informes): usa la molécula --&gt;</span>
+<span class="t">&lt;app-form-field</span>
+  <span class="a">label</span>=<span class="s">"Sede hospitalaria"</span>
+  <span class="a">controlId</span>=<span class="s">"sedes"</span>
+  <span class="a">[required]</span>=<span class="s">"true"</span>
+  <span class="a">[error]</span>=<span class="s">"mostrarErrorSedes() ? 'Selecciona al menos una sede.' : null"</span><span class="t">&gt;</span>
+
+  <span class="c">&lt;!-- el control real va en el hueco (ng-content) --&gt;</span>
+  <span class="t">&lt;p-multiselect</span> <span class="a">inputId</span>=<span class="s">"sedes"</span> <span class="a">formControlName</span>=<span class="s">"sedes"</span> <span class="t">/&gt;</span>
+
+<span class="t">&lt;/app-form-field&gt;</span></pre>
+
+      <div class="nota tip">
+        <span class="ico">🎯</span>
+        <p><strong>El antes y el después.</strong> Antes, cada campo eran ~25 líneas de HTML repetidas una y otra vez en cada pantalla. Ahora son 5 líneas que <em>reutilizan</em> la molécula. Si mañana cambias cómo se ve un error, lo tocas <strong>en un solo sitio</strong> (el átomo) y se actualiza en <strong>toda la app</strong>. Eso es Atomic Design dando fruto.</p>
+      </div>
+
+      <p>Fíjate en el viaje completo: <strong>2 átomos</strong> (etiqueta + error) → se combinaron en <strong>1 molécula</strong> (campo) → que usa <strong>la página</strong> (Informes). De pequeño a grande, exactamente como los LEGO.</p>
+    </section>
+
+    <!-- 5. EN ESTE PROYECTO -->
+    <section class="bloque" id="proyecto">
+      <h2><span class="num">5</span> Cómo encaja en este proyecto</h2>
+      <p>Este proyecto usa además otra organización llamada <strong>Clean Architecture</strong>. No te preocupes por sus detalles ahora; lo único que necesitas saber es que <strong>Atomic Design y Clean Architecture no pelean: se reparten el trabajo</strong>.</p>
+      <ul>
+        <li><strong>Clean Architecture</strong> decide <em>quién puede hablar con quién</em> (que la pantalla no toque directamente la base de datos, por ejemplo). Organiza el “negocio”.</li>
+        <li><strong>Atomic Design</strong> decide <em>el tamaño de cada pieza visual</em>. Organiza la “interfaz”.</li>
+      </ul>
+      <p>Cada nivel de Atomic Design vive en una carpeta concreta del proyecto:</p>
+
+      <div class="mapeo">
+        <div class="fila"><span class="lvl">⚛️ Átomos</span><span class="ruta">src/app/shared/ui/atoms/</span></div>
+        <div class="fila"><span class="lvl">🧬 Moléculas</span><span class="ruta">src/app/shared/ui/molecules/</span></div>
+        <div class="fila"><span class="lvl">🦠 Organismos</span><span class="ruta">src/app/shared/ui/organisms/</span></div>
+        <div class="fila"><span class="lvl">📐 Templates</span><span class="ruta">src/app/core/layout/</span></div>
+        <div class="fila"><span class="lvl">📄 Páginas</span><span class="ruta">src/app/presentation/&lt;pantalla&gt;/</span></div>
+      </div>
+
+      <div class="nota ojo">
+        <span class="ico">📏</span>
+        <p><strong>Regla de oro del proyecto:</strong> los átomos, moléculas y organismos son <strong>tontos</strong> (viven en <code class="inline">shared</code>): solo reciben datos y muestran. Las <strong>páginas</strong> son las inteligentes: piden datos, aplican reglas y usan a los tontos para mostrarlos. Mantener esa frontera es lo que hace que el código no se vuelva un caos.</p>
+      </div>
+    </section>
+
+    <!-- 6. POR QUÉ -->
+    <section class="bloque" id="porque">
+      <h2><span class="num">6</span> ¿Por qué molestarse en hacer todo esto?</h2>
+      <p>Podría parecer más trabajo al principio, y a veces lo es. Pero a cambio ganas cosas enormes:</p>
+      <table>
+        <thead><tr><th>Beneficio</th><th>Qué significa en la práctica</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Consistencia</strong></td><td>Todos los botones se ven y se comportan igual, porque todos salen del mismo átomo. La app se siente “de una sola pieza”.</td></tr>
+          <tr><td><strong>Menos repetición</strong></td><td>Escribes el campo una vez y lo usas 50 veces. No copias y pegas las mismas 25 líneas por todos lados.</td></tr>
+          <tr><td><strong>Cambios fáciles</strong></td><td>¿El jefe quiere los errores en naranja y no en rojo? Lo cambias en <em>un</em> átomo y se actualiza en toda la aplicación.</td></tr>
+          <tr><td><strong>Menos errores</strong></td><td>Si la pieza está bien hecha y probada una vez (incluida la accesibilidad), todos los que la usan heredan esa calidad.</td></tr>
+          <tr><td><strong>Trabajo en equipo</strong></td><td>Una persona pule los átomos mientras otra arma las páginas con ellos. Avanzan en paralelo sin pisarse.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 7. ERRORES -->
+    <section class="bloque" id="errores">
+      <h2><span class="num">7</span> Errores típicos de quien empieza</h2>
+
+      <h3>❌ Poner “cerebro” en un átomo o molécula</h3>
+      <p>Un átomo <strong>no</strong> debe pedir datos al servidor ni conocer reglas del negocio. Si tu botón sabe cómo guardar un usuario en la base de datos, dejó de ser un átomo reutilizable: solo sirve para esa pantalla. Mantén las piezas pequeñas <strong>tontas</strong>.</p>
+
+      <h3>❌ Obsesionarse con clasificar perfecto</h3>
+      <p>“¿Esto es una molécula grande o un organismo pequeño?” A veces no hay respuesta única, y <strong>no pasa nada</strong>. Los nombres son una guía, no una ley. Si dudas entre dos niveles, elige cualquiera y sigue: lo importante es separar piezas pequeñas de piezas grandes, no ganar un debate.</p>
+
+      <h3>❌ Crear átomos para todo desde el día uno</h3>
+      <p>No conviertas cada cosita en componente “por si acaso”. La regla práctica: <strong>cuando veas que repites el mismo bloque 2 o 3 veces</strong>, ahí sí vale la pena extraerlo a un átomo o molécula. Antes de eso, suele ser trabajo de más.</p>
+
+      <h3>❌ Pensar que es solo para diseñadores</h3>
+      <p>El nombre dice “design”, pero Atomic Design es tanto de <strong>diseño</strong> como de <strong>programación</strong>. Diseñadores y programadores comparten el mismo vocabulario (“el átomo botón”, “la molécula campo”) y eso hace que se entiendan mucho mejor.</p>
+
+      <div class="nota tip">
+        <span class="ico">🚀</span>
+        <p><strong>Cómo empezar tú:</strong> no rehagas toda la app de golpe. Toma <em>una</em> pantalla, busca el bloque que más se repite (como hicimos con el campo de formulario), conviértelo en átomos + molécula, y úsalo. Repite con la siguiente. Pieza a pieza, como los LEGO.</p>
+      </div>
+    </section>
+
+    <footer>
+      Guía de Atomic Design · creada para el proyecto Plataforma Domiciliaria ·
+      el ejemplo del campo de formulario es código real en <code class="inline">src/app/shared/ui/</code>.
+    </footer>
+
+  </main>
+</body>
+</html>

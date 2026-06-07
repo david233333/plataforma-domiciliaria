@@ -13,9 +13,16 @@ import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
 import { InputText } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
-import { Tooltip } from 'primeng/tooltip';
+
+// Sistema de diseño (shared/ui)
+import { PageHeaderComponent } from '../../../shared/ui/molecules/page-header/page-header.component';
+import { FormFieldComponent } from '../../../shared/ui/molecules/form-field/form-field.component';
+import { FormActionsComponent } from '../../../shared/ui/molecules/form-actions/form-actions.component';
+import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
+import { StatusBadgeComponent } from '../../../shared/ui/atoms/status-badge/status-badge.component';
+import { FilterCardComponent } from '../../../shared/ui/organisms/filter-card/filter-card.component';
+import { DataTableCardComponent } from '../../../shared/ui/organisms/data-table-card/data-table-card.component';
 
 // Dominio (solo TIPOS y casos de uso — la presentación no conoce HTTP ni reglas)
 import { Novedad } from '../../../domain/novedades/entities/novedad.entity';
@@ -50,9 +57,14 @@ type BadgeVariant = 'success' | 'warning' | 'error' | 'info';
     MultiSelect,
     DatePicker,
     InputText,
-    ButtonModule,
     TableModule,
-    Tooltip,
+    PageHeaderComponent,
+    FormFieldComponent,
+    FormActionsComponent,
+    ButtonComponent,
+    StatusBadgeComponent,
+    FilterCardComponent,
+    DataTableCardComponent,
   ],
   templateUrl: './gestionar-novedades.component.html',
   styleUrl: './gestionar-novedades.component.scss',
@@ -69,9 +81,6 @@ export class GestionarNovedadesComponent {
   protected readonly buscando = signal(false);
   protected readonly novedades = signal<Novedad[]>([]);
   protected readonly hayResultados = computed(() => this.novedades().length > 0);
-
-  /** Filas placeholder que alimentan la tabla mientras `buscando()` es true. */
-  protected readonly skeletonRows = Array.from({ length: 5 });
 
   // --- Catálogos de UI ---
   protected readonly ciudades: Opcion[] =CIUDADES;
@@ -109,10 +118,10 @@ export class GestionarNovedadesComponent {
     EstadoNovedad,
     { label: string; variant: BadgeVariant; icon: string }
   > = {
-    PENDIENTE_GESTION: { label: 'Pendiente', variant: 'warning', icon: 'pi-clock' },
-    GESTIONADA: { label: 'Gestionada', variant: 'success', icon: 'pi-check' },
-    EN_PROCESO: { label: 'En proceso', variant: 'info', icon: 'pi-spin pi-spinner' },
-    RECHAZADA: { label: 'Rechazada', variant: 'error', icon: 'pi-times' },
+    PENDIENTE_GESTION: { label: 'Pendiente', variant: 'warning', icon: 'clock' },
+    GESTIONADA: { label: 'Gestionada', variant: 'success', icon: 'check' },
+    EN_PROCESO: { label: 'En proceso', variant: 'info', icon: 'spinner' },
+    RECHAZADA: { label: 'Rechazada', variant: 'error', icon: 'times' },
   };
 
   protected estadoVariant(estado: EstadoNovedad): BadgeVariant {
@@ -126,10 +135,6 @@ export class GestionarNovedadesComponent {
   }
 
   // --- Acciones ---
-  protected toggleFiltros(): void {
-    this.filtrosAbiertos.update((v) => !v);
-  }
-
   protected buscar(): void {
     this.ejecutarBusqueda();
   }

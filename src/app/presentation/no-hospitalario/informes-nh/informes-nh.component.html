@@ -1,20 +1,20 @@
 <section class="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-6">
   <!-- ============================ ENCABEZADO ============================ -->
-  <header class="flex flex-col gap-1">
-    <h1 class="text-heading-lg text-text-primary text-balance m-0">
-      Informes no hospitalarios
-    </h1>
-    <p class="text-body-lg text-text-secondary text-pretty max-w-2xl">
-      Genera y descarga los informes del ámbito no hospitalario.
-    </p>
-  </header>
+  <app-page-header
+    title="Informes no hospitalarios"
+    description="Genera y descarga los informes del ámbito no hospitalario."
+  />
 
   <!-- ===================== ELEGIR INFORME ===================== -->
   <div class="flex flex-col gap-4">
     <h2 class="text-label-lg text-text-secondary m-0">Selecciona un informe</h2>
 
-    <div class="field max-w-md">
-      <label class="field__label" for="informe">Informe</label>
+    <app-form-field
+      class="max-w-md"
+      label="Informe"
+      controlId="informe"
+      hint="Elige un informe para definir su periodo y filtros."
+    >
       <p-select
         inputId="informe"
         [formControl]="informeControl"
@@ -29,11 +29,7 @@
         (onChange)="onInformeChange($event.value)"
         (onClear)="onInformeClear()"
       />
-      <p class="field__hint flex items-center gap-2">
-        <i class="pi pi-info-circle" aria-hidden="true"></i>
-        Elige un informe para definir su periodo y filtros.
-      </p>
-    </div>
+    </app-form-field>
   </div>
 
   <!-- ===================== FILTROS DEL INFORME ===================== -->
@@ -46,9 +42,7 @@
     >
       <!-- Resumen del informe elegido -->
       <header class="flex items-start gap-3">
-        <span class="informe-summary__icon" aria-hidden="true">
-          <i class="pi {{ informe.icon }}"></i>
-        </span>
+        <app-feature-icon [icon]="informe.icon" />
         <div class="flex flex-col gap-1">
           <h2
             #resumenHeading
@@ -63,10 +57,12 @@
 
       <!-- Campos -->
       <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
-        <div class="field">
-          <label class="field__label" for="servicios">
-            Tipo de servicio <span class="field__required" aria-hidden="true">*</span>
-          </label>
+        <app-form-field
+          label="Tipo de servicio"
+          controlId="servicios"
+          [required]="true"
+          [error]="mostrarErrorServicios() ? 'Selecciona al menos un tipo de servicio.' : null"
+        >
           <p-multiselect
             inputId="servicios"
             formControlName="servicios"
@@ -80,19 +76,14 @@
             styleClass="w-full"
             appendTo="body"
           />
-          <div class="field__message-slot">
-            @if (mostrarErrorServicios()) {
-              <p class="field__error" role="alert">
-                Selecciona al menos un tipo de servicio.
-              </p>
-            }
-          </div>
-        </div>
+        </app-form-field>
 
-        <div class="field">
-          <label class="field__label" for="ciudades">
-            Ciudad <span class="field__required" aria-hidden="true">*</span>
-          </label>
+        <app-form-field
+          label="Ciudad"
+          controlId="ciudades"
+          [required]="true"
+          [error]="mostrarErrorCiudades() ? 'Selecciona al menos una ciudad.' : null"
+        >
           <p-multiselect
             inputId="ciudades"
             formControlName="ciudades"
@@ -107,19 +98,14 @@
             styleClass="w-full"
             appendTo="body"
           />
-          <div class="field__message-slot">
-            @if (mostrarErrorCiudades()) {
-              <p class="field__error" role="alert">
-                Selecciona al menos una ciudad.
-              </p>
-            }
-          </div>
-        </div>
+        </app-form-field>
 
-        <div class="field">
-          <label class="field__label" for="fechaDesde">
-            Fecha de inicio <span class="field__required" aria-hidden="true">*</span>
-          </label>
+        <app-form-field
+          label="Fecha de inicio"
+          controlId="fechaDesde"
+          [required]="true"
+          [error]="mostrarErrorFechaDesde() ? 'Indica la fecha de inicio.' : null"
+        >
           <p-datepicker
             inputId="fechaDesde"
             formControlName="fechaDesde"
@@ -133,19 +119,14 @@
             appendTo="body"
             placeholder="dd/mm/aaaa"
           />
-          <div class="field__message-slot">
-            @if (mostrarErrorFechaDesde()) {
-              <p class="field__error" role="alert">
-                Indica la fecha de inicio.
-              </p>
-            }
-          </div>
-        </div>
+        </app-form-field>
 
-        <div class="field">
-          <label class="field__label" for="fechaHasta">
-            Fecha de fin <span class="field__required" aria-hidden="true">*</span>
-          </label>
+        <app-form-field
+          label="Fecha de fin"
+          controlId="fechaHasta"
+          [required]="true"
+          [error]="mostrarErrorFechaHasta() ? 'Indica la fecha de fin.' : null"
+        >
           <p-datepicker
             inputId="fechaHasta"
             formControlName="fechaHasta"
@@ -159,14 +140,7 @@
             appendTo="body"
             placeholder="dd/mm/aaaa"
           />
-          <div class="field__message-slot">
-            @if (mostrarErrorFechaHasta()) {
-              <p class="field__error" role="alert">
-                Indica la fecha de fin.
-              </p>
-            }
-          </div>
-        </div>
+        </app-form-field>
       </div>
 
       <!-- Mensaje de validación / ayuda del rango -->
@@ -208,34 +182,32 @@
               [attr.aria-label]="'Progreso de la descarga: ' + progresoTexto() + '%'"
             />
 
-            <div class="flex justify-end">
-              <p-button
+            <app-form-actions>
+              <app-button
                 label="Cancelar descarga"
-                icon="pi pi-times"
+                icon="times"
                 severity="danger"
-                [text]="true"
-                type="button"
-                (onClick)="cancelarDescarga()"
+                variant="text"
+                (clicked)="cancelarDescarga()"
               />
-            </div>
+            </app-form-actions>
           </div>
         } @else {
           <!-- Acciones normales -->
-          <div class="flex flex-wrap items-center justify-end gap-3">
-            <p-button
+          <app-form-actions>
+            <app-button
               label="Limpiar filtros"
-              icon="pi pi-refresh"
+              icon="refresh"
               severity="secondary"
-              [outlined]="true"
-              type="button"
-              (onClick)="limpiarFiltros()"
+              variant="outlined"
+              (clicked)="limpiarFiltros()"
             />
-            <p-button
+            <app-button
               label="Descargar informe"
-              icon="pi pi-download"
+              icon="download"
               type="submit"
             />
-          </div>
+          </app-form-actions>
         }
       </div>
     </form>

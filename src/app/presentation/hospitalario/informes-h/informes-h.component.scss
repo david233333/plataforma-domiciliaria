@@ -3,22 +3,6 @@
 }
 
 // -----------------------------------------------------------------------------
-// RESUMEN del informe elegido (cabecera de la tarjeta de filtros)
-// -----------------------------------------------------------------------------
-.informe-summary__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--app-radius-md);
-  background: var(--app-primary-50);
-  color: var(--app-primary-600);
-  font-size: var(--app-size-base);
-}
-
-// -----------------------------------------------------------------------------
 // ESTADO DE DESCARGA (barra de progreso + cancelar)
 // -----------------------------------------------------------------------------
 .descarga {

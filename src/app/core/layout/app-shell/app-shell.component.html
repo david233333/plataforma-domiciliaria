@@ -1,8 +1,9 @@
 <!--
-  App shell. Layout con utilidades Tailwind + tokens del sistema.
+  App shell (TEMPLATE). Layout con utilidades Tailwind + tokens del sistema.
   - Header fijo (no lo tapa el drawer): el drawer abre con offset = altura del header.
   - Drawer de PrimeNG (menú lateral) en modo NO modal: no oscurece ni cubre el header.
   - El contenido enrutado entra con fade vía `animate.enter` (Angular 21).
+  - Las acciones del header se PROYECTAN (ng-content): el shell no conoce presentation.
 -->
 <a
   class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50"
@@ -35,11 +36,10 @@
     <span class="text-label-lg app-brand__name">Plataforma Domiciliaria</span>
   </a>
 
-  <!-- Acciones del extremo derecho: notificaciones + usuario en sesión. -->
+  <!-- Acciones del extremo derecho (notificaciones, usuario…): las inyecta app-root. -->
   <div class="ml-auto flex items-center gap-2">
-    <!-- Badge de notificaciones: lee el estado compartido del NotificacionesFacade. -->
     <span class="app-header__sep" aria-hidden="true"></span>
-    <app-usuario-menu />
+    <ng-content select="[header-actions]" />
   </div>
 </header>
 
