@@ -14,6 +14,7 @@ import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
 import { InputText } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 // Sistema de diseño (shared/ui)
 import { PageHeaderComponent } from '../../../shared/ui/molecules/page-header/page-header.component';
@@ -75,6 +76,10 @@ export class GestionarNovedadesComponent {
   // pantalla, así que vive en signals del componente.
   private readonly buscarNovedades = inject(BuscarNovedadesUseCase);
   private readonly gestionarNovedadUseCase = inject(GestionarNovedadUseCase);
+  // Feedback app-wide: singletons root (ver app.config). El host de ambos vive
+  // en el app-root, así que aquí solo se disparan confirmación y toast.
+  private readonly confirmaciones = inject(ConfirmationService);
+  private readonly mensajes = inject(MessageService);
 
   // --- Estado UI ---
   protected readonly filtrosAbiertos = signal(true);
@@ -160,6 +165,49 @@ export class GestionarNovedadesComponent {
         // Una novedad no gestionable no debe romper la pantalla. En una
         // iteración futura aquí se mostraría un toast con el mensaje de dominio.
       },
+    });
+  }
+
+  /**
+   * Paso previo a sincronizar: pide confirmación explícita porque la acción
+   * cambia el estado de la novedad. Solo si el usuario acepta se ejecuta la
+   * sincronización. El diálogo y el toast usan los hosts globales del app-root.
+   */
+  protected confirmarSincronizacion(novedad: Novedad): void {
+    this.confirmaciones.confirm({
+      header: 'Sincronizar novedad',
+      message: `¿Deseas sincronizar la novedad de «${novedad.nombrePaciente}»? Esta acción actualizará su estado.`,
+      icon: 'pi pi-sync',
+      acceptButtonProps: { label: 'Sí, sincronizar', icon: 'pi pi-check' },
+      rejectButtonProps: {
+        label: 'Cancelar',
+        icon: 'pi pi-times',
+        severity: 'secondary',
+        outlined: true,
+      },
+      accept: () => this.sincronizarNovedad(novedad),
+    });
+  }
+
+  /** Ejecuta la sincronización y avisa el resultado con un toast. */
+  private sincronizarNovedad(novedad: Novedad): void {
+    this.gestionarNovedadUseCase.execute(novedad).subscribe({
+      next: () => {
+        this.ejecutarBusqueda();
+        this.mensajes.add({
+          severity: 'success',
+          summary: 'Sincronización completada',
+          detail: `La novedad de «${novedad.nombrePaciente}» se sincronizó correctamente.`,
+          life: 5000,
+        });
+      },
+      error: () =>
+        this.mensajes.add({
+          severity: 'error',
+          summary: 'No se pudo sincronizar',
+          detail: 'Ocurrió un problema al sincronizar la novedad. Inténtalo de nuevo.',
+          life: 5000,
+        }),
     });
   }
 

@@ -272,5 +272,32 @@
     --p-message-info-background: var(--app-info-light);
     --p-message-info-color: var(--app-info-dark);
     --p-message-info-border-color: var(--app-info);
+
+    // El componente Toast NO hereda los tokens --p-message-*: tiene su propia
+    // familia --p-toast-*. Se replica la paleta semántica para que el toast
+    // luzca idéntico a un Message (mismo fondo claro, texto oscuro y borde de
+    // acento). `detail-color` reusa el color de texto para conservar el contraste
+    // AA de la rampa. La sombra usa el token de elevación del sistema.
+    --p-toast-border-radius: var(--app-radius-md);
+    --p-toast-success-background: var(--app-success-light);
+    --p-toast-success-color: var(--app-success-dark);
+    --p-toast-success-detail-color: var(--app-success-dark);
+    --p-toast-success-border-color: var(--app-success);
+    --p-toast-success-shadow: var(--app-shadow-lg);
+    --p-toast-error-background: var(--app-error-light);
+    --p-toast-error-color: var(--app-error-dark);
+    --p-toast-error-detail-color: var(--app-error-dark);
+    --p-toast-error-border-color: var(--app-error);
+    --p-toast-error-shadow: var(--app-shadow-lg);
+    --p-toast-warn-background: var(--app-warning-light);
+    --p-toast-warn-color: var(--app-warning-dark);
+    --p-toast-warn-detail-color: var(--app-warning-dark);
+    --p-toast-warn-border-color: var(--app-warning);
+    --p-toast-warn-shadow: var(--app-shadow-lg);
+    --p-toast-info-background: var(--app-info-light);
+    --p-toast-info-color: var(--app-info-dark);
+    --p-toast-info-detail-color: var(--app-info-dark);
+    --p-toast-info-border-color: var(--app-info);
+    --p-toast-info-shadow: var(--app-shadow-lg);
   }
 }

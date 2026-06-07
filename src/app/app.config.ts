@@ -5,6 +5,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { definePreset } from '@primeng/themes';
 import Lara from '@primeng/themes/lara';
 
@@ -54,6 +55,13 @@ export const appConfig: ApplicationConfig = {
     // consumen el badge (header) y el panel. (novedades, en cambio, se cablea en
     // su propia ruta lazy con provideNovedades().)
     provideNotificaciones(),
+    // Servicios PrimeNG de feedback global. Singletons root para que CUALQUIER
+    // pantalla pida un toast o un diálogo de confirmación sin re-proveerlos:
+    //   - MessageService  → alimenta el <p-toast> montado en el app-root.
+    //   - ConfirmationService → alimenta el <p-confirmdialog> del app-root.
+    // El host de ambos (los elementos en pantalla) vive en app/app.ts.
+    MessageService,
+    ConfirmationService,
     // NOTA: no registramos provideAnimations(). En Angular 21 las transiciones
     // de ruta usan la directiva nativa `animate.enter` (core), que no requiere
     // provider. Ver app/core/animations/animations.ts.

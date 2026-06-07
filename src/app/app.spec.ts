@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { App } from './app';
 import { provideNotificaciones } from './application/di/notificaciones.providers';
 
@@ -9,8 +10,14 @@ describe('App', () => {
       imports: [App],
       // El header renderiza <app-notificaciones-badge>, que consume el
       // NotificacionesFacade (singleton root). Hay que cablear su DI igual que
-      // en app.config.ts.
-      providers: [provideRouter([]), provideNotificaciones()],
+      // en app.config.ts. Los hosts globales <p-toast> y <p-confirmdialog>
+      // inyectan MessageService / ConfirmationService: se proveen igual.
+      providers: [
+        provideRouter([]),
+        provideNotificaciones(),
+        MessageService,
+        ConfirmationService,
+      ],
     }).compileComponents();
   });
 
