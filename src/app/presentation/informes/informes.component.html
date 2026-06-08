@@ -82,6 +82,7 @@
             display="chip"
             [filter]="true"
             [invalid]="mostrarErrorServicios()"
+            (onBlur)="marcarTocado('servicios')"
             styleClass="w-full"
             appendTo="body"
           />
@@ -103,6 +104,7 @@
             [maxSelectedLabels]="3"
             [filter]="true"
             [invalid]="mostrarErrorDimension()"
+            (onBlur)="marcarTocado('dimension')"
             styleClass="w-full"
             appendTo="body"
           />

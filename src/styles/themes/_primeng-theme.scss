@@ -85,7 +85,11 @@
     --p-form-field-border-color: var(--app-surface-300);
     --p-form-field-hover-border-color: var(--app-surface-400);
     --p-form-field-focus-border-color: var(--app-primary-500);
-    --p-form-field-invalid-border-color: var(--app-error);
+    // ESTADO INVÁLIDO — el borde NO vira a rojo: se conserva el borde natural del
+    // sistema de diseño. La señal de error se comunica solo por el label (rojo,
+    // vía FloatLabel) y el mensaje debajo (app-field-error), evitando "saturar"
+    // el campo de rojo. Mismo criterio para inputtext/select/multiselect abajo.
+    --p-form-field-invalid-border-color: var(--app-surface-300);
     --p-form-field-border-radius: var(--app-radius-md);
     --p-form-field-color: var(--app-text-primary);
     --p-form-field-placeholder-color: var(--app-text-muted);
@@ -99,13 +103,27 @@
     --p-form-field-focus-ring-color: var(--app-primary-500);
 
     // -------------------------------------------------------------------------
+    // FLOATLABEL — color del label en estado inválido
+    // -------------------------------------------------------------------------
+    // ▼▼▼ REVERTIBLE: label NO rojo en error ▼▼▼
+    // Por defecto el FloatLabel vira el label a rojo (--app-error) cuando el
+    // campo es inválido. Aquí lo igualamos al color natural del label para que
+    // SOLO el mensaje de error (debajo) comunique el error, no el label.
+    // Para REVERTIR este comportamiento: elimina la línea de abajo (volverá al
+    // rojo por defecto del tema) o cámbiala por `var(--app-error)`.
+    --p-floatlabel-invalid-color: var(--p-floatlabel-color);
+    // ▲▲▲ FIN REVERTIBLE ▲▲▲
+
+    // -------------------------------------------------------------------------
     // INPUTTEXT
     // -------------------------------------------------------------------------
     --p-inputtext-background: var(--app-surface-0);
     --p-inputtext-border-color: var(--app-surface-300);
     --p-inputtext-hover-border-color: var(--app-surface-400);
     --p-inputtext-focus-border-color: var(--app-primary-500);
-    --p-inputtext-invalid-border-color: var(--app-error);
+    // Borde inválido neutralizado (ver nota en form-field): el error se ve en
+    // label + mensaje, no en el borde.
+    --p-inputtext-invalid-border-color: var(--app-surface-300);
     --p-inputtext-color: var(--app-text-primary);
     --p-inputtext-placeholder-color: var(--app-text-muted);
     --p-inputtext-border-radius: var(--app-radius-md);
@@ -128,7 +146,8 @@
     --p-select-border-color: var(--app-surface-300);
     --p-select-hover-border-color: var(--app-surface-400);
     --p-select-focus-border-color: var(--app-primary-500);
-    --p-select-invalid-border-color: var(--app-error);
+    // Borde inválido neutralizado (ver nota en form-field).
+    --p-select-invalid-border-color: var(--app-surface-300);
     --p-select-color: var(--app-text-primary);
     --p-select-placeholder-color: var(--app-text-muted);
     --p-select-border-radius: var(--app-radius-md);
@@ -152,7 +171,8 @@
     --p-multiselect-border-color: var(--app-surface-300);
     --p-multiselect-hover-border-color: var(--app-surface-400);
     --p-multiselect-focus-border-color: var(--app-primary-500);
-    --p-multiselect-invalid-border-color: var(--app-error);
+    // Borde inválido neutralizado (ver nota en form-field).
+    --p-multiselect-invalid-border-color: var(--app-surface-300);
     --p-multiselect-border-radius: var(--app-radius-md);
     --p-multiselect-overlay-background: var(--app-surface-0);
     --p-multiselect-overlay-border-color: var(--app-surface-200);

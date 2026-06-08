@@ -20,6 +20,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { merge } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 // PrimeNG 21 — standalone
@@ -315,11 +316,23 @@ export class InformesComponent {
 
   /**
    * Tick reactivo del estado del formulario. Bajo OnPush los cambios de
-   * validación/touched de Reactive Forms no marcan la vista; este signal
-   * (alimentado por `filtros.events`) es la dependencia que hace recomputar
-   * los signals de error de abajo. Su valor no se usa, solo su emisión.
+   * validación/touched de Reactive Forms no marcan la vista; este signal es la
+   * dependencia que hace recomputar los signals de error de abajo. Su valor no
+   * se usa, solo su emisión.
+   *
+   * Se fusionan los eventos del GRUPO y los de CADA control hijo. Motivo: el
+   * grupo solo emite su `TouchedChangeEvent` la PRIMERA vez que pasa a touched
+   * (Angular lo emite solo cuando `changed === true`); al tocar un segundo campo
+   * el grupo ya estaba touched y no reemitía, por lo que ese campo no mostraba
+   * su error hasta otro cambio. Cada hijo sí emite su propio touched al primer
+   * blur, así que escucharlos a todos garantiza el recálculo en cada interacción.
    */
-  private readonly filtrosEstado = toSignal(this.filtros.events);
+  private readonly filtrosEstado = toSignal(
+    merge(
+      this.filtros.events,
+      ...Object.values(this.filtros.controls).map((control) => control.events),
+    ),
+  );
 
   /** True tras un intento de envío: fuerza mostrar todos los errores. */
   protected readonly submitted = signal(false);
@@ -418,6 +431,19 @@ export class InformesComponent {
       !!this.filtros.get('fechaHasta')?.touched ||
       this.submitted();
     return this.filtros.hasError(error) && interactuado;
+  }
+
+  /**
+   * Marca un control como `touched` de inmediato al perder el foco.
+   *
+   * El MultiSelect con `[filter]` pospone su marcado interno de `touched` hasta
+   * que termina la animación de cierre del panel (lo difiere para no marcar el
+   * campo mientras el foco está en el input de filtro). Eso retrasaba la
+   * aparición del mensaje de requerido. Su output `(onBlur)`, en cambio, se
+   * emite al instante, así que lo usamos para marcar el control sin ese delay.
+   */
+  protected marcarTocado(nombre: string): void {
+    this.filtros.get(nombre)?.markAsTouched();
   }
 
   /** Cambia el informe activo: cancela cualquier descarga y reinicia filtros. */

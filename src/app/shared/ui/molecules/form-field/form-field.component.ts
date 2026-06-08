@@ -39,6 +39,7 @@ import { FieldHintComponent } from '../../atoms/field-hint/field-hint.component'
         <label [for]="controlId()">
           {{ label() }}@if (required()) {<span
               class="field__required"
+              [class.field__required--error]="!!error()"
               aria-hidden="true"
             >*</span>}
         </label>
@@ -56,6 +57,21 @@ import { FieldHintComponent } from '../../atoms/field-hint/field-hint.component'
   styles: `
     :host {
       display: block;
+    }
+
+    /*
+     * El asterisco de requerido NO nace rojo: arranca en un color neutro y solo
+     * vira a rojo (--app-error) cuando el campo entra en error (hay mensaje), en
+     * sincronía con el mensaje de requerido. Estos estilos del componente ganan
+     * a la regla global .field__required (que es roja) por orden de capas.
+     * Para REVERTIR (asterisco siempre rojo): elimina este bloque.
+     */
+    .field__required {
+      color: var(--app-text-muted);
+    }
+
+    .field__required--error {
+      color: var(--app-error);
     }
   `,
 })

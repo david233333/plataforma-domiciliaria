@@ -28,7 +28,7 @@ export class ToasterService {
   private readonly mensajes = inject(MessageService);
 
   /** Duración por defecto del toast (ms); coherente con el resto de la app. */
-  private static readonly VIDA_MS = 1000;
+  private static readonly VIDA_MS = 5000;
 
   showSuccess(detail: string, summary = 'Éxito'): void {
     this.mostrar('success', summary, detail);
