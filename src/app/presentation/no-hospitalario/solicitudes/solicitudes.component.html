@@ -1,16 +1,201 @@
-<section class="flex flex-col gap-4 w-full max-w-5xl mx-auto px-4 py-6">
-  <header class="flex flex-col gap-1">
-    <span class="text-overline text-primary-600">No hospitalario</span>
-    <h1 class="text-display-md text-text-primary m-0">Solicitudes</h1>
-    <p class="text-body-lg text-text-secondary max-w-2xl">
-      Gestiona las solicitudes del ámbito no hospitalario.
-    </p>
-  </header>
+<!--
+  SOLICITUDES — pantalla SMART (dueña de datos y lógica).
+  Homogénea con «Gestionar novedades»: reutiliza el mismo armazón del sistema de
+  diseño y proyecta SUS filtros y SU tabla dentro de los organismos tontos.
+    • app-page-header / app-filter-card / app-data-table-card → armazón (shared).
+    • app-form-field / app-form-actions / app-button / app-status-badge → piezas.
+  Sin botón «Descargar informe» (esta pantalla no lo requiere).
+-->
+<div class="container-fluid section animate-fade-in">
+  <!-- ============================ HEADER ============================ -->
+  <app-page-header
+    class="mb-8"
+    overline="No hospitalario"
+    title="Solicitudes"
+    icon="clipboard"
+  >
+    <app-button label="Crear solicitud" icon="plus" (clicked)="crearSolicitud()" />
+  </app-page-header>
 
-  <div class="card flex flex-col items-center gap-3 text-center py-10">
-    <i class="pi pi-inbox text-primary-500 solicitudes__icon" aria-hidden="true"></i>
-    <p class="text-body-md text-text-secondary m-0">
-      Aún no hay solicitudes registradas.
-    </p>
-  </div>
-</section>
+  <!-- ============================ FILTROS ============================ -->
+  <app-filter-card class="mb-8" title="Filtros" [(expanded)]="filtrosAbiertos">
+    <form [formGroup]="form">
+      <!-- Grid responsivo de filtros (los de ESTA pantalla) -->
+      <div class="field-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <app-form-field
+          label="Tipo de identificación"
+          controlId="tipoIdentificacion"
+          [required]="true"
+          [error]="mostrarErrorTipoId() ? 'Selecciona un tipo de identificación.' : null"
+        >
+          <p-select
+            inputId="tipoIdentificacion"
+            formControlName="tipoIdentificacion"
+            [options]="tiposIdentificacion()"
+            optionLabel="nombre"
+            optionValue="idTipo"
+            [showClear]="true"
+            [filter]="true"
+            filterBy="nombre"
+            [invalid]="mostrarErrorTipoId()"
+            (onBlur)="marcarTocado('tipoIdentificacion')"
+            styleClass="w-full"
+            appendTo="body"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Número de identificación"
+          controlId="numeroIdentificacion"
+          [required]="true"
+          [error]="mostrarErrorNumeroId() ? 'Indica el número de identificación.' : null"
+        >
+          <input
+            pInputText
+            id="numeroIdentificacion"
+            formControlName="numeroIdentificacion"
+            autocomplete="off"
+            [invalid]="mostrarErrorNumeroId()"
+            class="w-full"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Fecha fin de solicitud"
+          controlId="fechaSolicitud"
+          [required]="true"
+          [error]="mostrarErrorFecha() ? 'Indica el rango de fechas.' : null"
+        >
+          <p-datepicker
+            inputId="fechaSolicitud"
+            formControlName="fechaSolicitud"
+            selectionMode="range"
+            dateFormat="dd/mm/yy"
+            iconDisplay="input"
+            [showIcon]="true"
+            [readonlyInput]="true"
+            [showButtonBar]="true"
+            [invalid]="mostrarErrorFecha()"
+            (onBlur)="marcarTocado('fechaSolicitud')"
+            styleClass="w-full"
+            appendTo="body"
+          />
+        </app-form-field>
+      </div>
+
+      <!-- Acciones de los filtros -->
+      <app-form-actions class="mt-8" divider>
+        <app-button
+          label="Limpiar"
+          icon="times"
+          severity="secondary"
+          variant="text"
+          (clicked)="limpiar()"
+        />
+        <app-button
+          label="Buscar"
+          icon="search"
+          [loading]="buscando()"
+          (clicked)="buscar()"
+        />
+      </app-form-actions>
+    </form>
+  </app-filter-card>
+
+  <!-- ============================ RESULTADOS ============================ -->
+  <!--
+    No usamos el estado vacío del organismo (que reemplazaría la tabla): aquí la
+    tabla SIEMPRE se renderiza (header + paginador visibles) y el mensaje de
+    «sin resultados» va DENTRO, vía el `emptymessage` de PrimeNG. El organismo
+    sigue aportando el skeleton de carga.
+  -->
+  <app-data-table-card [loading]="buscando()" [skeletonColumns]="10">
+    <p-table
+      [value]="solicitudes()"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 20, 30]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+      [scrollable]="true"
+      [showGridlines]="true"
+      [tableStyle]="{ 'min-width': '72rem' }"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Tipo servicio</th>
+          <th>Id solicitud</th>
+          <th>Fecha finalización</th>
+          <th>Paciente</th>
+          <th>Plan Salud</th>
+          <th>Prioridad</th>
+          <th>Estado</th>
+          <th>Visita</th>
+          <th>Usuario</th>
+          <th style="width: 6rem" class="text-center">Acción</th>
+        </tr>
+      </ng-template>
+
+      <!-- Estado vacío DENTRO de la tabla: ocupa todas las columnas y conserva
+           header y paginador (como pidió el diseño). -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="10" class="!p-0">
+            <app-empty-state
+              icon="inbox"
+              title="No se encontraron solicitudes"
+              body="Ajusta los filtros e intenta una nueva búsqueda."
+            />
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.tipoServicio }}</td>
+          <td class="font-mono text-sm">{{ row.idSolicitud }}</td>
+          <td class="whitespace-nowrap">
+            @if (row.fechaFinalizacion) {
+              {{ row.fechaFinalizacion | date: 'dd/MM/yyyy hh:mm a' }}
+            } @else {
+              <span style="color: var(--app-text-disabled)">—</span>
+            }
+          </td>
+          <td>{{ row.paciente }}</td>
+          <td>{{ row.planSalud }}</td>
+          <td>
+            <app-status-badge
+              [variant]="prioridadVariant(row.prioridad)"
+              [icon]="prioridadIcon(row.prioridad)"
+            >
+              {{ prioridadLabel(row.prioridad) }}
+            </app-status-badge>
+          </td>
+          <td>
+            <app-status-badge
+              [variant]="estadoVariant(row.estado)"
+              [icon]="estadoIcon(row.estado)"
+            >
+              {{ estadoLabel(row.estado) }}
+            </app-status-badge>
+          </td>
+          <td>{{ row.visita }}</td>
+          <td>{{ row.usuario }}</td>
+          <td class="text-center">
+            <app-button
+              icon="eye"
+              severity="secondary"
+              variant="text"
+              [rounded]="true"
+              size="small"
+              ariaLabel="Ver solicitud"
+              tooltip="Ver solicitud"
+              (clicked)="verSolicitud(row)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </app-data-table-card>
+</div>

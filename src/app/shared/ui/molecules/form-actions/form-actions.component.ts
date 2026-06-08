@@ -40,6 +40,14 @@ export type FormActionsAlign = 'end' | 'start' | 'between';
       <ng-content />
     </div>
   `,
+  // El host debe ser bloque: si no, queda `inline` por defecto y los márgenes
+  // verticales que le pasa la página (p. ej. `mt-8`) NO aplican, dejando el
+  // divisor pegado a los campos (notorio cuando hay mensajes de error arriba).
+  styles: `
+    :host {
+      display: block;
+    }
+  `,
 })
 export class FormActionsComponent {
   /** Alineación de los botones (por defecto a la derecha). */

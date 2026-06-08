@@ -1,8 +1,10 @@
+// Estilos propios del componente. Los overrides de PrimeNG NO van aquí:
+// viven en src/styles/themes/_primeng-theme.scss (@layer sp-theme).
+//
+// El armazón (header, panel colapsable de filtros, estados de la tabla) lo
+// aportan los organismos de shared/ui; esta pantalla no necesita estilos
+// propios más allá del display base.
+
 :host {
   display: block;
-}
-
-// Ícono destacado del estado vacío. Tamaño no cubierto por utilidades.
-.solicitudes__icon {
-  font-size: 2.5rem;
 }

@@ -1,5 +1,6 @@
 import { ActivatedRouteSnapshot, Routes } from '@angular/router';
 import { environment } from '../environments/environment';
+import { provideMaestros } from './application/di/maestros.providers';
 
 // =============================================================================
 // RUTAS
@@ -59,6 +60,9 @@ export const routes: Routes = [
   },
   {
     path: 'no-hospitalario/solicitudes',
+    // El catálogo de tipos de identificación (filtro) viene del slice `maestros`;
+    // se cablea a nivel de ruta lazy para aislar el slice mientras está cargada.
+    providers: [provideMaestros()],
     loadComponent: () =>
       import('./presentation/no-hospitalario/solicitudes/solicitudes.component').then(
         (m) => m.SolicitudesComponent,
