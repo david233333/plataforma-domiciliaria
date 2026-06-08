@@ -92,7 +92,10 @@
     --p-form-field-disabled-color: var(--app-text-disabled);
     --p-form-field-padding-y: var(--app-space-2);
     --p-form-field-padding-x: var(--app-space-3);
-    --p-form-field-focus-ring-width: var(--app-focus-ring-width, 2px);
+    // Anillo de foco FINO en los form controls. Aura lo trae más grueso que Lara;
+    // 1px deja un borde azul delgado (no el halo grueso) sin perder visibilidad
+    // de foco para teclado. El borde también vira a primary (focus-border-color).
+    --p-form-field-focus-ring-width: 1px;
     --p-form-field-focus-ring-color: var(--app-primary-500);
 
     // -------------------------------------------------------------------------

@@ -7,7 +7,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { definePreset } from '@primeng/themes';
-import Lara from '@primeng/themes/lara';
+import Aura from '@primeng/themes/aura';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/http/auth.interceptor';
@@ -24,7 +24,7 @@ import { provideI18n } from './core/i18n/i18n.providers';
 // Por eso aquí los hex solo necesitan COINCIDIR con la rampa primary para que el
 // estado inicial (antes de que cargue el SCSS) ya sea correcto.
 // =============================================================================
-const AppPreset = definePreset(Lara, {
+const AppPreset = definePreset(Aura, {
   semantic: {
     primary: {
       50: '#eff6ff',

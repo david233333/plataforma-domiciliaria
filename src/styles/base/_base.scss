@@ -41,6 +41,19 @@ body {
   border-radius: var(--app-radius-sm);
 }
 
+// Controles de formulario de PrimeNG: foco FINO y pegado al borde (1px, sin
+// offset), no el anillo grueso de 2px de arriba. Los inputs de texto/fecha
+// disparan :focus-visible incluso al hacer clic, así que sin esto el outline
+// global (sin capa) los pintaría gruesos y separados. Botones/enlaces conservan
+// el de 2px. Va aquí (sin capa) para ganarle al :focus-visible global.
+.p-inputtext:focus-visible,
+.p-datepicker-input:focus-visible,
+.p-select:focus-visible,
+.p-multiselect:focus-visible {
+  outline-width: 1px;
+  outline-offset: 0;
+}
+
 // Quitamos el outline por defecto solo cuando NO es focus-visible (click mouse).
 :focus:not(:focus-visible) {
   outline: none;

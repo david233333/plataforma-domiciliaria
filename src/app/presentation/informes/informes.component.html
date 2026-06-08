@@ -31,7 +31,6 @@
         [formControl]="informeControl"
         [options]="config().informes"
         optionLabel="nombre"
-        placeholder="Selecciona un informe"
         [showClear]="true"
         [filter]="true"
         filterBy="nombre"
@@ -81,7 +80,6 @@
             optionLabel="label"
             optionValue="value"
             display="chip"
-            placeholder="Selecciona uno o varios"
             [filter]="true"
             [invalid]="mostrarErrorServicios()"
             styleClass="w-full"
@@ -102,7 +100,6 @@
             optionLabel="label"
             optionValue="value"
             display="chip"
-            [placeholder]="config().dimension.placeholder"
             [maxSelectedLabels]="3"
             [filter]="true"
             [invalid]="mostrarErrorDimension()"
@@ -128,7 +125,6 @@
             [invalid]="invalidoFechaDesde()"
             styleClass="w-full"
             appendTo="body"
-            placeholder="dd/mm/aaaa"
           />
         </app-form-field>
 
@@ -149,7 +145,6 @@
             [invalid]="invalidoFechaHasta()"
             styleClass="w-full"
             appendTo="body"
-            placeholder="dd/mm/aaaa"
           />
         </app-form-field>
       </div>

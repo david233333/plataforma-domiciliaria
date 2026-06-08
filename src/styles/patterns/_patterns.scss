@@ -82,8 +82,14 @@
   }
 
   // Reserva altura fija de una línea de mensaje → sin saltos al validar.
+  // OJO: fijamos también font-size/line-height a la métrica del mensaje. Si no,
+  // el slot hereda las del body (1rem · 1.5, mayores) y, al renderizar el
+  // mensaje, su caja de línea (~1.5rem) supera el min-height reservado (~1.18rem)
+  // → el slot crece y las filas de abajo saltan.
   .field__message-slot {
     min-height: calc(var(--app-size-sm) * var(--app-leading-snug));
+    font-size: var(--app-size-sm);
+    line-height: var(--app-leading-snug);
   }
 
   // ===========================================================================

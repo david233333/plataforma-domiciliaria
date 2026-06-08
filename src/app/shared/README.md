@@ -50,7 +50,7 @@ Cada molécula **compone átomos** y/o proyecta contenido. Son tontas: sin negoc
 
 | Selector | Para qué sirve | Compone |
 |----------|----------------|---------|
-| `app-form-field` | Campo: label + control (slot) + error/hint, con altura reservada. | `app-field-label`, `app-field-error`, `app-field-hint` |
+| `app-form-field` | Campo on-label: control (slot) dentro de FloatLabel `variant="on"` + error/hint, con altura reservada. | `p-floatlabel` (PrimeNG), `app-field-error`, `app-field-hint` |
 | `app-feature-icon` | Icono dentro de un recuadro de color (cabeceras, resúmenes). | `app-icon` |
 | `app-page-header` | Encabezado de página: overline + `<h1>` + descripción + icono + slot de acciones. | `app-feature-icon` |
 | `app-form-actions` | Barra de botones alineada, con divisor superior opcional. | — (slot de `app-button`) |

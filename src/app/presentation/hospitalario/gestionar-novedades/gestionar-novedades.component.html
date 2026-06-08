@@ -32,7 +32,6 @@
             [options]="ciudades()"
             optionLabel="nombre"
             optionValue="idCiudad"
-            placeholder="Selecciona"
             [showClear]="true"
             [filter]="true"
             filterBy="nombre"
@@ -48,7 +47,6 @@
             [options]="tiposIdentificacion()"
             optionLabel="nombre"
             optionValue="idTipo"
-            placeholder="Selecciona"
             [showClear]="true"
             styleClass="w-full"
             appendTo="body"
@@ -61,7 +59,6 @@
             id="numeroDocumento"
             formControlName="numeroDocumento"
             autocomplete="off"
-            placeholder="Ej. 1020304050"
             class="w-full"
           />
         </app-form-field>
@@ -71,7 +68,6 @@
             pInputText
             id="remision"
             formControlName="remision"
-            placeholder="Ej. R-00123"
             class="w-full"
           />
         </app-form-field>
@@ -83,7 +79,6 @@
             [options]="programas()"
             optionLabel="nombre"
             optionValue="idPrograma"
-            placeholder="Selecciona"
             [showClear]="true"
             [filter]="true"
             styleClass="w-full"
@@ -98,7 +93,6 @@
             [options]="clasificaciones()"
             optionLabel="nombre"
             optionValue="codigo"
-            placeholder="Selecciona"
             [showClear]="true"
             styleClass="w-full"
             appendTo="body"
@@ -112,7 +106,6 @@
             [options]="pisos"
             optionLabel="label"
             optionValue="value"
-            placeholder="Selecciona"
             display="chip"
             [filter]="true"
             styleClass="w-full"
@@ -127,7 +120,6 @@
             [options]="estados"
             optionLabel="label"
             optionValue="value"
-            placeholder="Selecciona"
             [showClear]="true"
             styleClass="w-full"
             appendTo="body"
@@ -141,7 +133,6 @@
             [options]="tiposNovedad()"
             optionLabel="nombre"
             optionValue="idTipo"
-            placeholder="Selecciona"
             [showClear]="true"
             [filter]="true"
             styleClass="w-full"
@@ -156,7 +147,6 @@
             [options]="especialidades"
             optionLabel="label"
             optionValue="value"
-            placeholder="Selecciona"
             [showClear]="true"
             [filter]="true"
             styleClass="w-full"
@@ -177,7 +167,6 @@
             [showButtonBar]="true"
             styleClass="w-full"
             appendTo="body"
-            placeholder="dd/mm/aaaa"
           />
         </app-form-field>
 
@@ -194,7 +183,6 @@
             [showButtonBar]="true"
             styleClass="w-full"
             appendTo="body"
-            placeholder="dd/mm/aaaa"
           />
         </app-form-field>
       </div>

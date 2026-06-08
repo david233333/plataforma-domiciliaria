@@ -1,20 +1,24 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FloatLabel } from 'primeng/floatlabel';
 
-import { FieldLabelComponent } from '../../atoms/field-label/field-label.component';
 import { FieldErrorComponent } from '../../atoms/field-error/field-error.component';
 import { FieldHintComponent } from '../../atoms/field-hint/field-hint.component';
 
 /**
  * Molécula: campo de formulario (Atomic Design).
  *
- * Compone los átomos `app-field-label` + `app-field-error` y proyecta el control
- * real (PrimeNG o nativo) vía `<ng-content>`. Colapsa el bloque repetido de
- * `label + control + slot de mensaje` que antes se escribía a mano en cada
- * pantalla.
+ * Envuelve el control proyectado (`<ng-content>`) con el **FloatLabel** de
+ * PrimeNG en `variant="on"`: el label hace de placeholder cuando el campo está
+ * vacío y sube al borde al enfocar/llenar. Así NO hay una línea de label arriba
+ * del control —los formularios quedan homogéneos (requieran validación o no) y
+ * más compactos—. Debajo queda el slot de mensaje (error/hint).
  *
  * Es **tonta**: no conoce dominio ni Reactive Forms. El estado de validación lo
  * decide la página (smart) y se lo pasa por `error`. La reserva de altura del
  * mensaje (`.field__message-slot`) evita layout shift al aparecer un error.
+ *
+ * IMPORTANTE: el control proyectado NO debe llevar `placeholder` —el label lo
+ * sustituye; además un `[placeholder]` fuerza al label a flotar siempre.
  *
  * Uso:
  * ```html
@@ -27,14 +31,18 @@ import { FieldHintComponent } from '../../atoms/field-hint/field-hint.component'
 @Component({
   selector: 'app-form-field',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FieldLabelComponent, FieldErrorComponent, FieldHintComponent],
+  imports: [FloatLabel, FieldErrorComponent, FieldHintComponent],
   template: `
     <div class="field">
-      <app-field-label [for]="controlId()" [required]="required()">
-        {{ label() }}
-      </app-field-label>
-
-      <ng-content />
+      <p-floatlabel variant="on">
+        <ng-content />
+        <label [for]="controlId()">
+          {{ label() }}@if (required()) {<span
+              class="field__required"
+              aria-hidden="true"
+            >*</span>}
+        </label>
+      </p-floatlabel>
 
       <div class="field__message-slot">
         @if (error()) {
