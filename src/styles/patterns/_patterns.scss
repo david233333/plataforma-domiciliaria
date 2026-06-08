@@ -92,6 +92,15 @@
     line-height: var(--app-leading-snug);
   }
 
+  // Rejilla de campos: CENTRALIZA los gaps (fila · columna) para que TODOS los
+  // formularios respiren igual y se ajusten desde un solo sitio. Las COLUMNAS las
+  // decide cada pantalla con utilidades grid-cols-* de Tailwind (varían por form).
+  // Cambiar el ritmo de todos los formularios = cambiar estos dos tokens aquí.
+  .field-grid {
+    display: grid;
+    gap: var(--app-space-3) var(--app-space-5); // row-gap · column-gap
+  }
+
   // ===========================================================================
   // STATUS BADGE (badges semánticos)
   // Tailwind maneja: posicionar el badge dentro de una celda/fila.
