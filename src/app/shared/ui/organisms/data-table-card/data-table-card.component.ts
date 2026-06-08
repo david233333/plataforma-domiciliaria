@@ -33,6 +33,11 @@ import { EmptyStateComponent } from '../../molecules/empty-state/empty-state.com
   imports: [SkeletonComponent, EmptyStateComponent],
   template: `
     <section class="card !p-0 overflow-hidden">
+      <!-- Caption opcional (acciones de la tabla, p. ej. «Crear»). Siempre
+           visible: vive FUERA del switch de carga/vacío para que la acción no
+           dependa de que haya datos. Si nada se proyecta, no renderiza nada. -->
+      <ng-content select="[card-caption]" />
+
       @if (loading()) {
         <div class="data-table-card__skeleton">
           <div class="data-table-card__row data-table-card__row--head">

@@ -13,13 +13,7 @@
     title="Gestionar novedades"
     icon="file-edit"
   >
-    <app-button
-      label="Descargar informe"
-      icon="download"
-      severity="secondary"
-      variant="outlined"
-      (clicked)="descargarInforme()"
-    />
+    <app-button label="Crear novedad" icon="plus" (clicked)="crearNovedad()" />
   </app-page-header>
 
   <!-- ============================ FILTROS ============================ -->
@@ -239,6 +233,20 @@
     emptyBody="Ajusta los filtros e intenta una nueva búsqueda."
     [skeletonColumns]="7"
   >
+    <!-- Caption de la tabla: acción de exportar arriba-derecha (siempre visible). -->
+    <div
+      card-caption
+      class="flex justify-end px-4 py-3 bg-[color:var(--app-surface-50)] border-b border-[color:var(--app-surface-200)]"
+    >
+      <app-button
+        label="Descargar informe"
+        icon="download"
+        severity="secondary"
+        variant="outlined"
+        (clicked)="descargarInforme()"
+      />
+    </div>
+
     <p-table
       [value]="novedades()"
       [paginator]="true"

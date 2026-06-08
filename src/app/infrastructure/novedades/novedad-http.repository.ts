@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { NovedadRepository } from '../../domain/novedades/ports/novedad.repository';
 import { Novedad } from '../../domain/novedades/entities/novedad.entity';
 import { FiltroNovedades } from '../../domain/novedades/entities/filtro-novedades';
@@ -143,7 +144,10 @@ export class NovedadHttpRepository extends NovedadRepository {
   override buscar(_filtro: FiltroNovedades): Observable<Novedad[]> {
     // TODO: reemplazar por this.http.get<NovedadDto[]>(apiUrl('novedades', '/buscar'), { params })
     //       y .pipe(map(dtos => dtos.map(toNovedad)), catchError(traducirErrorDominio)).
-    return of(this.mock.map(toNovedad));
+    // `delay` SOLO simula la latencia de red del mock: sin él, `of(...)` emite y
+    // completa en el mismo tick y el skeleton de carga ni se alcanza a ver. Con
+    // backend real esta latencia la aporta el HttpClient, así que se quita aquí.
+    return of(this.mock.map(toNovedad)).pipe(delay(800));
   }
 
   override gestionar(_id: string): Observable<void> {

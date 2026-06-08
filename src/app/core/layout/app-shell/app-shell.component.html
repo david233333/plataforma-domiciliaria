@@ -62,48 +62,54 @@
   </ng-template>
 
   <nav class="flex flex-col gap-4" aria-label="Menú principal">
-    <a
-      class="nav-item"
-      [routerLink]="inicioItem.route"
-      routerLinkActive="nav-item--active"
-    >
-      <i class="pi {{ inicioItem.icon }}"></i>
-      <span class="text-label-md">{{ inicioItem.label }}</span>
-    </a>
+    @for (entry of navEntries; track $index) {
+      @switch (entry.kind) {
+        @case ('link') {
+          <a
+            class="nav-item"
+            [class.nav-item--strong]="entry.emphasis"
+            [routerLink]="entry.route"
+            routerLinkActive="nav-item--active"
+          >
+            <i class="pi {{ entry.icon }}"></i>
+            <span class="text-label-md">{{ entry.label }}</span>
+          </a>
+        }
+        @case ('section') {
+          @let expanded = expandedSections()[entry.key];
+          <div class="nav-section">
+            <button
+              type="button"
+              class="nav-section__header"
+              [attr.aria-expanded]="expanded"
+              [attr.aria-controls]="'nav-section-' + entry.key"
+              (click)="toggleSection(entry.key)"
+            >
+              <span class="text-overline">{{ entry.label }}</span>
+              <i
+                class="pi pi-chevron-down nav-section__chevron"
+                [class.nav-section__chevron--collapsed]="!expanded"
+                aria-hidden="true"
+              ></i>
+            </button>
 
-    @for (section of navSections; track section.key) {
-      @let expanded = expandedSections()[section.key];
-      <div class="nav-section">
-        <button
-          type="button"
-          class="nav-section__header"
-          [attr.aria-expanded]="expanded"
-          [attr.aria-controls]="'nav-section-' + section.key"
-          (click)="toggleSection(section.key)"
-        >
-          <span class="text-overline">{{ section.label }}</span>
-          <i
-            class="pi pi-chevron-down nav-section__chevron"
-            [class.nav-section__chevron--collapsed]="!expanded"
-            aria-hidden="true"
-          ></i>
-        </button>
-
-        @if (expanded) {
-          <div class="flex flex-col gap-1" [id]="'nav-section-' + section.key">
-            @for (item of section.items; track item.route) {
-              <a
-                class="nav-item"
-                [routerLink]="item.route"
-                routerLinkActive="nav-item--active"
-              >
-                <i class="pi {{ item.icon }}"></i>
-                <span class="text-label-md">{{ item.label }}</span>
-              </a>
+            @if (expanded) {
+              <div class="flex flex-col gap-1" [id]="'nav-section-' + entry.key">
+                @for (item of entry.items; track item.route) {
+                  <a
+                    class="nav-item"
+                    [routerLink]="item.route"
+                    routerLinkActive="nav-item--active"
+                  >
+                    <i class="pi {{ item.icon }}"></i>
+                    <span class="text-label-md">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
             }
           </div>
         }
-      </div>
+      }
     }
   </nav>
 </p-drawer>
@@ -113,7 +119,11 @@
   id="contenido"
   class="app-main"
   [class.app-main--drawer-open]="drawerVisible()"
-  [animate.enter]="routeFade"
 >
-  <router-outlet />
+  <!-- Breadcrumb derivado de las rutas (chrome estable; no se desvanece). -->
+  <app-breadcrumbs />
+
+  <div [animate.enter]="routeFade">
+    <router-outlet />
+  </div>
 </main>

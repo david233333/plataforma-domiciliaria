@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 
 import { routeFadeAnimation } from '../../animations/animations';
 import { environment } from '../../../../environments/environment';
+import { BreadcrumbsComponent } from '../breadcrumbs/breadcrumbs.component';
 
 interface NavItem {
   readonly label: string;
@@ -19,6 +20,17 @@ interface NavSection {
   readonly label: string;
   readonly items: readonly NavItem[];
 }
+
+/**
+ * Una entrada del menú, en orden de aparición. Puede ser:
+ *   - `link`    → acceso directo de primer nivel (p. ej. Inicio, Informes), o
+ *   - `section` → grupo colapsable con sus ítems (p. ej. Hospitalario).
+ * Unificarlas en una sola lista permite intercalar enlaces sueltos ENTRE
+ * secciones sin romper el orden.
+ */
+type NavEntry =
+  | ({ readonly kind: 'link'; readonly emphasis?: boolean } & NavItem)
+  | ({ readonly kind: 'section' } & NavSection);
 
 /**
  * TEMPLATE (Atomic Design) · el «app shell».
@@ -44,6 +56,7 @@ interface NavSection {
     NgOptimizedImage,
     Drawer,
     ButtonModule,
+    BreadcrumbsComponent,
   ],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
@@ -55,19 +68,17 @@ export class AppShellComponent {
   /** Visibilidad del menú lateral. Abierto por defecto. */
   protected readonly drawerVisible = signal(true);
 
-  /** Acceso directo de primer nivel, fuera de las secciones colapsables. */
-  protected readonly inicioItem: NavItem = {
-    label: 'Inicio',
-    icon: 'pi pi-home',
-    route: '/inicio',
-  };
-
   /**
-   * Secciones de navegación del drawer (estilo colapsable). El catálogo Design
-   * System solo se ofrece fuera de producción, igual que su ruta.
+   * Entradas del drawer EN ORDEN. Inicio e Informes son accesos directos
+   * (`link`); el resto, secciones colapsables. Informes abre un único
+   * componente donde el usuario elige el ámbito (hospitalario / no hospitalario)
+   * con el toggle; por eso es un enlace simple a `/informes`, no una sección.
+   * El catálogo Design System solo se ofrece fuera de producción.
    */
-  protected readonly navSections: readonly NavSection[] = [
+  protected readonly navEntries: readonly NavEntry[] = [
+    { kind: 'link', label: 'Inicio', icon: 'pi pi-home', route: '/inicio' },
     {
+      kind: 'section',
       key: 'hospitalario',
       label: 'Hospitalario',
       items: [
@@ -75,21 +86,17 @@ export class AppShellComponent {
       ],
     },
     {
+      kind: 'section',
       key: 'no-hospitalario',
       label: 'No hospitalario',
       items: [
         { label: 'Solicitudes', icon: 'pi pi-inbox', route: '/no-hospitalario/solicitudes' },
       ],
     },
+    // Negrilla (emphasis) para que pese visualmente como los rótulos de sección.
+    { kind: 'link', label: 'Informes', icon: 'pi pi-chart-bar', route: '/informes', emphasis: true },
     {
-      key: 'informes',
-      label: 'Informes',
-      items: [
-        { label: 'Hospitalarios', icon: 'pi pi-chart-bar', route: '/informes/hospitalario' },
-        { label: 'No hospitalarios', icon: 'pi pi-chart-bar', route: '/informes/no-hospitalario' },
-      ],
-    },
-    {
+      kind: 'section',
       key: 'documentacion',
       label: 'Documentación',
       items: [
@@ -103,7 +110,11 @@ export class AppShellComponent {
 
   /** Secciones expandidas. Por defecto todas abiertas. */
   protected readonly expandedSections = signal<Record<string, boolean>>(
-    Object.fromEntries(this.navSections.map((s) => [s.key, true])),
+    Object.fromEntries(
+      this.navEntries
+        .filter((e): e is Extract<NavEntry, { kind: 'section' }> => e.kind === 'section')
+        .map((s) => [s.key, true]),
+    ),
   );
 
   /** Único punto de apertura/cierre: el botón hamburguesa (y la X vía visibleChange). */

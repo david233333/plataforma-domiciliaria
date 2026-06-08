@@ -154,4 +154,10 @@
       color: var(--app-primary-600);
     }
   }
+
+  // Enlace con énfasis (p. ej. Informes): negrilla, igual que los rótulos de
+  // sección, para que pese visualmente como ellos pese a ser un enlace directo.
+  &--strong .text-label-md {
+    font-weight: var(--app-weight-bold);
+  }
 }

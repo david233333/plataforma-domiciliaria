@@ -207,6 +207,10 @@ export class GestionarNovedadesComponent {
     // Persistiría los filtros del usuario.
   }
 
+  protected crearNovedad(): void {
+    // Abriría el flujo de creación de una novedad.
+  }
+
   protected descargarInforme(): void {
     // Dispararía la generación del reporte.
   }

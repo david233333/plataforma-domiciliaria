@@ -76,6 +76,14 @@ export const appConfig: ApplicationConfig = {
         },
       },
       ripple: true,
+      // Pass-through global: nombra el <nav> del breadcrumb (PrimeNG no le pone
+      // aria-label propio). Hay un solo breadcrumb en la app, así que el ámbito
+      // global es suficiente y evita un wrapper extra en el componente.
+      pt: {
+        breadcrumb: {
+          root: { 'aria-label': 'Ruta de navegación' },
+        },
+      },
     }),
   ],
 };

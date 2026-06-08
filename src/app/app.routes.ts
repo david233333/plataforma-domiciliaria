@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import { ActivatedRouteSnapshot, Routes } from '@angular/router';
 import { environment } from '../environments/environment';
 
 // =============================================================================
@@ -44,6 +44,18 @@ export const routes: Routes = [
         (m) => m.InformesComponent,
       ),
     title: 'Informes · Salud en Casa',
+    // Última miga depende del ámbito (parámetro de ruta).
+    data: {
+      breadcrumb: (route: ActivatedRouteSnapshot) => [
+        { label: 'Informes' },
+        {
+          label:
+            route.paramMap.get('ambito') === 'no-hospitalario'
+              ? 'No hospitalarios'
+              : 'Hospitalarios',
+        },
+      ],
+    },
   },
   {
     path: 'no-hospitalario/solicitudes',
@@ -52,6 +64,7 @@ export const routes: Routes = [
         (m) => m.SolicitudesComponent,
       ),
     title: 'Solicitudes no hospitalario · Salud en Casa',
+    data: { breadcrumb: [{ label: 'No hospitalario' }, { label: 'Solicitudes' }] },
   },
 
   {
@@ -61,6 +74,9 @@ export const routes: Routes = [
         './presentation/documentacion/arquitectura-estilos/arquitectura-estilos.component'
       ).then((m) => m.ArquitecturaEstilosComponent),
     title: 'Arquitectura de estilos',
+    data: {
+      breadcrumb: [{ label: 'Documentación' }, { label: 'Arquitectura de estilos' }],
+    },
   },
   ...(!environment.production
     ? [
@@ -71,6 +87,7 @@ export const routes: Routes = [
               (m) => m.DesignSystemComponent,
             ),
           title: 'Design System',
+          data: { breadcrumb: [{ label: 'Documentación' }, { label: 'Design System' }] },
         },
       ]
     : []),
