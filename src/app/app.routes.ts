@@ -30,22 +30,20 @@ export const routes: Routes = [
       ),
   },
 
-  // Informes — un componente dedicado por ámbito.
+  // Informes — UN solo componente para ambos ámbitos; el ámbito viaja en la URL
+  // (`/informes/:ambito`) para poder enlazarlo directo desde el menú lateral.
   {
-    path: 'hospitalario/informes',
-    loadComponent: () =>
-      import('./presentation/hospitalario/informes-h/informes-h.component').then(
-        (m) => m.InformesHComponent,
-      ),
-    title: 'Informes hospitalario · Salud en Casa',
+    path: 'informes',
+    redirectTo: 'informes/hospitalario',
+    pathMatch: 'full',
   },
   {
-    path: 'no-hospitalario/informes',
+    path: 'informes/:ambito',
     loadComponent: () =>
-      import('./presentation/no-hospitalario/informes-nh/informes-nh.component').then(
-        (m) => m.InformesNhComponent,
+      import('./presentation/informes/informes.component').then(
+        (m) => m.InformesComponent,
       ),
-    title: 'Informes no hospitalario · Salud en Casa',
+    title: 'Informes · Salud en Casa',
   },
   {
     path: 'no-hospitalario/solicitudes',

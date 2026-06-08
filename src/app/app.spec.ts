@@ -2,19 +2,15 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { App } from './app';
-import { provideNotificaciones } from './application/di/notificaciones.providers';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      // El header renderiza <app-notificaciones-badge>, que consume el
-      // NotificacionesFacade (singleton root). Hay que cablear su DI igual que
-      // en app.config.ts. Los hosts globales <p-toast> y <p-confirmdialog>
-      // inyectan MessageService / ConfirmationService: se proveen igual.
+      // Los hosts globales <p-toast> y <p-confirmdialog> inyectan
+      // MessageService / ConfirmationService: hay que proveerlos en el test.
       providers: [
         provideRouter([]),
-        provideNotificaciones(),
         MessageService,
         ConfirmationService,
       ],

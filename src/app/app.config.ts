@@ -13,7 +13,6 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
 import { provideI18n } from './core/i18n/i18n.providers';
-import { provideNotificaciones } from './application/di/notificaciones.providers';
 
 // =============================================================================
 // PRESET PRIMENG — basado en Lara (estética enterprise: bordes rectos, densidad
@@ -51,10 +50,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     // Locale es-CO (formato de fechas/números). i18n solo PREPARADO, sin librería.
     provideI18n(),
-    // DI del slice notificaciones a nivel app: su facade es singleton root y lo
-    // consumen el badge (header) y el panel. (novedades, en cambio, se cablea en
-    // su propia ruta lazy con provideNovedades().)
-    provideNotificaciones(),
     // Servicios PrimeNG de feedback global. Singletons root para que CUALQUIER
     // pantalla pida un toast o un diálogo de confirmación sin re-proveerlos:
     //   - MessageService  → alimenta el <p-toast> montado en el app-root.

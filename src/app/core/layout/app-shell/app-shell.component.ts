@@ -72,15 +72,21 @@ export class AppShellComponent {
       label: 'Hospitalario',
       items: [
         { label: 'Gestionar novedades', icon: 'pi pi-file-edit', route: '/novedades' },
-        { label: 'Informes', icon: 'pi pi-chart-bar', route: '/hospitalario/informes' },
       ],
     },
     {
       key: 'no-hospitalario',
       label: 'No hospitalario',
       items: [
-        { label: 'Informes', icon: 'pi pi-chart-bar', route: '/no-hospitalario/informes' },
         { label: 'Solicitudes', icon: 'pi pi-inbox', route: '/no-hospitalario/solicitudes' },
+      ],
+    },
+    {
+      key: 'informes',
+      label: 'Informes',
+      items: [
+        { label: 'Hospitalarios', icon: 'pi pi-chart-bar', route: '/informes/hospitalario' },
+        { label: 'No hospitalarios', icon: 'pi pi-chart-bar', route: '/informes/no-hospitalario' },
       ],
     },
     {

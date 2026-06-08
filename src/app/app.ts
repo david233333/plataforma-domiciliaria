@@ -3,7 +3,7 @@ import { Toast } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 
 import { AppShellComponent } from './core/layout/app-shell/app-shell.component';
-import { UsuarioMenuComponent } from './presentation/usuario/usuario-menu.component';
+import { UsuarioMenuComponent } from './core/layout/usuario-menu/usuario-menu.component';
 
 /**
  * Punto de entrada raíz. Es deliberadamente delgado: solo monta el TEMPLATE

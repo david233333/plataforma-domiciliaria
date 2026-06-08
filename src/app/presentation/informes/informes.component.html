@@ -1,9 +1,20 @@
 <section class="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-6">
   <!-- ============================ ENCABEZADO ============================ -->
-  <app-page-header
-    title="Informes no hospitalarios"
-    description="Genera y descarga los informes del ámbito no hospitalario."
-  />
+  <app-page-header [title]="config().titulo" [description]="config().descripcion" />
+
+  <!-- ===================== ÁMBITO ===================== -->
+  <div class="flex flex-col gap-3">
+    <h2 id="ambito-label" class="text-label-lg text-text-secondary m-0">Ámbito del informe</h2>
+    <p-selectButton
+      [options]="ambitosOpciones"
+      [ngModel]="ambito()"
+      optionLabel="label"
+      optionValue="value"
+      [allowEmpty]="false"
+      ariaLabelledBy="ambito-label"
+      (onChange)="onAmbitoChange($event.value)"
+    />
+  </div>
 
   <!-- ===================== ELEGIR INFORME ===================== -->
   <div class="flex flex-col gap-4">
@@ -18,7 +29,7 @@
       <p-select
         inputId="informe"
         [formControl]="informeControl"
-        [options]="informes"
+        [options]="config().informes"
         optionLabel="nombre"
         placeholder="Selecciona un informe"
         [showClear]="true"
@@ -66,7 +77,7 @@
           <p-multiselect
             inputId="servicios"
             formControlName="servicios"
-            [options]="servicios"
+            [options]="config().servicios"
             optionLabel="label"
             optionValue="value"
             display="chip"
@@ -79,22 +90,22 @@
         </app-form-field>
 
         <app-form-field
-          label="Ciudad"
-          controlId="ciudades"
+          [label]="config().dimension.label"
+          controlId="dimension"
           [required]="true"
-          [error]="mostrarErrorCiudades() ? 'Selecciona al menos una ciudad.' : null"
+          [error]="mostrarErrorDimension() ? config().dimension.error : null"
         >
           <p-multiselect
-            inputId="ciudades"
-            formControlName="ciudades"
-            [options]="ciudades"
+            inputId="dimension"
+            formControlName="dimension"
+            [options]="config().dimension.opciones"
             optionLabel="label"
             optionValue="value"
             display="chip"
-            placeholder="Selecciona una o varias"
+            [placeholder]="config().dimension.placeholder"
             [maxSelectedLabels]="3"
             [filter]="true"
-            [invalid]="mostrarErrorCiudades()"
+            [invalid]="mostrarErrorDimension()"
             styleClass="w-full"
             appendTo="body"
           />

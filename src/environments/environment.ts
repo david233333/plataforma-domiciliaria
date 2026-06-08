@@ -8,7 +8,6 @@ export const environment = {
   production: false,
   apis: {
     core: 'https://api.dev/core',
-    notificaciones: 'https://api.dev/notificaciones',
     apiBaseUrl: 'https://apidomiciliario.labsura.com',
     // Base de maestros. Cada repositorio agrega su path (p. ej. /maestros/ciudad).
     novedades: 'http://192.168.40.95:9099/api_novedades',
