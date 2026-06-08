@@ -35,18 +35,18 @@ import { FiltroNovedades } from '../../../domain/novedades/entities/filtro-noved
 import { BuscarNovedadesUseCase } from '../../../domain/novedades/use-cases/buscar-novedades.use-case';
 import { GestionarNovedadUseCase } from '../../../domain/novedades/use-cases/gestionar-novedad.use-case';
 import { Ciudad } from '../../../domain/maestros/entities/ciudad.entity';
-import { ConsultarCiudadesUseCase } from '../../../domain/maestros/use-cases/consultar-ciudades.use-case';
+import { TipoIdentificacion } from '../../../domain/maestros/entities/tipo-identificacion.entity';
+import { Programa } from '../../../domain/maestros/entities/programa.entity';
+import { ClasificacionPermanentes } from '../../../domain/maestros/entities/clasificacion-permanentes.entity';
+import { TipoNovedad } from '../../../domain/maestros/entities/tipo-novedad.entity';
+import { MaestrosUseCase } from '../../../domain/maestros/use-cases/maestros.use-case';
 
 // Catálogos/labels de UI co-localizados (convención i18n)
 import {
-  CLASIFICACIONES,
   ESPECIALIDADES,
   ESTADOS,
   Opcion,
   PISOS,
-  PROGRAMAS,
-  TIPOS_IDENTIFICACION,
-  TIPOS_NOVEDAD,
 } from './novedades.labels';
 
 /** Variante visual del badge de estado. Cosmética de presentación, no dominio. */
@@ -80,7 +80,7 @@ export class GestionarNovedadesComponent {
   // pantalla, así que vive en signals del componente.
   private readonly buscarNovedades = inject(BuscarNovedadesUseCase);
   private readonly gestionarNovedadUseCase = inject(GestionarNovedadUseCase);
-  private readonly consultarCiudades = inject(ConsultarCiudadesUseCase);
+  private readonly maestros = inject(MaestrosUseCase);
   // Feedback app-wide: la confirmación usa el ConfirmationService (singleton
   // root) y el aviso usa el ToasterService del sistema de diseño. Sus hosts
   // (<p-confirmdialog> y <p-toast>) viven en el app-root.
@@ -94,15 +94,17 @@ export class GestionarNovedadesComponent {
   protected readonly hayResultados = computed(() => this.novedades().length > 0);
 
   // --- Catálogos de UI ---
-  // Ciudad viene del backend (maestro): empieza vacío y se llena al cargar.
+  // Estos catálogos vienen del backend (maestros): empiezan vacíos y se llenan
+  // al cargar la pantalla.
   protected readonly ciudades = signal<Ciudad[]>([]);
-  protected readonly tiposIdentificacion: Opcion[] =TIPOS_IDENTIFICACION;
-  protected readonly programas: Opcion[] =PROGRAMAS;
-  protected readonly clasificaciones: Opcion[] =CLASIFICACIONES;
-  protected readonly pisos: Opcion[] =PISOS;
-  protected readonly estados: Opcion[] =ESTADOS;
-  protected readonly tiposNovedad: Opcion[] =TIPOS_NOVEDAD;
-  protected readonly especialidades: Opcion[] =ESPECIALIDADES;
+  protected readonly tiposIdentificacion = signal<TipoIdentificacion[]>([]);
+  protected readonly programas = signal<Programa[]>([]);
+  protected readonly clasificaciones = signal<ClasificacionPermanentes[]>([]);
+  protected readonly tiposNovedad = signal<TipoNovedad[]>([]);
+  // Estos siguen siendo estáticos (aún no hay maestro en el backend).
+  protected readonly pisos: Opcion[] = PISOS;
+  protected readonly estados: Opcion[] = ESTADOS;
+  protected readonly especialidades: Opcion[] = ESPECIALIDADES;
 
   protected readonly form = this.fb.group({
     ciudad: [''],
@@ -120,18 +122,54 @@ export class GestionarNovedadesComponent {
   });
 
   constructor() {
-    // Carga inicial: poblar la tabla y el catálogo de ciudades al entrar.
+    // Carga inicial: poblar la tabla y los catálogos (maestros) al entrar.
     this.ejecutarBusqueda();
     this.cargarCiudades();
+    this.cargarTiposIdentificacion();
+    this.cargarProgramas();
+    this.cargarClasificaciones();
+    this.cargarTiposNovedad();
   }
 
   /** Consulta el maestro de ciudades y lo vuelca en el signal del filtro. */
   private cargarCiudades(): void {
-    this.consultarCiudades.execute().subscribe({
+    this.maestros.consultarCiudades().subscribe({
       next: (ciudades) => this.ciudades.set(ciudades),
       // Un fallo no debe romper la pantalla: el errorInterceptor ya avisa con un
       // toast; aquí el filtro simplemente queda sin opciones.
       error: () => this.ciudades.set([]),
+    });
+  }
+
+  /** Consulta el maestro de tipos de identificación y lo vuelca en su signal. */
+  private cargarTiposIdentificacion(): void {
+    this.maestros.consultarTiposIdentificacion().subscribe({
+      next: (tipos) => this.tiposIdentificacion.set(tipos),
+      error: () => this.tiposIdentificacion.set([]),
+    });
+  }
+
+  /** Consulta el maestro de programas y lo vuelca en su signal. */
+  private cargarProgramas(): void {
+    this.maestros.consultarProgramas().subscribe({
+      next: (programas) => this.programas.set(programas),
+      error: () => this.programas.set([]),
+    });
+  }
+
+  /** Consulta el maestro de clasificaciones (permanentes) y lo vuelca en su signal. */
+  private cargarClasificaciones(): void {
+    this.maestros.consultarClasificacionesPermanentes().subscribe({
+      next: (clasificaciones) => this.clasificaciones.set(clasificaciones),
+      error: () => this.clasificaciones.set([]),
+    });
+  }
+
+  /** Consulta el maestro de tipos de novedad y lo vuelca en su signal. */
+  private cargarTiposNovedad(): void {
+    this.maestros.consultarTiposNovedad().subscribe({
+      next: (tipos) => this.tiposNovedad.set(tipos),
+      error: () => this.tiposNovedad.set([]),
     });
   }
 

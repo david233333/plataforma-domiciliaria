@@ -13,25 +13,10 @@ export interface Opcion {
   readonly value: string;
 }
 
-// NOTA: el catálogo de ciudad ya NO es estático: viene del backend vía el slice
-// `maestros` (domain/maestros + infrastructure/maestros). Ver gestionar-novedades.
-
-export const TIPOS_IDENTIFICACION: Opcion[] = [
-  { label: 'Cédula de ciudadanía', value: 'cc' },
-  { label: 'Tarjeta de identidad', value: 'ti' },
-  { label: 'Pasaporte', value: 'pa' },
-];
-
-export const PROGRAMAS: Opcion[] = [
-  { label: 'Hospitalización domiciliaria', value: 'hosp' },
-  { label: 'Cuidado paliativo', value: 'pal' },
-  { label: 'Rehabilitación', value: 'rehab' },
-];
-
-export const CLASIFICACIONES: Opcion[] = [
-  { label: 'Permanente', value: 'perm' },
-  { label: 'Temporal', value: 'temp' },
-];
+// NOTA: los catálogos de ciudad, tipo de identificación, programa, clasificación
+// (permanentes) y tipo de novedad ya NO son estáticos: vienen del backend vía el
+// slice `maestros` (domain/maestros + infrastructure/maestros). Ver
+// gestionar-novedades. Los de abajo siguen estáticos por ahora.
 
 export const PISOS: Opcion[] = [
   { label: 'Piso 1', value: 'p1' },
@@ -44,12 +29,6 @@ export const ESTADOS: Opcion[] = [
   { label: 'Gestionada', value: 'GESTIONADA' },
   { label: 'En proceso', value: 'EN_PROCESO' },
   { label: 'Rechazada', value: 'RECHAZADA' },
-];
-
-export const TIPOS_NOVEDAD: Opcion[] = [
-  { label: 'Activación', value: 'ACTIVACION' },
-  { label: 'Cambio de cita', value: 'CAMBIO_CITA' },
-  { label: 'Cancelación', value: 'CANCELACION' },
 ];
 
 export const ESPECIALIDADES: Opcion[] = [
