@@ -35,11 +35,13 @@
           <p-select
             inputId="ciudad"
             formControlName="ciudad"
-            [options]="ciudades"
-            optionLabel="label"
-            optionValue="value"
+            [options]="ciudades()"
+            optionLabel="nombre"
+            optionValue="idCiudad"
             placeholder="Selecciona"
             [showClear]="true"
+            [filter]="true"
+            filterBy="nombre"
             styleClass="w-full"
             appendTo="body"
           />

@@ -13,11 +13,8 @@ export interface Opcion {
   readonly value: string;
 }
 
-export const CIUDADES: Opcion[] = [
-  { label: 'Medellín', value: 'med' },
-  { label: 'Bogotá', value: 'bog' },
-  { label: 'Cali', value: 'cal' },
-];
+// NOTA: el catálogo de ciudad ya NO es estático: viene del backend vía el slice
+// `maestros` (domain/maestros + infrastructure/maestros). Ver gestionar-novedades.
 
 export const TIPOS_IDENTIFICACION: Opcion[] = [
   { label: 'Cédula de ciudadanía', value: 'cc' },

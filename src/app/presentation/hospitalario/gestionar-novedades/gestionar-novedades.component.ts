@@ -14,7 +14,10 @@ import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
 import { InputText } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
+
+// Feedback app-wide (envuelve PrimeNG)
+import { ToasterService } from '../../../core/feedback/toaster.service';
 
 // Sistema de diseño (shared/ui)
 import { PageHeaderComponent } from '../../../shared/ui/molecules/page-header/page-header.component';
@@ -31,10 +34,11 @@ import { EstadoNovedad } from '../../../domain/novedades/entities/estado-novedad
 import { FiltroNovedades } from '../../../domain/novedades/entities/filtro-novedades';
 import { BuscarNovedadesUseCase } from '../../../domain/novedades/use-cases/buscar-novedades.use-case';
 import { GestionarNovedadUseCase } from '../../../domain/novedades/use-cases/gestionar-novedad.use-case';
+import { Ciudad } from '../../../domain/maestros/entities/ciudad.entity';
+import { ConsultarCiudadesUseCase } from '../../../domain/maestros/use-cases/consultar-ciudades.use-case';
 
 // Catálogos/labels de UI co-localizados (convención i18n)
 import {
-  CIUDADES,
   CLASIFICACIONES,
   ESPECIALIDADES,
   ESTADOS,
@@ -76,10 +80,12 @@ export class GestionarNovedadesComponent {
   // pantalla, así que vive en signals del componente.
   private readonly buscarNovedades = inject(BuscarNovedadesUseCase);
   private readonly gestionarNovedadUseCase = inject(GestionarNovedadUseCase);
-  // Feedback app-wide: singletons root (ver app.config). El host de ambos vive
-  // en el app-root, así que aquí solo se disparan confirmación y toast.
+  private readonly consultarCiudades = inject(ConsultarCiudadesUseCase);
+  // Feedback app-wide: la confirmación usa el ConfirmationService (singleton
+  // root) y el aviso usa el ToasterService del sistema de diseño. Sus hosts
+  // (<p-confirmdialog> y <p-toast>) viven en el app-root.
   private readonly confirmaciones = inject(ConfirmationService);
-  private readonly mensajes = inject(MessageService);
+  private readonly toaster = inject(ToasterService);
 
   // --- Estado UI ---
   protected readonly filtrosAbiertos = signal(true);
@@ -88,7 +94,8 @@ export class GestionarNovedadesComponent {
   protected readonly hayResultados = computed(() => this.novedades().length > 0);
 
   // --- Catálogos de UI ---
-  protected readonly ciudades: Opcion[] =CIUDADES;
+  // Ciudad viene del backend (maestro): empieza vacío y se llena al cargar.
+  protected readonly ciudades = signal<Ciudad[]>([]);
   protected readonly tiposIdentificacion: Opcion[] =TIPOS_IDENTIFICACION;
   protected readonly programas: Opcion[] =PROGRAMAS;
   protected readonly clasificaciones: Opcion[] =CLASIFICACIONES;
@@ -113,9 +120,19 @@ export class GestionarNovedadesComponent {
   });
 
   constructor() {
-    // Carga inicial: poblar la tabla al entrar (mismo comportamiento que antes,
-    // cuando los datos venían precargados en el signal).
+    // Carga inicial: poblar la tabla y el catálogo de ciudades al entrar.
     this.ejecutarBusqueda();
+    this.cargarCiudades();
+  }
+
+  /** Consulta el maestro de ciudades y lo vuelca en el signal del filtro. */
+  private cargarCiudades(): void {
+    this.consultarCiudades.execute().subscribe({
+      next: (ciudades) => this.ciudades.set(ciudades),
+      // Un fallo no debe romper la pantalla: el errorInterceptor ya avisa con un
+      // toast; aquí el filtro simplemente queda sin opciones.
+      error: () => this.ciudades.set([]),
+    });
   }
 
   // --- Helpers de presentación (cosmética del estado) ---
@@ -194,20 +211,16 @@ export class GestionarNovedadesComponent {
     this.gestionarNovedadUseCase.execute(novedad).subscribe({
       next: () => {
         this.ejecutarBusqueda();
-        this.mensajes.add({
-          severity: 'success',
-          summary: 'Sincronización completada',
-          detail: `La novedad de «${novedad.nombrePaciente}» se sincronizó correctamente.`,
-          life: 5000,
-        });
+        this.toaster.showSuccess(
+          `La novedad de «${novedad.nombrePaciente}» se sincronizó correctamente.`,
+          'Sincronización completada',
+        );
       },
       error: () =>
-        this.mensajes.add({
-          severity: 'error',
-          summary: 'No se pudo sincronizar',
-          detail: 'Ocurrió un problema al sincronizar la novedad. Inténtalo de nuevo.',
-          life: 5000,
-        }),
+        this.toaster.showError(
+          'Ocurrió un problema al sincronizar la novedad. Inténtalo de nuevo.',
+          'No se pudo sincronizar',
+        ),
     });
   }
 

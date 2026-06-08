@@ -24,9 +24,9 @@ import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
 import { ProgressBar } from 'primeng/progressbar';
-import { MessageService } from 'primeng/api';
 
 import { routeFadeAnimation } from '../../../core/animations/animations';
+import { ToasterService } from '../../../core/feedback/toaster.service';
 import { FormFieldComponent } from '../../../shared/ui/molecules/form-field/form-field.component';
 import { PageHeaderComponent } from '../../../shared/ui/molecules/page-header/page-header.component';
 import { FeatureIconComponent } from '../../../shared/ui/molecules/feature-icon/feature-icon.component';
@@ -105,8 +105,9 @@ function validarRangoFechas(group: AbstractControl): ValidationErrors | null {
 })
 export class InformesNhComponent {
   private readonly fb = inject(FormBuilder);
-  // MessageService singleton root: el <p-toast> vive en el app-root.
-  private readonly mensajes = inject(MessageService);
+  // Feedback vía el servicio del sistema de diseño (envuelve PrimeNG); el
+  // <p-toast> vive en el app-root.
+  private readonly toaster = inject(ToasterService);
 
   /** Clase de entrada para revelar la tarjeta de filtros. */
   protected readonly fadeIn = routeFadeAnimation;
@@ -342,18 +343,12 @@ export class InformesNhComponent {
     this.notificarDescargaLista(informe);
   }
 
-  /**
-   * Confirma con un toast de éxito que el archivo se generó. Usa el host global
-   * (`<p-toast>` del app-root) vía el MessageService singleton; `life` lo
-   * autocierra y el cierre manual queda disponible para lectores de pantalla.
-   */
+  /** Confirma con un toast de éxito que el archivo se generó. */
   private notificarDescargaLista(informe: OpcionInforme): void {
-    this.mensajes.add({
-      severity: 'success',
-      summary: 'Descarga completada',
-      detail: `El informe «${informe.nombre}» se descargó correctamente.`,
-      life: 5000,
-    });
+    this.toaster.showSuccess(
+      `El informe «${informe.nombre}» se descargó correctamente.`,
+      'Descarga completada',
+    );
   }
 
   /** Detiene el temporizador de progreso si está activo. */
