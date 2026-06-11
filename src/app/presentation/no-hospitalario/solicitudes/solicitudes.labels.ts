@@ -88,3 +88,130 @@ export const SOLICITUDES_DEMO: Solicitud[] = [
     usuario: 'jlopez',
   },
 ];
+
+/**
+ * Detalle ampliado de una solicitud (lo que muestra el modal). Tipo de
+ * presentación: cuando exista el slice de dominio `solicitudes`, la entidad y la
+ * consulta se moverán a `domain/solicitudes` + su adaptador.
+ */
+export interface SolicitudDetalle {
+  readonly idSolicitud: string;
+  // Datos básicos
+  readonly tipoDocumento: string;
+  readonly numeroDocumento: string;
+  readonly planSalud: string;
+  readonly tieneAnexoDomiciliario: boolean;
+  readonly fechaInicioAsegurado: Date;
+  readonly fechaFinAsegurado: Date;
+  readonly descripcionPlan: string;
+  // Información del usuario
+  readonly nombres: string;
+  readonly apellidos: string;
+  readonly fechaNacimiento: Date;
+  readonly edad: number;
+  readonly sexo: string;
+  readonly celular: string;
+  readonly telefono: string;
+  readonly email: string;
+  // Datos de atención
+  readonly ciudad: string;
+  readonly municipio: string;
+  readonly direccion: string;
+  readonly barrio: string;
+  readonly informacionComplementaria: string;
+  // Datos del servicio
+  readonly tipoServicio: string;
+  readonly tipoPrestacion: string;
+  readonly tipoConducta: string;
+  readonly programa: string;
+  readonly zona: string;
+  readonly fechaVisita: Date;
+  readonly prioridad: string;
+  readonly sla: number;
+  readonly tipoConvenio: string;
+  readonly copago: number;
+  readonly gestionAdmision: string;
+  // Estado y cancelación
+  readonly estado: EstadoSolicitud;
+  readonly cancelacion: CancelacionInfo | null;
+}
+
+/** Información de la cancelación de una visita (presente solo si ya se canceló). */
+export interface CancelacionInfo {
+  readonly motivo: string;
+  readonly observacion: string;
+  readonly usuario: string;
+  readonly fecha: Date;
+}
+
+/** Catálogo (UI) de motivos de cancelación de una visita. */
+export const MOTIVOS_CANCELACION: Opcion[] = [
+  { label: 'Paciente no desea recibir la atención', value: 'no-desea' },
+  { label: 'Paciente se dirige a urgencias', value: 'urgencias' },
+  { label: 'Datos de contacto errados', value: 'datos-errados' },
+  { label: 'Paciente fuera de cobertura', value: 'fuera-cobertura' },
+  { label: 'Solicitud duplicada', value: 'duplicada' },
+  { label: 'Otro motivo', value: 'otro' },
+];
+
+/**
+ * Detalle de ejemplo (data quemada) para el modal. Se siembra con algunos campos
+ * de la fila clicada (id, plan de salud y nombre del paciente) para que se sienta
+ * conectado; el resto es fijo. Al integrar el backend, esto lo reemplaza el caso
+ * de uso de dominio.
+ */
+export function crearDetalleDemo(solicitud: Solicitud): SolicitudDetalle {
+  const [primerNombre, ...resto] = solicitud.paciente.split(' ');
+  return {
+    idSolicitud: solicitud.idSolicitud,
+    tipoDocumento: 'Registro civil',
+    numeroDocumento: '1013387705',
+    planSalud: solicitud.planSalud,
+    tieneAnexoDomiciliario: true,
+    fechaInicioAsegurado: new Date(2025, 8, 4),
+    fechaFinAsegurado: new Date(2026, 6, 18),
+    descripcionPlan: 'PLAN SALUD PARA TODOS FAMILIAR - 3 | PREFERENCIAL',
+    nombres: primerNombre ?? solicitud.paciente,
+    apellidos: resto.join(' '),
+    fechaNacimiento: new Date(2025, 7, 6),
+    edad: 0,
+    sexo: 'Masculino',
+    celular: '3012885548',
+    telefono: '3005486334',
+    email: 'saramelisa336@gmail.com',
+    // Datos de atención
+    ciudad: 'Medellín',
+    municipio: 'Santa Elena',
+    direccion: 'CL 53A # 35 ESTE - 547',
+    barrio: 'Santa Elena',
+    informacionComplementaria: 'Casa Fink / Santa Elena - por la montaña mágica',
+    // Datos del servicio
+    tipoServicio: 'Emergencias médicas a domicilio',
+    tipoPrestacion: 'Atención médica domiciliaria',
+    tipoConducta: 'Prioritaria',
+    programa: 'Emergencias médicas a domicilio',
+    zona: 'Emergencias Médicas Centro',
+    fechaVisita: new Date(2026, 5, 11, 0, 41, 43),
+    prioridad: '3',
+    sla: 360,
+    tipoConvenio: 'Cápita',
+    copago: 19400,
+    gestionAdmision:
+      'MC: «Tiene fiebre y vómito». Se comunica la madre del paciente, quien ' +
+      'consulta por cuadro clínico de 3 horas de evolución caracterizado por ' +
+      'emesis #3, fiebre 38 °C, escalofrío y refiere disnea. Niega palidez, ' +
+      'cianosis, retracciones y otros síntomas. AP: niega. Alergias: niega. ' +
+      'P3: su atención será prestada en máximo 360 minutos.',
+    // Estado y cancelación: la razón solo existe si la solicitud está cancelada.
+    estado: solicitud.estado,
+    cancelacion:
+      solicitud.estado === 'CANCELADA'
+        ? {
+            motivo: 'Paciente no desea recibir la atención',
+            observacion: 'Refiere que el paciente se dirige a urgencias.',
+            usuario: 'sarapapt',
+            fecha: new Date(2026, 5, 11, 0, 42),
+          }
+        : null,
+  };
+}

@@ -13,7 +13,7 @@
     title="Solicitudes"
     icon="clipboard"
   >
-    <app-button label="Crear solicitud" icon="plus" (clicked)="crearSolicitud()" />
+    <app-button label="Crear solicitud" icon="plus" variant="outlined" (clicked)="crearSolicitud()" />
   </app-page-header>
 
   <!-- ============================ FILTROS ============================ -->
@@ -24,7 +24,6 @@
         <app-form-field
           label="Tipo de identificación"
           controlId="tipoIdentificacion"
-          [required]="true"
           [error]="mostrarErrorTipoId() ? 'Selecciona un tipo de identificación.' : null"
         >
           <p-select
@@ -46,7 +45,6 @@
         <app-form-field
           label="Número de identificación"
           controlId="numeroIdentificacion"
-          [required]="true"
           [error]="mostrarErrorNumeroId() ? 'Indica el número de identificación.' : null"
         >
           <input
@@ -62,7 +60,6 @@
         <app-form-field
           label="Fecha fin de solicitud"
           controlId="fechaSolicitud"
-          [required]="true"
           [error]="mostrarErrorFecha() ? 'Indica el rango de fechas.' : null"
         >
           <p-datepicker
@@ -198,3 +195,10 @@
     </p-table>
   </app-data-table-card>
 </div>
+
+<!-- ============================ DETALLE (MODAL) ============================ -->
+<app-solicitud-detalle-dialog
+  [detalle]="detalle()"
+  [(visible)]="detalleVisible"
+  (cancelar)="onCancelarSolicitud()"
+/>

@@ -7,11 +7,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { merge } from 'rxjs';
 
 // PrimeNG 21 — standalone
@@ -43,8 +39,11 @@ import {
   EstadoSolicitud,
   Prioridad,
   Solicitud,
+  SolicitudDetalle,
   SOLICITUDES_DEMO,
+  crearDetalleDemo,
 } from './solicitudes.labels';
+import { SolicitudDetalleDialogComponent } from './solicitud-detalle-dialog.component';
 
 /** Variante visual del badge. Cosmética de presentación, no dominio. */
 type BadgeVariant = 'success' | 'warning' | 'error' | 'info';
@@ -83,6 +82,7 @@ type BadgeVariant = 'success' | 'warning' | 'error' | 'info';
     FilterCardComponent,
     DataTableCardComponent,
     EmptyStateComponent,
+    SolicitudDetalleDialogComponent,
   ],
   templateUrl: './solicitudes.component.html',
   styleUrl: './solicitudes.component.scss',
@@ -97,21 +97,19 @@ export class SolicitudesComponent {
   protected readonly buscando = signal(false);
   protected readonly solicitudes = signal<Solicitud[]>([]);
 
+  // --- Estado del modal de detalle ---
+  protected readonly detalle = signal<SolicitudDetalle | null>(null);
+  protected readonly detalleVisible = signal(false);
+
   // --- Catálogos de UI (maestros del backend) ---
   protected readonly tiposIdentificacion = signal<TipoIdentificacion[]>([]);
 
-  // --- Formulario de filtros (los tres son obligatorios, como en el diseño) ---
+  // --- Formulario de filtros (de momento sin campos obligatorios) ---
   protected readonly form = this.fb.group({
-    tipoIdentificacion: this.fb.control<string>('', {
-      nonNullable: true,
-      validators: Validators.required,
-    }),
-    numeroIdentificacion: this.fb.control<string>('', {
-      nonNullable: true,
-      validators: Validators.required,
-    }),
+    tipoIdentificacion: this.fb.control<string>('', { nonNullable: true }),
+    numeroIdentificacion: this.fb.control<string>('', { nonNullable: true }),
     // Rango de fechas (selectionMode="range" → arreglo de 1–2 fechas).
-    fechaSolicitud: this.fb.control<Date[] | null>(null, Validators.required),
+    fechaSolicitud: this.fb.control<Date[] | null>(null),
   });
 
   /**
@@ -225,11 +223,18 @@ export class SolicitudesComponent {
     // Abriría el flujo de creación de una solicitud.
   }
 
+  /** Abre el modal de detalle con el detalle (demo) de la solicitud clicada. */
   protected verSolicitud(solicitud: Solicitud): void {
-    // Abriría el detalle de la solicitud.
-    this.toaster.showInfo(
-      `Detalle de la solicitud «${solicitud.idSolicitud}».`,
-      'Próximamente',
+    this.detalle.set(crearDetalleDemo(solicitud));
+    this.detalleVisible.set(true);
+  }
+
+  /** Recibe la cancelación confirmada desde el modal: cierra y notifica. */
+  protected onCancelarSolicitud(): void {
+    this.detalleVisible.set(false);
+    this.toaster.showSuccess(
+      'La visita se canceló correctamente.',
+      'Cancelación registrada',
     );
   }
 
