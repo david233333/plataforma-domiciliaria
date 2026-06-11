@@ -20,6 +20,13 @@ import { FieldHintComponent } from '../../atoms/field-hint/field-hint.component'
  * IMPORTANTE: el control proyectado NO debe llevar `placeholder` —el label lo
  * sustituye; además un `[placeholder]` fuerza al label a flotar siempre.
  *
+ * ACCESIBILIDAD (WCAG 2.1 AA · 3.3.2 / 4.1.2): el asterisco rojo es solo visual
+ * (`aria-hidden`). Para que el estado «obligatorio» llegue también a los lectores
+ * de pantalla, el label incluye el texto oculto `.sr-only` «(obligatorio)»: al
+ * estar asociado al control por `for`/`inputId`, pasa a formar parte de su nombre
+ * accesible. Va en el label (no como `aria-required` por control) para cubrir por
+ * igual input nativo, p-select, p-datepicker y p-multiselect con un solo cambio.
+ *
  * Uso:
  * ```html
  * <app-form-field label="Sede" controlId="sedes" [required]="true"
@@ -41,7 +48,7 @@ import { FieldHintComponent } from '../../atoms/field-hint/field-hint.component'
               class="field__required"
               [class.field__required--error]="!!error()"
               aria-hidden="true"
-            >*</span>}
+            >*</span><span class="sr-only">&nbsp;(obligatorio)</span>}
         </label>
       </p-floatlabel>
 
@@ -82,7 +89,8 @@ export class FormFieldComponent {
   /** Id del control proyectado (enlaza label↔control por `for`/`inputId`). */
   readonly controlId = input.required<string>();
 
-  /** Marca el campo como obligatorio (asterisco en el label). */
+  /** Marca el campo como obligatorio: asterisco visible + «(obligatorio)» oculto
+   *  para lectores de pantalla (ver nota de ACCESIBILIDAD arriba). */
   readonly required = input(false);
 
   /** Mensaje de error a mostrar; `null` cuando el campo es válido. */

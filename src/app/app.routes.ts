@@ -83,6 +83,17 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'atomic-design',
+    loadComponent: () =>
+      import(
+        './presentation/documentacion/atomic-design/atomic-design.component'
+      ).then((m) => m.AtomicDesignComponent),
+    title: 'Atomic Design',
+    data: {
+      breadcrumb: [{ label: 'Documentación' }, { label: 'Atomic Design' }],
+    },
+  },
+  {
     path: 'novedades-angular',
     loadComponent: () =>
       import(
