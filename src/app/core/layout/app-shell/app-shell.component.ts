@@ -104,6 +104,7 @@ export class AppShellComponent {
           ? []
           : [{ label: 'Design System', icon: 'pi pi-palette', route: '/design-system' }]),
         { label: 'Arquitectura de estilos', icon: 'pi pi-book', route: '/arquitectura-estilos' },
+        { label: 'Novedades de Angular', icon: 'pi pi-bolt', route: '/novedades-angular' },
       ],
     },
   ];

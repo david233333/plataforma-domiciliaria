@@ -82,6 +82,17 @@ export const routes: Routes = [
       breadcrumb: [{ label: 'Documentación' }, { label: 'Arquitectura de estilos' }],
     },
   },
+  {
+    path: 'novedades-angular',
+    loadComponent: () =>
+      import(
+        './presentation/documentacion/novedades-angular/novedades-angular.component'
+      ).then((m) => m.NovedadesAngularComponent),
+    title: 'Novedades de Angular 18 → 21',
+    data: {
+      breadcrumb: [{ label: 'Documentación' }, { label: 'Novedades de Angular 18 → 21' }],
+    },
+  },
   ...(!environment.production
     ? [
         {

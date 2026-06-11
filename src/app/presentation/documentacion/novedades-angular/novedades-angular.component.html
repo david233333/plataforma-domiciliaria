@@ -1,0 +1,415 @@
+<div class="container-app section animate-fade-in">
+  <!-- ============================ HEADER ============================ -->
+  <header class="mb-10">
+    <p class="text-overline">Documentación interna</p>
+    <h1 class="text-display-md mt-2">Novedades de Angular 18 → 21</h1>
+    <p class="text-body-lg mt-3" style="color: var(--app-text-secondary); max-width: 70ch">
+      Recorrido didáctico por los cambios más importantes de Angular entre las
+      versiones 18 y 21: el paso a <strong>zoneless</strong>, las distintas formas
+      de <strong>detección de cambios</strong> y las <strong>signals</strong>.
+      Escrito para entenderlo desde cero, con ejemplos de "antes (clásico)" vs
+      "ahora (signals/zoneless)". Este proyecto ya corre sobre Angular 21.
+    </p>
+  </header>
+
+  <!-- ============================ ÍNDICE ============================ -->
+  <nav class="card doc-toc mb-12" aria-label="Índice">
+    <p class="text-label-lg mb-3">Contenido</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+      <a href="#panorama">1. Panorama de versiones 18 → 21</a>
+      <a href="#zoneless">2. Zone.js y el cambio a Zoneless</a>
+      <a href="#change-detection">3. Detección de cambios (CD)</a>
+      <a href="#signals">4. Signals a fondo</a>
+      <a href="#signals-rxjs">5. Signals vs RxJS</a>
+      <a href="#signal-forms">6. Signal Forms (v21)</a>
+    </div>
+  </nav>
+
+  <!-- ============================ 1. PANORAMA ============================ -->
+  <section id="panorama" class="mb-14">
+    <h2 class="text-heading-xl mb-4">1. Panorama de versiones 18 → 21</h2>
+    <p class="text-body-md mb-5" style="color: var(--app-text-secondary)">
+      En cuatro versiones, Angular pasó de "todo lo nuevo es experimental" a
+      "signals y zoneless son el modelo por defecto". Esta es la foto rápida de
+      qué se cocinó en cada una:
+    </p>
+
+    <div class="card !p-0 overflow-hidden mb-6">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Versión</th>
+            <th>Lo grande</th>
+            <th>Signals / Zoneless</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>v18</td>
+            <td>
+              Control flow <code class="doc-inline">&#64;if</code> /
+              <code class="doc-inline">&#64;for</code> /
+              <code class="doc-inline">&#64;switch</code> <strong>estable</strong>.
+              <em>Deferrable views</em> (<code class="doc-inline">&#64;defer</code>)
+              estables.
+            </td>
+            <td>Zoneless llega como <strong>experimental</strong>.</td>
+          </tr>
+          <tr>
+            <td>v19</td>
+            <td>
+              <strong>Standalone por defecto</strong>. Herramientas de la CLI para
+              migrar a signals. <code class="doc-inline">linkedSignal</code> y
+              <code class="doc-inline">resource</code> entran como <em>preview</em>.
+            </td>
+            <td>
+              Se <strong>estabilizan</strong> <code class="doc-inline">signal</code>,
+              <code class="doc-inline">computed</code>,
+              <code class="doc-inline">input</code>,
+              <code class="doc-inline">output</code> y las
+              <em>view queries</em> (<code class="doc-inline">viewChild</code>…).
+            </td>
+          </tr>
+          <tr>
+            <td>v20</td>
+            <td>
+              <em>Incremental hydration</em> estable. Madura todo el ecosistema de
+              signals.
+            </td>
+            <td>
+              Se estabilizan <code class="doc-inline">effect</code>,
+              <code class="doc-inline">linkedSignal</code> y
+              <code class="doc-inline">toSignal</code>. Zoneless pasa a
+              <strong>developer preview</strong> (estable en 20.2).
+            </td>
+          </tr>
+          <tr>
+            <td>v21</td>
+            <td>
+              <strong>Vitest</strong> como test runner por defecto.
+              <code class="doc-inline">model()</code> para two-way binding.
+              <em>Signal Forms</em> (experimental) y <em>Angular Aria</em> (preview).
+            </td>
+            <td>
+              <strong>Zoneless es el modelo por defecto</strong>: las apps nuevas ya
+              <strong>no incluyen zone.js</strong>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-callout doc-callout--tip">
+      <i class="pi pi-lightbulb"></i>
+      <div>
+        <strong>Hilo conductor:</strong> primero llegaron las <em>signals</em> (una
+        forma nueva de guardar y derivar estado), y una vez maduras, Angular pudo
+        apoyarse en ellas para detectar cambios <strong>sin zone.js</strong>. Por eso
+        signals y zoneless van de la mano.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 2. ZONELESS ============================ -->
+  <section id="zoneless" class="mb-14">
+    <h2 class="text-heading-xl mb-4">2. Zone.js y el cambio a Zoneless</h2>
+
+    <h3 class="text-heading-sm mb-2">¿Qué hacía zone.js?</h3>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      <code class="doc-inline">zone.js</code> "parcheaba" (monkey-patching) las APIs
+      asíncronas del navegador: <code class="doc-inline">setTimeout</code>, los
+      eventos (click, input…) y las Promesas. Cada vez que una de ellas terminaba,
+      avisaba a Angular: <em>"oye, algo pudo haber cambiado"</em>, y Angular
+      disparaba la detección de cambios en <strong>todo el árbol</strong> de
+      componentes, por si acaso.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="card--outlined">
+        <i class="pi pi-box" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">Pesaba</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Sumaba ~30&nbsp;KB al bundle solo por estar incluida.
+        </p>
+      </div>
+      <div class="card--outlined">
+        <i class="pi pi-search" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">Confundía</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Los <em>stack traces</em> pasaban por zone.js y eran más difíciles de leer.
+        </p>
+      </div>
+      <div class="card--outlined">
+        <i class="pi pi-bolt" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">Revisaba de más</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Detección "eager": ante cualquier evento revisaba más de lo necesario.
+        </p>
+      </div>
+    </div>
+
+    <h3 class="text-heading-sm mb-2">¿Qué es "zoneless"?</h3>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      En modo <strong>zoneless</strong> ya no hay un vigilante global. La detección de
+      cambios se basa en <strong>signals</strong> y en los <strong>eventos del
+      template</strong>: cuando una signal que la vista lee cambia, esa vista (y solo
+      esa) se marca para actualizarse. Se repinta <strong>lo que realmente
+      cambió</strong>, no todo "por si acaso".
+    </p>
+
+    <h3 class="text-heading-sm mb-2">¿Cómo se activa hoy?</h3>
+    <pre class="doc-code mb-4"><code>{{ code.bootstrapZoneless }}</code></pre>
+
+    <div class="doc-callout mb-6">
+      <i class="pi pi-info-circle"></i>
+      <div>
+        El <code class="doc-inline">async</code> pipe y
+        <code class="doc-inline">markForCheck()</code> <strong>siguen funcionando</strong>
+        en zoneless: ambos marcan la vista directamente, sin depender de zone.js. Es
+        decir, tu código de siempre convive sin cambios.
+      </div>
+    </div>
+
+    <h3 class="text-heading-sm mb-2">Idea breve de migración</h3>
+    <pre class="doc-code mb-4"><code>{{ code.quitarZoneJs }}</code></pre>
+    <p class="text-body-md mb-2" style="color: var(--app-text-secondary)">
+      Al quitar zone.js conviene revisar: código que dependía de que Angular
+      detectara cambios "solo" tras un <code class="doc-inline">setTimeout</code> o un
+      callback de terceros (mapas, gráficos, librerías que no usan signals). Esos
+      casos quizá necesiten un <code class="doc-inline">markForCheck()</code> explícito
+      o envolver el estado en una signal.
+    </p>
+  </section>
+
+  <!-- ============================ 3. CHANGE DETECTION ============================ -->
+  <section id="change-detection" class="mb-14">
+    <h2 class="text-heading-xl mb-4">3. Detección de cambios: estrategias y "las diferentes formas"</h2>
+
+    <h3 class="text-heading-sm mb-2">¿Cómo recorre Angular el árbol?</h3>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      La app es un <strong>árbol de componentes</strong> (la raíz, sus hijos, los
+      hijos de sus hijos…). En cada "ciclo de detección de cambios", Angular recorre
+      ese árbol <strong>de arriba hacia abajo</strong> y, en cada componente, compara
+      los valores que usa el template para decidir si tiene que repintar algo. La
+      <strong>estrategia</strong> del componente decide si Angular lo revisa siempre o
+      solo a veces.
+    </p>
+
+    <h3 class="text-heading-sm mb-2">Estrategia <code class="doc-inline">Default</code> (CheckAlways)</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Revisa el componente en <strong>cada</strong> ciclo. Es la más simple, pero si
+      el template llama funciones, esas funciones se ejecutan una y otra vez.
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.cdDefault }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Estrategia <code class="doc-inline">OnPush</code></h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Le dice a Angular: <em>"no me revises en cada ciclo; solo cuando pase algo que
+      me afecte de verdad"</em>. Esos disparadores son exactamente cinco:
+    </p>
+    <pre class="doc-code mb-4"><code>{{ code.cdOnPush }}</code></pre>
+
+    <ol class="flex flex-col gap-2 mb-6" style="list-style: decimal; padding-left: 1.5rem; color: var(--app-text-secondary)">
+      <li class="text-body-md">Cambio de <strong>referencia</strong> en un <code class="doc-inline">&#64;Input()</code> / <code class="doc-inline">input()</code>.</li>
+      <li class="text-body-md">Un <strong>evento</strong> originado en el componente o en un hijo (click, input, etc.).</li>
+      <li class="text-body-md">Emisión de un <strong>Observable</strong> consumido con <code class="doc-inline">async</code> pipe en el template.</li>
+      <li class="text-body-md">Una llamada manual a <code class="doc-inline">markForCheck()</code>.</li>
+      <li class="text-body-md">La <strong>lectura de una signal</strong> en el template (la signal notifica sola).</li>
+    </ol>
+
+    <h3 class="text-heading-sm mb-2">Por qué la inmutabilidad importa con OnPush</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      OnPush compara los <code class="doc-inline">&#64;Input()</code>
+      <strong>por referencia, no por contenido</strong>. Si mutas un objeto o un array
+      "por dentro", la referencia es la misma y Angular cree que nada cambió. De ahí el
+      bug más típico:
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.mutacionBug }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">APIs de <code class="doc-inline">ChangeDetectorRef</code></h3>
+    <pre class="doc-code mb-4"><code>{{ code.cdRefApis }}</code></pre>
+    <div class="card !p-0 overflow-hidden mb-6">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>API</th>
+            <th>Qué hace</th>
+            <th>Cuándo usarla</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>markForCheck()</td>
+            <td>Marca el componente y sus ancestros para el próximo ciclo.</td>
+            <td>Con OnPush, cuando cambiaste algo fuera de los 5 disparadores.</td>
+          </tr>
+          <tr>
+            <td>detectChanges()</td>
+            <td>Corre la detección de este componente y sus hijos ya, síncrono.</td>
+            <td>Cuando necesitas pintar en el momento (p. ej. antes de medir el DOM).</td>
+          </tr>
+          <tr>
+            <td>detach() / reattach()</td>
+            <td>Saca / reincorpora el componente al árbol de detección.</td>
+            <td>Listas enormes o datos que cambian a altísima frecuencia.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="text-heading-sm mb-2">Cómo encajan las signals (y por qué zoneless ≈ OnPush en todo el árbol)</h3>
+    <pre class="doc-code mb-4"><code>{{ code.signalOnPush }}</code></pre>
+    <div class="doc-callout doc-callout--tip">
+      <i class="pi pi-check-circle"></i>
+      <div>
+        Con signals, el componente sabe <strong>exactamente</strong> qué vistas leen
+        cada valor. Por eso el modo <strong>zoneless</strong> se comporta, a grandes
+        rasgos, como tener <strong>OnPush en todo el árbol</strong>: no revisa "por si
+        acaso", revisa solo lo que una signal o un evento tocó.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 4. SIGNALS ============================ -->
+  <section id="signals" class="mb-14">
+    <h2 class="text-heading-xl mb-4">4. Signals a fondo</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Una <strong>signal</strong> es un contenedor de un valor que avisa a quien lo lea
+      cuando cambia. Se <strong>lee llamándola como función</strong>:
+      <code class="doc-inline">contador()</code>. Hay tres primitivas base:
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="card">
+        <span class="status-badge status-badge--info mb-3">signal()</span>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Estado <strong>escribible</strong>. Se cambia con
+          <code class="doc-inline">set()</code> o <code class="doc-inline">update()</code>.
+        </p>
+      </div>
+      <div class="card">
+        <span class="status-badge status-badge--success mb-3">computed()</span>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Valor <strong>derivado</strong> y de <strong>solo lectura</strong>. Se
+          recalcula solo (perezoso y cacheado) cuando cambia su fuente.
+        </p>
+      </div>
+      <div class="card">
+        <span class="status-badge status-badge--warning mb-3">effect()</span>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Corre un <strong>efecto secundario</strong> cada vez que cambian las signals
+          que lee (logging, sincronizar con algo externo…).
+        </p>
+      </div>
+    </div>
+
+    <h3 class="text-heading-sm mb-2">Primitivas y métodos</h3>
+    <pre class="doc-code mb-6"><code>{{ code.signalBasics }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">¿Por qué se removió <code class="doc-inline">mutate()</code>?</h3>
+    <pre class="doc-code mb-6"><code>{{ code.mutateRemoved }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2"><code class="doc-inline">linkedSignal()</code> y <code class="doc-inline">resource()</code></h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Dos piezas más avanzadas: <code class="doc-inline">linkedSignal</code> es un
+      derivado <strong>escribible</strong>, y <code class="doc-inline">resource</code>
+      (junto a <code class="doc-inline">httpResource</code>) modela estado
+      <strong>asíncrono</strong> con sus banderas de carga y error.
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.linkedResource }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Interop con RxJS</h3>
+    <pre class="doc-code mb-6"><code>{{ code.interop }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Signals para entradas y salidas</h3>
+    <pre class="doc-code mb-6"><code>{{ code.signalIo }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Ejemplo completo: contador con <code class="doc-inline">signal</code> + <code class="doc-inline">computed</code></h3>
+    <pre class="doc-code"><code>{{ code.contadorCompleto }}</code></pre>
+  </section>
+
+  <!-- ============================ 5. SIGNALS vs RXJS ============================ -->
+  <section id="signals-rxjs" class="mb-14">
+    <h2 class="text-heading-xl mb-4">5. Signals vs RxJS — ¿cuándo uso cada uno?</h2>
+    <p class="text-body-md mb-5" style="color: var(--app-text-secondary)">
+      No compiten: se complementan. La regla mental:
+      <strong>signals para el estado, RxJS para los flujos de eventos en el tiempo</strong>.
+    </p>
+
+    <div class="card !p-0 overflow-hidden mb-6">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Dimensión</th>
+            <th>Signals</th>
+            <th>RxJS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Naturaleza</td>
+            <td>Estado <strong>síncrono</strong> (un valor "ahora mismo").</td>
+            <td>Flujos <strong>asíncronos</strong> de eventos en el tiempo.</td>
+          </tr>
+          <tr>
+            <td>Modelo</td>
+            <td><em>Pull-based</em>: lees el valor cuando lo necesitas.</td>
+            <td><em>Push-based</em>: el flujo te empuja valores cuando ocurren.</td>
+          </tr>
+          <tr>
+            <td>Lectura</td>
+            <td>Sin <em>glitches</em>, siempre consistente y cacheada.</td>
+            <td>Depende de operadores y del momento de la suscripción.</td>
+          </tr>
+          <tr>
+            <td>Suscripción</td>
+            <td>No hay <code class="doc-inline">subscribe</code>/<code class="doc-inline">unsubscribe</code>.</td>
+            <td>Hay que suscribirse y limpiar (o usar <code class="doc-inline">async</code> pipe).</td>
+          </tr>
+          <tr>
+            <td>Granularidad</td>
+            <td>Fina: solo se recalcula lo que depende del valor que cambió.</td>
+            <td>La defines tú con operadores (<code class="doc-inline">map</code>, <code class="doc-inline">filter</code>…).</td>
+          </tr>
+          <tr>
+            <td>Ideal para</td>
+            <td>Estado de UI, derivados, formularios, contadores.</td>
+            <td>Eventos, streams, <em>debounce</em>, combinaciones complejas, websockets.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Y cuando un caso necesita lo mejor de ambos, los enchufas con
+      <code class="doc-inline">toSignal</code> / <code class="doc-inline">toObservable</code>:
+      usas RxJS para orquestar el flujo y dejas el <strong>resultado final como signal</strong>
+      para leerlo cómodo en el template.
+    </p>
+    <pre class="doc-code"><code>{{ code.signalsVsRxjs }}</code></pre>
+  </section>
+
+  <!-- ============================ 6. SIGNAL FORMS ============================ -->
+  <section id="signal-forms" class="mb-6">
+    <h2 class="text-heading-xl mb-4">6. Signal Forms (v21)</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      <strong>Signal Forms</strong> es la evolución <em>experimental</em> de los
+      formularios construida sobre signals. En vez de <code class="doc-inline">FormControl</code>
+      / <code class="doc-inline">FormGroup</code>, el formulario nace de una signal con
+      el modelo de datos, y el estado (valor, validez, errores) es reactivo por
+      defecto. Se menciona como hacia dónde va el ecosistema:
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.signalForms }}</code></pre>
+
+    <div class="doc-callout doc-callout--warn">
+      <i class="pi pi-exclamation-triangle"></i>
+      <div>
+        Es <strong>experimental</strong> en v21: la API puede cambiar entre versiones.
+        Para formularios de producción seguimos usando
+        <code class="doc-inline">ReactiveFormsModule</code> (como en el
+        <code class="doc-inline">/design-system</code>). Tenlo en el radar, no en el
+        código aún.
+      </div>
+    </div>
+  </section>
+</div>
