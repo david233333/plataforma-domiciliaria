@@ -37,6 +37,8 @@ interface Par {
   readonly full?: boolean;
   /** Texto largo (notas clínicas): se pinta como párrafo legible, no en negrilla. */
   readonly longText?: boolean;
+  /** Icono PrimeIcons opcional (sin prefijo pi-) junto al valor, decorativo. */
+  readonly icon?: string;
 }
 
 /** Carga útil que emite el formulario de cancelación. */
@@ -97,14 +99,14 @@ const MAX_OBSERVACION = 4000;
       [breakpoints]="{ '960px': '92vw' }"
       [contentStyle]="{ 'max-height': '72vh', 'overflow-y': 'auto' }"
     >
-      <!-- Cabecera con banda azul de marca: título e id en blanco. -->
+      <!-- Cabecera limpia (sin banda de color): marca + título + id. -->
       <ng-template #header>
-        <span class="dlg-header">
-          <i class="pi pi-clipboard dlg-header__icon" aria-hidden="true"></i>
+        <span class="flex items-center gap-3">
+          <app-feature-icon icon="clipboard" tone="primary" size="md" />
           <span class="flex flex-col">
-            <span class="dlg-header__title text-heading-sm m-0">Solicitud</span>
+            <span class="text-heading-sm text-text-primary">Solicitud</span>
             @if (detalle(); as d) {
-              <span class="dlg-header__id text-caption font-mono">{{ d.idSolicitud }}</span>
+              <span class="text-caption font-mono">{{ d.idSolicitud }}</span>
             }
           </span>
         </span>
@@ -113,7 +115,7 @@ const MAX_OBSERVACION = 4000;
       <!-- Plantilla reutilizable de sección: cabecera (marca + título) + rejilla
            de pares etiqueta/valor. Se instancia una vez por bloque del detalle. -->
       <ng-template #seccion let-titulo="titulo" let-icono="icono" let-items="items">
-        <section>
+        <section class="dlg-section">
           <header class="dlg-head">
             <app-feature-icon [icon]="icono" tone="primary" size="md" />
             <h3 class="text-label-lg text-text-primary m-0">{{ titulo }}</h3>
@@ -122,7 +124,11 @@ const MAX_OBSERVACION = 4000;
             @for (par of items; track par.label) {
               <div class="dlg-item" [class.dlg-item--full]="par.full">
                 <dt class="dlg-label">{{ par.label }}</dt>
-                <dd class="dlg-value" [class.dlg-value--long]="par.longText">{{ par.value }}</dd>
+                <dd class="dlg-value" [class.dlg-value--long]="par.longText">
+                  @if (par.icon) {
+                    <i class="pi pi-{{ par.icon }} dlg-value__icon" aria-hidden="true"></i>
+                  }{{ par.value }}
+                </dd>
               </div>
             }
           </dl>
@@ -147,7 +153,7 @@ const MAX_OBSERVACION = 4000;
           <p-tabpanels>
             <!-- ============ Pestaña: detalle (solo lectura) ============ -->
             <p-tabpanel value="detalle">
-              <div class="flex flex-col gap-8">
+              <div class="flex flex-col gap-5">
                 <ng-container
                   [ngTemplateOutlet]="seccion"
                   [ngTemplateOutletContext]="{ titulo: 'Datos básicos', icono: 'id-card', items: datosBasicos() }"
@@ -171,7 +177,7 @@ const MAX_OBSERVACION = 4000;
             <p-tabpanel value="cancelar">
               @if (d.cancelacion; as c) {
                 <!-- Ya cancelada → razón en solo lectura -->
-                <section>
+                <section class="dlg-section">
                   <header class="dlg-head">
                     <app-feature-icon icon="ban" tone="danger" size="md" />
                     <h3 class="text-label-lg text-text-primary m-0">Razón de cancelación</h3>
@@ -193,17 +199,21 @@ const MAX_OBSERVACION = 4000;
                     </div>
                     <div class="dlg-item">
                       <dt class="dlg-label">Usuario que gestiona</dt>
-                      <dd class="dlg-value">{{ c.usuario }}</dd>
+                      <dd class="dlg-value">
+                        <i class="pi pi-user dlg-value__icon" aria-hidden="true"></i>{{ c.usuario }}
+                      </dd>
                     </div>
                     <div class="dlg-item">
                       <dt class="dlg-label">Fecha de cancelación</dt>
-                      <dd class="dlg-value">{{ fechaHora(c.fecha) }}</dd>
+                      <dd class="dlg-value">
+                        <i class="pi pi-calendar dlg-value__icon" aria-hidden="true"></i>{{ fechaHora(c.fecha) }}
+                      </dd>
                     </div>
                   </dl>
                 </section>
               } @else {
                 <!-- Activa → formulario de cancelación -->
-                <form class="flex flex-col gap-2" [formGroup]="form" (ngSubmit)="enviarCancelacion()">
+                <form class="dlg-section flex flex-col gap-2" [formGroup]="form" (ngSubmit)="enviarCancelacion()">
                   <header class="dlg-head">
                     <app-feature-icon icon="ban" tone="danger" size="md" />
                     <h3 class="text-label-lg text-text-primary m-0">Razón de cancelación</h3>
@@ -269,6 +279,16 @@ const MAX_OBSERVACION = 4000;
     </p-dialog>
   `,
   styles: `
+    /* Cada sección va en un panel tenue para separarse dentro del modal: relleno
+       surface-50 + borde hairline, SIN sombra. No es una "card" elevada anidada
+       (eso lo prohíbe el sistema), solo una agrupación visual de la sección. */
+    .dlg-section {
+      background: var(--app-surface-50);
+      border: 1px solid var(--app-surface-200);
+      border-radius: var(--app-radius-md);
+      padding: var(--app-space-5) var(--app-space-6);
+    }
+
     /* Cabecera de cada sección: marca + título + línea divisoria. */
     .dlg-head {
       display: flex;
@@ -321,43 +341,17 @@ const MAX_OBSERVACION = 4000;
       max-width: 70ch;
       text-wrap: pretty;
     }
-
-    /* ---- Cabecera con banda azul de marca ---- */
-    .dlg-header {
-      display: flex;
-      align-items: center;
-      gap: var(--app-space-3);
-      color: var(--app-surface-0);
-    }
-    .dlg-header__icon {
-      font-size: 1.25rem;
-    }
-    .dlg-header__title {
-      color: var(--app-surface-0);
-    }
-    /* El id hereda .text-caption (gris); lo aclaramos sobre el azul. */
-    .dlg-header__id {
-      color: rgb(255 255 255 / 0.8);
+    /* Iconito tenue junto al valor: ayuda a reconocer el dato sin competir. */
+    .dlg-value__icon {
+      color: var(--app-text-muted);
+      font-size: var(--app-size-sm);
+      margin-right: var(--app-space-2);
+      vertical-align: -0.05em;
     }
 
-    /* PrimeNG pinta partes del dialog (cabecera, paneles de tabs) FUERA de la
-       encapsulación (appendTo="body"); se ajustan con ::ng-deep, acotado por la
-       clase única del dialog para no afectar otros modales. */
-    ::ng-deep .solicitud-detalle-dialog .p-dialog-header {
-      background: var(--app-primary-700);
-      border-bottom: 0;
-      border-top-left-radius: var(--app-radius-lg);
-      border-top-right-radius: var(--app-radius-lg);
-      padding: var(--app-space-4) var(--app-space-5);
-    }
-    ::ng-deep .solicitud-detalle-dialog .p-dialog-close-button {
-      color: var(--app-surface-0);
-    }
-    ::ng-deep .solicitud-detalle-dialog .p-dialog-close-button:hover {
-      background: rgb(255 255 255 / 0.16);
-      color: var(--app-surface-0);
-    }
-    /* Paneles de tabs: sin fondo propio, con aire arriba para separar del tablist. */
+    /* PrimeNG pinta los paneles de tabs FUERA de la encapsulación
+       (appendTo="body"); se ajustan con ::ng-deep, acotado por la clase única
+       del dialog para no afectar otros modales. */
     ::ng-deep .solicitud-detalle-dialog .p-tabpanels {
       background: transparent;
       padding: var(--app-space-6) 0 0;
@@ -454,11 +448,11 @@ export class SolicitudDetalleDialogComponent {
     }
     return [
       { label: 'Tipo de documento', value: d.tipoDocumento },
-      { label: 'Número de documento', value: d.numeroDocumento },
+      { label: 'Número de documento', value: d.numeroDocumento, icon: 'hashtag' },
       { label: 'Plan de salud', value: d.planSalud },
       { label: 'Anexo domiciliario', value: d.tieneAnexoDomiciliario ? 'Sí' : 'No' },
-      { label: 'Inicio del asegurado', value: this.fecha(d.fechaInicioAsegurado) },
-      { label: 'Fin del asegurado', value: this.fecha(d.fechaFinAsegurado) },
+      { label: 'Inicio del asegurado', value: this.fecha(d.fechaInicioAsegurado), icon: 'calendar' },
+      { label: 'Fin del asegurado', value: this.fecha(d.fechaFinAsegurado), icon: 'calendar' },
       { label: 'Descripción del plan', value: d.descripcionPlan, full: true },
     ];
   });
@@ -472,12 +466,12 @@ export class SolicitudDetalleDialogComponent {
     return [
       { label: 'Nombres', value: d.nombres },
       { label: 'Apellidos', value: d.apellidos },
-      { label: 'Fecha de nacimiento', value: this.fecha(d.fechaNacimiento) },
+      { label: 'Fecha de nacimiento', value: this.fecha(d.fechaNacimiento), icon: 'calendar' },
       { label: 'Edad', value: `${d.edad} ${d.edad === 1 ? 'año' : 'años'}` },
       { label: 'Sexo', value: d.sexo },
-      { label: 'Celular', value: d.celular },
-      { label: 'Teléfono', value: d.telefono },
-      { label: 'Correo electrónico', value: d.email },
+      { label: 'Celular', value: d.celular, icon: 'mobile' },
+      { label: 'Teléfono', value: d.telefono, icon: 'phone' },
+      { label: 'Correo electrónico', value: d.email, icon: 'envelope' },
     ];
   });
 
@@ -490,7 +484,7 @@ export class SolicitudDetalleDialogComponent {
     return [
       { label: 'Ciudad', value: d.ciudad },
       { label: 'Municipio', value: d.municipio },
-      { label: 'Dirección', value: d.direccion },
+      { label: 'Dirección', value: d.direccion, icon: 'home' },
       { label: 'Barrio', value: d.barrio },
       { label: 'Información complementaria', value: d.informacionComplementaria, full: true },
     ];
@@ -508,11 +502,11 @@ export class SolicitudDetalleDialogComponent {
       { label: 'Tipo de conducta', value: d.tipoConducta },
       { label: 'Programa', value: d.programa },
       { label: 'Zona', value: d.zona },
-      { label: 'Fecha de visita', value: this.fechaHora(d.fechaVisita) },
+      { label: 'Fecha de visita', value: this.fechaHora(d.fechaVisita), icon: 'calendar' },
       { label: 'Prioridad', value: d.prioridad },
-      { label: 'SLA (min)', value: String(d.sla) },
+      { label: 'SLA (min)', value: String(d.sla), icon: 'clock' },
       { label: 'Tipo de convenio', value: d.tipoConvenio },
-      { label: 'Copago', value: this.moneda(d.copago) },
+      { label: 'Copago', value: this.moneda(d.copago), icon: 'dollar' },
       {
         label: 'Gestión de admisión',
         value: d.gestionAdmision,
