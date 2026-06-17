@@ -106,6 +106,7 @@ export class AppShellComponent {
         { label: 'Arquitectura de estilos', icon: 'pi pi-book', route: '/arquitectura-estilos' },
         { label: 'Atomic Design', icon: 'pi pi-sitemap', route: '/atomic-design' },
         { label: 'Novedades de Angular', icon: 'pi pi-bolt', route: '/novedades-angular' },
+        { label: 'SignalStore (estado)', icon: 'pi pi-database', route: '/signal-store' },
       ],
     },
   ];

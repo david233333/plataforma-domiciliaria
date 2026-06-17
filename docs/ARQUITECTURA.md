@@ -89,6 +89,12 @@ dos componentes leyendo el **mismo** estado. Si viviera dentro de un componente,
 el otro no lo vería. `novedades` deliberadamente **no** usa facade, para tener
 ambos enfoques lado a lado antes de decidir si se generaliza.
 
+Cuando el estado de una **pantalla** crece (varias secciones que comparten
+selecciones, banderas de carga y derivados), se usa un **SignalStore**
+(`@ngrx/signals`) provisto a nivel de componente en vez de signals sueltos. Hoy
+el ejemplo es la feature «crear solicitud no hospitalaria». Cómo funciona en
+detalle: ver [`estado-signal-store.md`](./estado-signal-store.md).
+
 ## HTTP y múltiples APIs
 
 `environment.apis` mapea una base por servicio. Cada adaptador arma su URL con el

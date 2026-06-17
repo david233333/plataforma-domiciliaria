@@ -1,0 +1,944 @@
+    paciente: PacienteCoberturaNh | null;
+    planSalud: string | null;
+    convenio: Convenio | null;
+    programa: Programa | null;
+    piso: ConfiguracionInferirPiso | null;
+    conducta: Conducta | null;
+    cargando: boolean;
+  };
+
+  const initial: SolicitudState = {
+    paciente: null, planSalud: null, convenio: null,
+    programa: null, piso: null, conducta: null, cargando: false,
+  };
+
+  export const SolicitudNhStore = signalStore(
+    // OJO: sin providedIn:'root' -> lo provees en la RUTA del wizard
+    withState(initial),
+
+    withComputed((store) => ({
+      coberturaResuelta: computed(() => store.paciente() !== null),
+      puedeGuardar:      computed(() => !!store.programa() && !!store.piso()),
+    })),
+
+    withMethods((store, gateway = inject(SolicitudNhUseCase)) => ({
+      // cambio síncrono y simple
+      seleccionarPlan(plan: string) {
+        patchState(store, { planSalud: plan, convenio: null, programa: null });
+      },
+
+      // cadena async: reemplaza tu subscribe + takeUntilDestroyed
+      cargarPaciente: rxMethod<{ tipo: string; doc: string }>(
+        pipe(
+          tap(() => patchState(store, { cargando: true })),
+          switchMap(({ tipo, doc }) =>
+            gateway.consultarDatosPaciente(tipo, doc).pipe(
+              tapResponse({
+                next: (paciente) => patchState(store, { paciente, cargando: false }),
+                error: () => patchState(store, { cargando: false }),
+              }),
+            ),
+          ),
+        ),
+      ),
+    })),
+  );
+
+  Y en el componente, todo el @Input/@Output desaparece:
+
+  private store = inject(SolicitudNhStore);
+  // template:  @if (store.coberturaResuelta()) { ... }   [loading]="store.cargando()"
+  // acción:    this.store.cargarPaciente({ tipo, doc });
+
+  Tres detalles que conviene grabarse:
+  - tapResponse (de @ngrx/operators) maneja el error dentro del switchMap sin matar el stream. Si el error sube al rxMethod, este se "rompe" y deja de reaccionar — por eso elerror se captura adentro.
+  - Provee el store en la ruta, no en root. Así nace y muere con la pantalla (adiós resets manuales en cancelar()).
+  - Para encadenar (servicio → prestación → piso → conducta) usas más switchMap dentro del mismo rxMethod, o varios rxMethod que se llaman entre sí. Eso es justo donde tu datos-servicio adelgaza muchísimo.
+
+  ---
+  ¿Stepper sí o no?
+  
+  Mi opinión honesta: no lo veo obligatorio, y para tu pantalla probablemente hay algo mejor.
+
+  El stepper brilla cuando el usuario llena pasos largos y secuenciales con poca dependencia entre ellos. Pero lo tuyo tiene dos rasgos que reman en contra:
+
+  - Mucho campo se autoinfiere (programa, piso, conducta, sla, copago se llenan solos). Varios "pasos" serían pantallas casi de solo lectura — pasos para mirar lo inferido es fricción, no ayuda.
+  - Hay ramas, no una línea recta: no-admisión, POS/Póliza/ARL, copago/autorización para Evento. El stepper rígido (siguiente/atrás) se siente torpe cuando el flujo se bifurca.
+
+  Y, leyendo el código (cobertura, HADA, copago, intake de paciente), esto huele a herramienta de operador — gente que la usa muchas veces al día y prefiere una pantalla densa antes que dar clic en "siguiente" cinco veces.
+
+  Por eso te planteo la alternativa que creo encaja mejor: secciones progresivas + un panel de resumen fijo. Es la evolución de lo que ya haces con mostrarFormulario(): una sola pantalla que va desbloqueando secciones a medida que completas la anterior, con un panel lateral pegajoso
+  que muestra lo inferido (programa, piso, sla, copago) en tiempo real. Con el store, "la sección X está completa" es un computed() trivial, y el power-user ve y reedita todosin navegar.
+
+  Dicho esto, la decisión cambia lo que te plano después, así que es tuya:
+
+⏺ User answered Claude's questions:
+  ⎿  · ¿Qué forma de UI quieres que tome el plan de implementación con @ngrx/signals? → Secciones progresivas + resumen
+
+⏺ Excelente elección — secciones progresivas + resumen es la que mejor aprovecha el store y la que menos fricción le da a un operador. Aquí tienes el plan, pensado para que aprendas @ngrx/signals mientras migras, sin reescribir todo de golpe.
+
+  Idea rectora: separa "selecciones/inferencias" de "catálogos"
+
+  Antes de tocar nada, la distinción más importante (y el error más común al llegar a un store):
+
+  - Al store van las selecciones y las inferencias — lo que el usuario eligió y lo que el sistema dedujo: paciente, planSalud, convenioContrato, programa, piso, conducta, sla, copago, ubicacion. Eso es lo que hoy está disperso en campos del contenedor y en el use case.
+  - Al store NO van las listas de opciones de los dropdowns (tipoServicioList, programaList, zonasList…). Esos son catálogos; déjalos locales en el componente o, si los reutilizas, en un MaestrosStore aparte. Si metes todo al store, vuelves a tener un saco gigante igual de difícil
+  de seguir.
+
+  Regla mental: el store guarda el "qué se decidió", no el "qué se puede elegir".
+
+  Forma del estado
+
+  type SolicitudNhState = {
+    // Cobertura / identificación
+    paciente: PacienteCoberturaNh | null;
+    planSalud: PlanSalud | null;
+    convenioContrato: Convenio | null;     // el de póliza (hoy: signal 'convenio')
+    // Servicio (en su mayoría inferidos por la cascada)
+    tipoServicio: TipoAtencion | null;
+    tipoPrestacion: TipoPrestacion | null;
+    programa: Programa | null;
+    piso: ConfiguracionInferirPiso | null;
+    zona: Zona | null;
+    conducta: Conducta | null;
+    tipoConvenio: TipoConvenio | null;     // distinto de convenioContrato (hoy: 'infoConvenio')
+    sla: string | null;
+    copago: number | null;
+    // Atención
+    ubicacion: UbicacionNH | null;
+    // Flujo
+    fechaInicioCreacion: Date | null;
+    guardando: boolean;
+    respuesta: Iresponse_solicitud | null;
+  };
+
+  Ojo a un bug latente que destapa este ejercicio: hoy convenio (signal, tipo Convenio) e infoConvenio (tipo TipoConvenio) son dos cosas distintas con nombres casi iguales. En el store quedan separados y nombrados claro (convenioContrato vs tipoConvenio). Eso por sí solo ya limpia
+  confusión.
+
+  Los computed() que mueven la UI progresiva
+
+  Aquí es donde "secciones progresivas + resumen" se vuelve casi gratis:
+
+  withComputed((store) => ({
+    // desbloqueo de secciones
+    coberturaResuelta:   computed(() => !!store.paciente() && !!store.planSalud()),
+    servicioHabilitado:  computed(() => !!store.planSalud() && !!store.ubicacion()?.ciudadPrincipal),
+    puedeGuardar:        computed(() => !!store.programa() && !!store.piso() && !!store.conducta()),
+    // panel de resumen (lo que pintas en el lateral fijo)
+    resumen: computed(() => ({
+      programa: store.programa()?.nombre ?? '—',
+      piso:     store.piso()?.idPiso ?? '—',
+      zona:     store.zona()?.nombre ?? '—',
+      sla:      store.sla() ?? '—',
+      copago:   store.copago() ?? 0,
+    })),
+  })),
+
+  En el template, cada sección se revela con su bandera:
+
+  <section-cobertura />                          <!-- siempre -->
+  @if (store.coberturaResuelta()) {
+    <section-paciente />
+    <section-atencion />
+  }
+  @if (store.servicioHabilitado()) {
+    <section-servicio />
+    <section-no-admision />
+  }
+  <!-- panel lateral pegajoso -->
+  <aside class="resumen-sticky">
+    Programa: {{ store.resumen().programa }}
+    Piso: {{ store.resumen().piso }} · SLA: {{ store.resumen().sla }} · Copago: {{ store.resumen().copago | currency }}
+  </aside>
+  <p-button [disabled]="!store.puedeGuardar()" (click)="store.guardar()" [loading]="store.guardando()" />
+
+  Fíjate: el mostrarFormulario() que hoy es un signal manual desaparece — es solo coberturaResuelta(), derivado del estado real. Menos cosas que sincronizar a mano.
+
+  La cascada de inferencia, sacada del componente
+
+  Esto es el corazón del aprendizaje de rxMethod. Hoy datos-servicio.component.ts tiene ~450 líneas encadenando subscribe dentro de subscribe. En el store queda como una tubería declarativa:
+
+  withMethods((store, maestros = inject(MaestrosUseCase)) => ({
+
+    // El usuario elige el servicio -> se dispara toda la cadena
+    seleccionarServicio: rxMethod<TipoAtencion>(
+      pipe(
+        tap((servicio) => patchState(store, { tipoServicio: servicio, /* limpia inferidos */ })),
+        switchMap((servicio) =>
+          maestros.consultarTipoPrestacionPorServicio(servicio.codigo).pipe(
+            switchMap((prestaciones) => /* infiere prestación -> piso */ ...),
+            tapResponse({
+              next: (resultado) => patchState(store, { programa: ..., piso: ..., conducta: ... }),
+              error: () => patchState(store, { /* fallback */ }),
+            }),
+          ),
+        ),
+      ),
+    ),
+  })),
+
+  Lo que ganas y por qué importa para tu caso:
+  - Adiós a takeUntilDestroyed repetido: rxMethod se desuscribe solo.
+  - switchMap cancela la cascada anterior si el usuario cambia de servicio a medias — hoy eso te puede dejar inferencias "fantasma" de la selección previa. Esto lo arregla deraíz.
+  - El componente datos-servicio se queda en ~80 líneas: pinta dropdowns y llama store.seleccionarServicio(x).
+
+  Orden de migración (incremental, sin romper nada)
+
+  No lo hagas de un tirón. Cada paso compila y queda funcional:
+
+  1. Instala @ngrx/signals@18 @ngrx/operators@18. Crea SolicitudNhStore solo con withState. Provéelo en la ruta del wizard (providers: [SolicitudNhStore] en la config de ruta), no en root → nace y muere con la pantalla, sin resets manuales en cancelar().
+  2. Mueve los signals del use case al store. El SolicitudNhUseCase vuelve a ser lo que tu Clean Architecture pide: fino, solo gateway (guardarSolicitud, consultarDatosPaciente…), sin estado de UI.
+  3. Reemplaza los campos sueltos del contenedor (infoPaciente, infoPrograma, infoPiso…) por lecturas del store. construirSolicitudNH() se vuelve un computed() que arma el request.
+  4. Mueve la cascada de datos-servicio al store, un eslabón a la vez (primero prestación, luego piso, luego conducta…). Tras cada eslabón, prueba.
+  5. Borra TransferenciaDatosService. Los datos del HADA pasan a ser un computed() del store (única fuente de verdad para el paciente, fin de la duplicación).
+  6. Convierte los @Output en llamadas a métodos del store y bórralos. Aquí desaparece casi todo el espagueti de eventos.
+  7. UI progresiva: aplica las banderas computed + el panel resumen pegajoso.
+
+  Un plus para tu cultura de tests
+
+  Un SignalStore se testea como POJO, igual que tus UseCase: lo instancias, llamas un método, y verificas el signal con expect(store.programa()).toBe(...). Para los rxMethod con cadenas async, mockeas el MaestrosUseCase y verificas el estado resultante — mismo espíritu que tus
+  reglas de StepVerifier, pero del lado front.
+
+  ---
+  Te dejé el plan a nivel de arquitectura y aprendizaje. Cuando quieras, te genero el archivo solicitud-nh.store.ts completo y real (con la cascada entera traducida desde tu datos-servicio actual) para que lo estudies línea por línea — ese es el mejor siguiente paso para aprender
+  @ngrx/signals de verdad. ¿Lo armo?
+  
+  Voy a guardar esta decisión para no perder el hilo entre sesiones:
+
+  Read 1 file, recalled 1 memory, wrote 3 memories (ctrl+o to expand)
+
+⏺ Listo, guardé la decisión en memoria para retomarla cuando quieras.
+
+  Para cerrar el resumen de lo que decidimos juntos:
+
+  - Stack confirmado: Angular 18.2 → @ngrx/signals@18 (no NgRx clásico, no metas todo en un componente).
+  - Patrón: un SolicitudNhStore como única fuente de verdad, provisto en la ruta.
+  - UI: secciones progresivas que se desbloquean con computed() + panel de resumen fijo.
+  - Limpieza de fondo: el SolicitudNhUseCase adelgaza a solo-gateway, muere TransferenciaDatosService, y la cascada de inferencia sale de datos-servicio hacia rxMethod.
+
+  El siguiente paso natural para aprender de verdad es que te genere el solicitud-nh.store.ts completo —con tu cascada real traducida— y lo estudiemos juntos línea por línea. Cuando me digas, lo armo.
+
+  Un único aviso: ese código vive en el repo 518-front (otro proyecto, fuera de este working dir), así que si quieres que escriba el archivo ahí, dímelo explícitamente y lo creo en su ruta; si prefieres que te lo muestre aquí para revisarlo antes de pegarlo tú, también.
+
+✻ Crunched for 4m 1s
+
+❯ no, la idea es hacerlo en este proyecto que estamos actuamento y hay algo que me dejaste la duda, angular 18 esta en el otro proyecto aqui la idea es utilizar angular 21 como esta este  proyecto actualmente,ademas de atomic desing, proque nombraste angular 18?                     
+
+⏺ Tienes toda la razón, y te aclaro el malentendido: nombré Angular 18 porque la versión la saqué del package.json de 518-front (el repo que me diste como referencia de la implementación pobre). Nunca miré este proyecto. Déjame ver qué tienes aquí realmente.
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && node -e "const p=require('./package.json'); const d={...p.depend…)
+  ⎿  @angular/common: ^21.2.0
+     @angular/compiler: ^21.2.0
+     @angular/core: ^21.2.0
+     … +13 lines (ctrl+o to expand)
+  
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && echo "=== árbol src/app (2 niveles) ===" && find src/app -maxdep…)
+  ⎿  === árbol src/app (2 niveles) ===
+     src/app
+     src/app/application
+     … +25 lines (ctrl+o to expand)
+  
+⏺ Confirmado: este proyecto es Angular 21.2, PrimeNG 21, Tailwind v4, rxjs 7.8 — y NgRx tampoco está instalado aquí. El "Angular 18" era del repo de referencia (518-front), no de aquí. Mi error fue no validar este proyecto desde el principio; gracias por corregirlo. Déjame ver tu
+  estructura de shared/ui (atomic design) y el módulo no-hospitalario para aterrizar el plan a esta base de código.
+  
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && echo "=== shared/ui ===" && find src/app/shared/ui -maxdepth 3 -…)
+  ⎿  === shared/ui ===
+     src/app/shared/ui
+     src/app/shared/ui/atoms
+     … +23 lines (ctrl+o to expand)
+  
+⏺ Ahora veo tu atomic design real (atoms/molecules/organisms en shared/ui). Déjame ver cómo está organizado un módulo ya hecho (informes) y qué hay en solicitudes, para que el plan calce con tus convenciones y no con las del otro repo.
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && echo "=== solicitudes (no-hospitalario) ===" && find src/app/pre…)
+  ⎿  === solicitudes (no-hospitalario) ===
+     src/app/presentation/no-hospitalario/solicitudes/solicitud-detalle-dialog.component.ts
+     src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.html
+     … +12 lines (ctrl+o to expand)
+  
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && echo "=== ¿hay signalStore / withState / patchState ya en el rep…)
+  ⎿  === ¿hay signalStore / withState / patchState ya en el repo? ===
+     --- fin grep ngrx ---
+     … +8 lines (ctrl+o to expand)
+
+⏺ Eso explica el "18": lo leí del repo de referencia, no de aquí. Y hay algo más importante que el grep me reveló: en este proyecto NO hay NgRx ni ningún store todavía — hoy todo el estado se maneja con signal()/computed() planos en componentes y servicios. Es decir, meter
+  @ngrx/signals aquí sería estrenar esa librería en el repo. No es malo (encaja perfecto con Angular 21 y con lo que quieres aprender), pero quiero que lo decidas con el datosobre la mesa.
+     
+  Déjame ver cómo escribes hoy un componente de feature, una molécula y el patrón de DI, para que el store calce con tus convenciones reales.
+
+  Read 3 files (ctrl+o to expand)
+
+⏺ Ahora sí tengo el panorama correcto de este proyecto, y cambia cosas importantes del plan. Gracias por la corrección — el "18" salió de 518-front; nunca debí asumir que aplicaba aquí.
+
+  Lo que de verdad tienes en este repo
+
+  - Angular 21.2, PrimeNG 21 (standalone: Select, DatePicker…), Tailwind v4, rxjs 7.8. → si usamos NgRx sería @ngrx/signals@21.
+  - Cero librerías de estado hoy. Todo es signal()/computed() plano en componentes smart (lo vi en solicitudes.component.ts). Meter @ngrx/signals aquí es estrenar el patrón en el repo.
+  - Clean Architecture estricta y distinta a la de 518-front. Y este es el punto clave que cambia todo 👇
+
+  La diferencia que lo cambia todo: aquí el dominio es TS puro
+
+  En 518-front, el SolicitudNhUseCase era un @Injectable({providedIn:'root'}) con signals adentro — mezclaba Angular, estado y dominio. Aquí no. Tu MaestrosUseCase es TypeScript puro, sin Angular, instanciado por una factory en DI:
+
+  // application/di/maestros.providers.ts
+  useFactory: () => new MaestrosUseCase(inject(MaestroRepository))
+
+  El dominio aquí es deliberadamente Angular-free. Eso tiene una consecuencia directa para tu pregunta:
+
+  Un SignalStore de @ngrx/signals usa inject(), DI y signals → es Angular. Por lo tanto NO puede vivir en domain/. Vive en la capa de presentación. Y eso, lejos de ser un problema, es lo que mantiene tu arquitectura limpia:
+
+  - El use-case (domain/, TS puro) sigue siendo el que sabe del negocio: guardar(), consultarCobertura(), inferirPiso()…
+  - El store (presentation/) es el cerebro de la pantalla: inyecta el use-case y orquesta la cascada y el estado de UI. No reemplaza al use-case, lo consume.
+
+  En llano: el use-case es "qué se puede hacer con una solicitud" (negocio); el store es "cómo se comporta esta pantalla mientras la armo" (UI). Cosas distintas, capas distintas.
+
+  Dónde vive cada cosa (en TUS carpetas)
+
+  domain/no-hospitalario/solicitud/
+    entities/…                         (tipos: Paciente, Convenio, Programa…)
+    ports/solicitud.repository.ts      (interfaz)
+    use-cases/solicitud.use-case.ts    (TS PURO: guardar, consultarCobertura, inferir*)
+
+  infrastructure/no-hospitalario/solicitud/
+    solicitud-http.repository.ts       (implementa el port)
+
+  application/di/
+    solicitud.providers.ts             (provideSolicitud(): port→adapter + factory del use-case)
+
+  presentation/no-hospitalario/solicitud-crear/
+    solicitud-crear.store.ts           ← AQUÍ vive @ngrx/signals (estado UI + cascada)
+    solicitud-crear.component.ts       (página smart: provee y consume el store)
+    sections/
+      seccion-cobertura.component.ts   (organismo de feature: lee/escribe el store)
+      seccion-servicio.component.ts
+      …
+
+  shared/ui/{atoms,molecules,organisms}/   (intactos, tontos, reutilizables)
+
+  El store se provee en la ruta del wizard, exactamente con el mismo patrón que ya usas (provideMaestros() en los providers de la ruta). Así nace y muere con la pantalla.
+
+  Atomic design + store: quién toca el store y quién NO
+
+  Esta es la regla que mantiene sano el sistema de diseño:
+
+  - Atoms y molecules (shared/ui: button, form-field, field-error…): jamás tocan el store ni el dominio. Siguen siendo tontos, puro input()/output(), como ya los tienes. Son reutilizables entre features y no deben saber que existe "solicitud".
+  - Organisms del sistema de diseño (shared/ui/organisms: data-table-card): también genéricos y tontos.
+  - Secciones de la feature (presentation/.../solicitud-crear/sections/): estas sí inyectan el store. Son específicas de esta pantalla, no van en el sistema de diseño, y aquíel store paga su valor: matan el prop-drilling (pasar datos por mil @Input/@Output). Cada sección compone
+  átomos/moléculas tontos por dentro.
+
+  Es decir: el store toca solo el nivel feature (página + sus secciones). El sistema de diseño no se entera de que existe. Eso es justo lo que evita que tu atomic design se "contamine".
+
+  Una nota honesta antes de seguir
+
+  Como el repo hoy no tiene ninguna librería de estado, la alternativa "de la casa" sería un servicio con signals planos (cero dependencias nuevas, idéntico a tu estilo actual). Funciona igual de bien para el estado. Lo que @ngrx/signals te suma —y por lo que vale aprenderlo— es
+  rxMethod para la cascada async (servicio→prestación→piso→conducta→sla) y una convención clara withState/withComputed/withMethods. Tú quieres aprenderlo, encaja perfecto conAngular 21, y no rompe tu arquitectura (vive en presentación). Así que vamos con él; solo quería que
+  supieras que es una dependencia nueva y la primera de su tipo en el repo.
+
+  Actualizo la memoria, que había quedado con datos equivocados (decía Angular 18 / repo externo):
+
+  Wrote 1 memory (ctrl+o to expand)
+
+⏺ Con eso, el plan ya está anclado a tu repo real (Angular 21, dominio TS puro, atomic design, store en presentación). Para el siguiente paso —que es donde de verdad se aprende— te propongo arrancar por el solicitud-crear.store.ts, porque es el corazón de @ngrx/signals y lo
+  estudiamos línea por línea.
+
+  Para armarlo bien necesito acordar contigo una cosa antes: el store consume un use-case de dominio que aún no existe aquí (es greenfield). Así que hay dos formas de empezar:
+
+  - (A) Esqueleto completo, capa por capa — creo el domain/.../solicitud.use-case.ts (TS puro) + su port + un infrastructure mock + el provideSolicitud() en DI + el store que los une. Quedas con el flujo entero cableado y compilando, listo para ir llenando.
+  - (B) Solo el store, con el use-case "mockeado" — voy directo al solicitud-crear.store.ts para que veas withState/withComputed/withMethods/rxMethod ya, y dejamos el dominioreal para después. Más rápido para aprender la librería, menos "arquitectura" de entrada.
+
+  Mi recomendación para aprender sin perder el rigor de tu repo: (A), pero te lo explico empezando por el store y bajando a las otras capas, no al revés. ¿Con cuál vamos? ¿O prefieres que primero solo instale @ngrx/signals@21 y te muestre un store mínimo de juguete para tocar la API
+  antes de meterle tu dominio?
+
+✻ Churned for 3m 8s
+
+❯ otra duda antes de proceder, este NgRx Signal Stores lo vamos a utilizar a nivel de front de toda la aplicacion o solo a nivel de ese componentes de solicitudes?                                                                                                                        
+
+⏺ Buena pregunta de fondo, y la respuesta corta es: a nivel de feature, no de toda la app. Te explico el porqué, porque la decisión equivocada aquí es justo la que hace que NgRx tenga mala fama.
+
+  No hagas un store global de toda la aplicación
+
+  El antipatrón clásico (heredado del NgRx viejo) es montar un store gigante root donde vive todo el estado de la app. Eso:
+  - Choca con tu Clean Architecture: tu estado de verdad (catálogos, solicitudes) ya está modelado en domain/. Un mega-store root duplicaría esas responsabilidades.
+  - Hace que todo viva para siempre en memoria y se acople entre features que no tienen nada que ver. 
+  - Te obliga a "resetear a mano" — el mismo dolor que viste en 518-front.
+
+  Tu repo hoy es sano precisamente porque no tiene eso: cada pantalla maneja su estado con signals locales.
+
+  La regla: el store se usa por feature, y solo cuando se gana su lugar
+
+  @ngrx/signals no es un reemplazo de los signals planos; es una herramienta que sacas cuando la complejidad lo justifica. Lo provees en la ruta de esa feature, vive y muere con ella.
+
+  ┌───────────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────┐
+  │                                 Situación                                 │                       Qué usar                        │
+  ├───────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ Estado dentro de un componente (un filtro, un modal, una lista simple)    │ signal()/computed() planos — como ya haces            │
+  ├───────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ Estado compartido entre varios componentes (secciones que se pasan datos) │ SignalStore (mata el prop-drilling de @Input/@Output) │
+  ├───────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ Cascada async que orquesta varios pasos (servicio→prestación→piso→…)      │ SignalStore con rxMethod                              │
+  ├───────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ Pantalla con lifecycle propio (wizard que debe nacer/morir limpio)        │ SignalStore provisto en la ruta                       │
+  └───────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────┘
+
+  Aplicado a lo concreto:
+  - solicitud-crear (el wizard de secciones progresivas) → sí, SignalStore. Tiene estado compartido, cascada y lifecycle. Es el caso de libro.
+  - solicitudes (la lista con filtros y tabla) → no lo toques. Funciona perfecto con signals planos. Migrarlo sería complejidad sin beneficio.
+  - informes, gestionar-novedades, etc. → igual, déjalos como están salvo que crezcan a algo con cascada/estado compartido.
+
+  El único caso "app-wide" legítimo (y por qué tampoco lo fuerzo)
+
+  Sí existe estado verdaderamente transversal: sesión/usuario, feature flags, notificaciones globales. Eso sí podría ser un SignalStore provisto en root. Pero tú ya resuelves eso con core/auth y core/feedback (ToasterService), y funcionan. No los retrofitees. Si algún día uno de
+  esos crece, lo conviertes; hoy no hay razón.
+
+  Para que el repo no quede inconsistente
+
+  Como vas a tener dos patrones conviviendo (signals planos + algún SignalStore), lo único que importa es que la regla sea clara y se respete: "SignalStore solo en features con estado compartido + cascada o lifecycle; el resto, signals planos." Mientras eso se cumpla, no es
+  inconsistencia, es usar la herramienta adecuada para cada tamaño de problema. Si quieres, eso lo dejamos escrito como una nota corta en docs/ o en el CLAUDE.md del proyectocuando hagamos el primer store, para que el equipo lo siga.
+
+  ---
+  En resumen: @ngrx/signals entra solo en solicitud-crear por ahora. No es una decisión global de la app; es una herramienta puntual para la única pantalla que hoy la necesita de verdad.
+  
+  Lo dejo anotado en memoria para que la política quede fija:
+
+  Wrote 1 memory (ctrl+o to expand)
+
+⏺ ¿Seguimos entonces con el esqueleto de solicitud-crear (opción A: dominio TS puro → port → infra mock → DI → store), explicándolo desde el store hacia abajo? ¿O prefieres que primero solo instale @ngrx/signals@21 y te muestre un store mínimo de juguete para que toques
+  withState/withMethods/rxMethod antes de meterle tu dominio?
+
+✻ Sautéed for 50s
+
+❯ Esqueleto completo, capa por capa — creo el domain/.../solicitud.use-case.ts (TS puro) + su port + un infrastructure mock + el provideSolicitud() en DI + el store que los une. Quedas con el flujo entero cableado y compilando, listo para ir llenando. y la interfaz grafica,         
+  recuerda utilizar a nuestro proyecto, clean arquitecture, angular 21, atomic desing en fin.. dame el ajuste                                                                                                                                                                              
+  
+⏺ ¡Vamos! Antes de escribir una línea, necesito calcar tus convenciones exactas (nombres de archivo, forma de los use-case, ports, repos HTTP, rutas y las APIs de tus átomos). Déjame leer los módulos de referencia.
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && echo "=== domain/maestros ===" && find src/app/domain/maestros -…)
+  ⎿  === domain/maestros ===
+     src/app/domain/maestros/entities/ciudad.entity.ts
+     src/app/domain/maestros/entities/clasificacion-permanentes.entity.ts
+     … +55 lines (ctrl+o to expand)
+
+  Read 4 files (ctrl+o to expand)
+
+⏺ Ahora la capa de infra, las rutas, DI y un par de átomos para la UI.
+
+  Read 5 files (ctrl+o to expand)
+
+⏺ Y finalmente los átomos/moléculas que usaré en la UI, una entidad de muestra y un feature completo de referencia.
+
+  Read 5 files (ctrl+o to expand)
+
+⏺ Tengo lo que necesito de las capas. Dos cosas más antes de escribir: cómo compones un formulario en el template y tu gestor de paquetes, para instalar @ngrx/signals bien.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && echo "=== lockfiles ===" && ls -1 package-lock.json pnpm-lock.ya…)
+  ⎿  Error: Exit code 1
+     === lockfiles ===
+     package-lock.json
+
+⏺ Gestor: npm. Voy a instalar @ngrx/signals@21 + @ngrx/operators@21 (alineados a Angular 21).
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && npm install @ngrx/signals@^21 @ngrx/operators@^21 --save 2>&1 |…)
+  ⎿  added 2 packages, and audited 605 packages in 6s
+
+     149 packages are looking for funding
+     … +8 lines (ctrl+o to expand)
+  ⎿  (timeout 3m)
+
+⏺ Instalado (2 paquetes; las vulnerabilidades son preexistentes del repo, no de esto). Una última verificación de estilos globales para que las tarjetas y grids calcen con tusistema:
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && echo "=== def de .card / .field / .field-grid / .section ===" &&…)
+  ⎿  === def de .card / .field / .field-grid / .section ===
+     src/styles/patterns/_patterns.scss:20:  .card {
+     src/styles/patterns/_patterns.scss:28:  .card--outlined {
+     … +14 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Tengo todo lo necesario. Construyo el esqueleto completo. Primero creo las carpetas, luego escribo capa por capa.
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && mkdir -p \
+        src/app/domain/no-hospitalario/solicitud/entities \…)
+  ⎿  OK carpetas creadas
+
+⏺ Capa domain — entidades (TS puro, interface, igual que tus maestros):
+
+⏺ Write(src/app/domain/no-hospitalario/solicitud/entities/paciente-cobertura.entity.ts)
+  ⎿  Wrote 19 lines to src/app/domain/no-hospitalario/solicitud/entities/paciente-cobertura.entity.ts
+       1 /**
+       2  * Entidad de dominio: paciente con su cobertura (resultado de consultar la
+       3  * identificación contra el backend de afiliación). Inmutable. TypeScript puro:
+       4  * sin Angular, sin PrimeNG, sin tipos HTTP.
+       5  *
+       6  * `planesDisponibles` lista los IDs de plan de salud a los que ESTE paciente
+       7  * tiene acceso; el caso de uso lo cruza con el catálogo de planes para ofrecer
+       8  * solo los válidos (ver `SolicitudUseCase.consultarPlanesDisponibles`).
+       9  */
+      10 export interface PacienteCobertura {
+     … +9 lines (ctrl+o to expand)
+
+⏺ Write(src/app/domain/no-hospitalario/solicitud/entities/plan-salud.entity.ts)
+  ⎿  Wrote 8 lines to src/app/domain/no-hospitalario/solicitud/entities/plan-salud.entity.ts
+      1 /**
+      2  * Entidad de dominio: plan de salud (POS, Póliza, ARL, Particular…). Inmutable.
+      3  * TypeScript puro. Se modela como `interface`: dato sin comportamiento.
+      5 export interface TipoServicio {
+      6   readonly codigo: string;
+      7   readonly nombre: string;
+      8 }
+
+⏺ Write(src/app/domain/no-hospitalario/solicitud/entities/inferencia-servicio.entity.ts)
+  ⎿  Wrote 17 lines to src/app/domain/no-hospitalario/solicitud/entities/inferencia-servicio.entity.ts
+       1 /**
+       2  * Entidad de dominio: resultado de INFERIR el servicio.
+       3  *
+       4  * En el sistema legacy, elegir un tipo de servicio disparaba una cadena de
+       5  * consultas (prestación → programa → piso → zona → conducta → SLA → copago).
+       6  * Aquí ese encadenamiento se modela como UNA operación de dominio que devuelve
+       7  * el paquete inferido completo. El backend (o el mock) resuelve la cascada; la
+       8  * presentación solo consume el resultado.
+       9  */
+      10 export interface InferenciaServicio {
+     … +7 lines (ctrl+o to expand)
+
+⏺ Write(src/app/domain/no-hospitalario/solicitud/entities/solicitud.entity.ts)
+  ⎿  Wrote 28 lines to src/app/domain/no-hospitalario/solicitud/entities/solicitud.entity.ts
+       1 /**
+       2  * Entidades de dominio del guardado de una solicitud.
+       3  *
+       4  * `NuevaSolicitud` es el comando que viaja al backend al confirmar; reúne lo
+       5  * elegido por el usuario (identificación, plan, servicio) con lo inferido por la
+       6  * cascada (programa, piso, zona, conducta, SLA, copago).
+       7  *
+       8  * `ResultadoSolicitud` es la respuesta: el identificador asignado y los datos
+       9  * que la pantalla muestra al final (resumen/confirmación).
+      10  */
+     … +18 lines (ctrl+o to expand)
+
+⏺ Ahora el port y el use-case (TS puro, puerto por constructor, como MaestrosUseCase):
+
+⏺ Write(src/app/domain/no-hospitalario/solicitud/ports/solicitud.repository.ts)
+  ⎿  Wrote 42 lines to src/app/domain/no-hospitalario/solicitud/ports/solicitud.repository.ts
+       1 import { Observable } from 'rxjs';
+       2 import { PacienteCobertura } from '../entities/paciente-cobertura.entity';
+       3 import { PlanSalud } from '../entities/plan-salud.entity';
+       4 import { TipoServicio } from '../entities/tipo-servicio.entity';
+       5 import { InferenciaServicio } from '../entities/inferencia-servicio.entity';
+       6 import { NuevaSolicitud, ResultadoSolicitud } from '../entities/solicitud.entity';
+       7
+       8 /**
+       9  * Puerto (contrato) del repositorio de «solicitud no hospitalaria».
+      10  *
+     … +32 lines (ctrl+o to expand)
+
+⏺ Write(src/app/domain/no-hospitalario/solicitud/use-cases/solicitud.use-case.ts)
+  ⎿  Wrote 63 lines to src/app/domain/no-hospitalario/solicitud/use-cases/solicitud.use-case.ts
+       1 import { map, Observable } from 'rxjs';
+       2 import { PacienteCobertura } from '../entities/paciente-cobertura.entity';
+       3 import { PlanSalud } from '../entities/plan-salud.entity';
+       4 import { TipoServicio } from '../entities/tipo-servicio.entity';
+       5 import { InferenciaServicio } from '../entities/inferencia-servicio.entity';
+       6 import { NuevaSolicitud, ResultadoSolicitud } from '../entities/solicitud.entity';
+       7 import { SolicitudRepository } from '../ports/solicitud.repository';
+       8
+       9 /**
+      10  * Caso de uso de «crear solicitud no hospitalaria».
+     … +53 lines (ctrl+o to expand)
+
+⏺ Capa infrastructure — adaptador mock (mismo patrón que NovedadHttpRepository: of(...).pipe(delay), con TODOs para el HTTP real):
+
+⏺ Write(src/app/infrastructure/no-hospitalario/solicitud/solicitud-http.repository.ts)
+  ⎿  Wrote 116 lines to src/app/infrastructure/no-hospitalario/solicitud/solicitud-http.repository.ts
+       1 import { Injectable } from '@angular/core';
+       2 import { Observable, of } from 'rxjs';
+       3 import { delay } from 'rxjs/operators';
+       4 import { SolicitudRepository } from '../../../domain/no-hospitalario/solicitud/ports/solicitud.repository';
+       5 import { PacienteCobertura } from '../../../domain/no-hospitalario/solicitud/entities/paciente-cobertura.entity';
+       6 import { PlanSalud } from '../../../domain/no-hospitalario/solicitud/entities/plan-salud.entity';
+       7 import { TipoServicio } from '../../../domain/no-hospitalario/solicitud/entities/tipo-servicio.entity';
+       8 import { InferenciaServicio } from '../../../domain/no-hospitalario/solicitud/entities/inferencia-servicio.entity';
+       9 import {
+      10   NuevaSolicitud,
+     … +106 lines (ctrl+o to expand)
+
+⏺ Capa application/di — provideSolicitud() (port→adapter + use-case por factory, idéntico patrón a provideNovedades):
+
+⏺ Write(src/app/application/di/solicitud.providers.ts)
+  ⎿  Wrote 25 lines to src/app/application/di/solicitud.providers.ts
+       1 import { inject, Provider } from '@angular/core';
+
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.store.ts)
+  ⎿  Wrote 229 lines to src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.store.ts
+       1 import { computed, inject } from '@angular/core';
+       2 import {
+       3   patchState,
+       4   signalStore,
+       5   withComputed,
+       6   withMethods,
+       7   withState,
+       8 } from '@ngrx/signals';
+       9 import { rxMethod } from '@ngrx/signals/rxjs-interop';
+      10 import { tapResponse } from '@ngrx/operators';
+     … +219 lines (ctrl+o to expand)
+
+⏺ Capa presentation — las secciones (cada una inyecta el store; aquí muere el prop-drilling). Sección de cobertura:
+
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/sections/seccion-cobertura.component.ts)
+  ⎿  Wrote 171 lines to src/app/presentation/no-hospitalario/solicitud-crear/sections/seccion-cobertura.component.ts
+       1 import {
+       2   ChangeDetectionStrategy,
+       3   Component,
+       4   computed,
+       5   inject,
+       6   signal,
+       7 } from '@angular/core';
+       8 import { toSignal } from '@angular/core/rxjs-interop';
+       9 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+      10 import { merge } from 'rxjs';
+     … +161 lines (ctrl+o to expand)
+
+⏺ Sección de paciente (datos de solo lectura + selector de plan enlazado al store):
+
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/sections/seccion-paciente.component.ts)
+  ⎿  Wrote 89 lines to src/app/presentation/no-hospitalario/solicitud-crear/sections/seccion-paciente.component.ts
+       1 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+       2 import { DatePipe } from '@angular/common';
+       3 import { FormsModule } from '@angular/forms';
+       4 import { Select } from 'primeng/select';
+       5
+       6 import { FormFieldComponent } from '../../../../shared/ui/molecules/form-field/form-field.component';
+       7 import { SolicitudCrearStore } from '../solicitud-crear.store';
+       8
+       9 /**
+      10  * Sección: datos del paciente (solo lectura) + selección del plan de salud.
+     … +79 lines (ctrl+o to expand)
+
+⏺ Sección de servicio (selector que dispara la inferencia) y el panel de resumen fijo:
+
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/sections/seccion-servicio.component.ts)
+  ⎿  Wrote 69 lines to src/app/presentation/no-hospitalario/solicitud-crear/sections/seccion-servicio.component.ts
+       1 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+       2 import { FormsModule } from '@angular/forms';
+       3 import { Select } from 'primeng/select';
+       4
+       5 import { FormFieldComponent } from '../../../../shared/ui/molecules/form-field/form-field.component';
+       6 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+       7 import { SolicitudCrearStore } from '../solicitud-crear.store';
+       8
+       9 /**
+      10  * Sección: datos del servicio. Elegir el tipo de servicio dispara la INFERENCIA
+     … +59 lines (ctrl+o to expand)
+
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/sections/resumen-solicitud.component.ts)
+  ⎿  Wrote 108 lines to src/app/presentation/no-hospitalario/solicitud-crear/sections/resumen-solicitud.component.ts
+       1 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+       2 import { CurrencyPipe, DatePipe } from '@angular/common';
+       3 
+       4 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+       5 import { SolicitudCrearStore } from '../solicitud-crear.store';
+       6 
+       7 /**
+       8  * Panel de RESUMEN (aside fijo). Solo LECTURA: refleja en vivo lo que el store
+       9  * va acumulando (paciente, plan, servicio y los datos inferidos) y, al guardar,
+      10  * muestra el resultado. No tiene lógica: es la cara visible de los `computed`
+     … +98 lines (ctrl+o to expand)
+
+⏺ La página smart (provee y consume el store) + su HTML con las secciones progresivas y el resumen fijo:
+
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.component.ts)
+  ⎿  Wrote 44 lines to src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.component.ts
+       1 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+       2 
+       3 import { PageHeaderComponent } from '../../../shared/ui/molecules/page-header/page-header.component';
+       4 import { FormActionsComponent } from '../../../shared/ui/molecules/form-actions/form-actions.component';
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.component.html)
+  ⎿  Wrote 48 lines to src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.component.html
+       1 <!--
+       2   CREAR SOLICITUD — pantalla SMART. La página solo orquesta: provee el store,
+       3   compone las secciones y las revela de forma PROGRESIVA según los `computed`
+       4   del store. El estado vive en el store, no aquí.
+       5 -->
+       6 <div class="container-fluid section animate-fade-in">
+       7   <app-page-header
+       8     class="mb-8"
+       9     overline="No hospitalario"
+      10     title="Nueva solicitud"
+     … +38 lines (ctrl+o to expand)
+
+⏺ Las rutas lazy de la feature (DI a nivel de ruta, como novedades.routes.ts):
+
+⏺ Write(src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.routes.ts)
+  ⎿  Wrote 29 lines to src/app/presentation/no-hospitalario/solicitud-crear/solicitud-crear.routes.ts
+       1 import { Routes } from '@angular/router';
+       2 import { provideSolicitud } from '../../../application/di/solicitud.providers';
+       3 import { provideMaestros } from '../../../application/di/maestros.providers';
+       4
+       5 /**
+       6  * Rutas de la feature «crear solicitud no hospitalaria». El cableado de DI
+       7  * (`provideSolicitud`, `provideMaestros`) se registra aquí, a nivel de ruta
+       8  * lazy, para aislar el slice: puerto→adaptador y caso de uso solo existen
+       9  * mientras la feature está cargada. `maestros` alimenta el catálogo de tipos de
+      10  * identificación de la sección de cobertura.
+     … +19 lines (ctrl+o to expand)
+
+⏺ Ahora registro la ruta en app.routes.ts (la específica /crear antes de la lista) y conecto el botón Crear solicitud de la lista para que navegue:
+
+⏺ Update(src/app/app.routes.ts)
+  ⎿  Added 10 lines
+      59      },
+      60    },
+      61    {
+      62 +    // Crear solicitud (wizard de secciones progresivas con @ngrx/signals). La                                                                                                                                                                                            
+      63 +    // ruta más específica va ANTES que la lista. El DI del slice se cablea                                                                                                                                                                                               
+      64 +    // dentro de sus propias rutas lazy (`SOLICITUD_CREAR_ROUTES`).                                                                                                                                                                                                       
+      65 +    path: 'no-hospitalario/solicitudes/crear',                                                                                                                                                                                                                            
+      66 +    loadChildren: () =>                                                                                                                                                                                                                                                   
+      67 +      import(                                                                                                                                                                                                                                                             
+      68 +        './presentation/no-hospitalario/solicitud-crear/solicitud-crear.routes'                                                                                                                                                                                           
+      69 +      ).then((m) => m.SOLICITUD_CREAR_ROUTES),                                                                                                                                                                                                                            
+      70 +  },                                                                                                                                                                                                                                                                      
+      71 +  {                                                                                                                                                                                                                                                                       
+      72      path: 'no-hospitalario/solicitudes',
+      73      // El catálogo de tipos de identificación (filtro) viene del slice `maestros`;
+      74      // se cablea a nivel de ruta lazy para aislar el slice mientras está cargada.
+
+⏺ Conecto el botón Crear solicitud de la lista para navegar al wizard:
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 1 line
+       8  import { toSignal } from '@angular/core/rxjs-interop';
+       9  import { DatePipe } from '@angular/common';
+      10  import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+      11 +import { Router } from '@angular/router';                                                                                                                                                                                                                                 
+      12  import { merge } from 'rxjs';
+      13  
+      14  // PrimeNG 21 — standalone
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 1 line
+      92    private readonly fb = inject(FormBuilder);
+      93    private readonly maestros = inject(MaestrosUseCase);
+      94    private readonly toaster = inject(ToasterService);
+      95 +  private readonly router = inject(Router);                                                                                                                                                                                                                               
+      96  
+      97    // --- Estado UI ---
+      98    protected readonly filtrosAbiertos = signal(true);
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 2 lines, removed 1 line
+      222    }
+      223  
+      224    protected crearSolicitud(): void {
+      225 -    // Abriría el flujo de creación de una solicitud.                                                                                                                                                                                                                    
+      225 +    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).                                                                                                                                                                                           
+      12  import { merge } from 'rxjs';
+      13  
+      14  // PrimeNG 21 — standalone
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 1 line
+      92    private readonly fb = inject(FormBuilder);
+      93    private readonly maestros = inject(MaestrosUseCase);
+      94    private readonly toaster = inject(ToasterService);
+      95 +  private readonly router = inject(Router);                                                                                                                                                                                                                               
+      96  
+      97    // --- Estado UI ---
+      98    protected readonly filtrosAbiertos = signal(true);
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 2 lines, removed 1 line
+      222    }
+      223  
+      224    protected crearSolicitud(): void {
+      225 -    // Abriría el flujo de creación de una solicitud.                                                                                                                                                                                                                    
+      225 +    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).                                                                                                                                                                                           
+      226 +    void this.router.navigate(['/no-hospitalario/solicitudes/crear']);                                                                                                                                                                                                   
+      227    }
+      228  
+      13  
+      14  // PrimeNG 21 — standalone
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 1 line
+      92    private readonly fb = inject(FormBuilder);
+      93    private readonly maestros = inject(MaestrosUseCase);
+      94    private readonly toaster = inject(ToasterService);
+      95 +  private readonly router = inject(Router);                                                                                                                                                                                                                               
+      96  
+      97    // --- Estado UI ---
+      98    protected readonly filtrosAbiertos = signal(true);
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 2 lines, removed 1 line
+      222    }
+      223  
+      224    protected crearSolicitud(): void {
+      225 -    // Abriría el flujo de creación de una solicitud.                                                                                                                                                                                                                    
+      225 +    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).                                                                                                                                                                                           
+      226 +    void this.router.navigate(['/no-hospitalario/solicitudes/crear']);                                                                                                                                                                                                   
+      227    }
+      228  
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 1 line
+      92    private readonly fb = inject(FormBuilder);
+      93    private readonly maestros = inject(MaestrosUseCase);
+      94    private readonly toaster = inject(ToasterService);
+      95 +  private readonly router = inject(Router);                                                                                                                                                                                                                               
+      96  
+      97    // --- Estado UI ---
+      98    protected readonly filtrosAbiertos = signal(true);
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 2 lines, removed 1 line
+      222    }
+      223  
+      224    protected crearSolicitud(): void {
+      225 -    // Abriría el flujo de creación de una solicitud.                                                                                                                                                                                                                    
+      225 +    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).                                                                                                                                                                                           
+      226 +    void this.router.navigate(['/no-hospitalario/solicitudes/crear']);                                                                                                                                                                                                   
+      227    }
+      228  
+      95 +  private readonly router = inject(Router);                                                                                                                                                                                                                               
+      96  
+      97    // --- Estado UI ---
+      98    protected readonly filtrosAbiertos = signal(true);
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitudes/solicitudes.component.ts)
+  ⎿  Added 2 lines, removed 1 line
+      222    }
+      223  
+      224    protected crearSolicitud(): void {
+      225 -    // Abriría el flujo de creación de una solicitud.                                                                                                                                                                                                                    
+      225 +    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).                                                                                                                                                                                           
+      226 +    void this.router.navigate(['/no-hospitalario/solicitudes/crear']);                                                                                                                                                                                                   
+      227    }
+      228  
+  ⎿  Added 2 lines, removed 1 line
+      222    }
+      223  
+      224    protected crearSolicitud(): void {
+      225 -    // Abriría el flujo de creación de una solicitud.                                                                                                                                                                                                                    
+      225 +    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).                                                                                                                                                                                           
+      226 +    void this.router.navigate(['/no-hospitalario/solicitudes/crear']);                                                                                                                                                                                                   
+      227    }
+      228  
+      225 -    // Abriría el flujo de creación de una solicitud.                                                                                                                                                                                                                    
+      225 +    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).                                                                                                                                                                                           
+      226 +    void this.router.navigate(['/no-hospitalario/solicitudes/crear']);                                                                                                                                                                                                   
+      227    }
+      228  
+      227    }
+      228  
+      229    /** Abre el modal de detalle con el detalle (demo) de la solicitud clicada. */
+  ⎿  {
+       "ng": "ng",
+       "start": "ng serve",
+  ⎿  Node.js version v25.6.1 detected.
+     Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+     ❯ Building...
+     … +8 lines (ctrl+o to expand)
+  ⎿  (timeout 7m)
+
+⏺ El input spin del átomo icon es booleano sin transform, así que hay que enlazarlo explícito. Lo corrijo:
+
+⏺ Update(src/app/presentation/no-hospitalario/solicitud-crear/sections/seccion-servicio.component.ts)
+  ⎿  Added 1 line, removed 1 line
+      52            class="text-text-secondary flex items-center gap-2 mt-2"
+      53            style="font-size: var(--app-size-sm)"
+      54          >
+      55 -          <app-icon name="spinner" spin label="Infiriendo" />                                                                                                                                                                                                             
+      55 +          <app-icon name="spinner" [spin]="true" label="Infiriendo" />                                                                                                                                                                                                    
+      56            Infiriendo datos del servicio…
+      57          </p>
+      58        }
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && npx ng build --configuration development 2>&1 | tail -45)
+  ⎿  Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+     ❯ Building...
+     ✔ Building...
+     … +41 lines (ctrl+o to expand)
+
+⏺ Compila limpio — el chunk solicitud-crear-component (53.6 kB) se generó. Ahora paso el linter (el equipo cuida el estilo) para no dejar nada sucio:
+
+⏺ Bash(cd "/Users/jesusdavidceballoscastillo/Documents/Study/salud-en-casa/plataforma-domiciliaria" && npx ng lint 2>&1 | tail -40)
+  ⎿  Node.js version v25.6.1 detected.
+     Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+     … +3 lines (ctrl+o to expand)
+
+⏺ Build ✅, lint ✅. El esqueleto completo compila limpio. Actualizo memoria y te explico lo entregado.
+
+  Wrote 1 memory (ctrl+o to expand)
+
+⏺ Listo. Esqueleto completo, cableado de punta a punta, compilando y pasando lint.
+
+  Lo que quedó creado (capa por capa)
+
+  domain/no-hospitalario/solicitud/            ← TS PURO (sin Angular)
+  ├─ entities/  paciente-cobertura · plan-salud · tipo-servicio · inferencia-servicio · solicitud
+  ├─ ports/     solicitud.repository.ts        ← contrato (abstract class = token DI)
+  └─ use-cases/ solicitud.use-case.ts          ← lógica (incluye consultarPlanesDisponibles)
+
+  infrastructure/no-hospitalario/solicitud/
+  └─ solicitud-http.repository.ts              ← MOCK of().pipe(delay), con TODOs para HttpClient
+
+  application/di/
+  └─ solicitud.providers.ts                    ← provideSolicitud(): port→adapter + factory
+
+  presentation/no-hospitalario/solicitud-crear/
+  ├─ solicitud-crear.store.ts                  ← ⭐ SignalStore (estado + cascada)
+  ├─ solicitud-crear.component.ts/.html        ← página: PROVEE y orquesta el store
+  ├─ sections/  seccion-cobertura · seccion-paciente · seccion-servicio · resumen-solicitud
+  └─ solicitud-crear.routes.ts                 ← ruta lazy + DI del slice
+
+  Más: ruta no-hospitalario/solicitudes/crear en app.routes.ts, y el botón Crear solicitud de la lista ya navega ahí.
+
+  Cómo leerlo para aprender @ngrx/signals
+
+  Abre solicitud-crear.store.ts y míralo en este orden:
+
+  1. withState(initialState) — el estado. Cada campo es ya un signal (store.paciente()).
+  presentation/no-hospitalario/solicitud-crear/
+  ├─ solicitud-crear.store.ts                  ← ⭐ SignalStore (estado + cascada)
+  ├─ solicitud-crear.component.ts/.html        ← página: PROVEE y orquesta el store
+  ├─ sections/  seccion-cobertura · seccion-paciente · seccion-servicio · resumen-solicitud
+  └─ solicitud-crear.routes.ts                 ← ruta lazy + DI del slice
+
+  Más: ruta no-hospitalario/solicitudes/crear en app.routes.ts, y el botón Crear solicitud de la lista ya navega ahí.
+
+  Cómo leerlo para aprender @ngrx/signals
+
+  Abre solicitud-crear.store.ts y míralo en este orden:
+
+  1. withState(initialState) — el estado. Cada campo es ya un signal (store.paciente()).
+  2. withComputed — fíjate en coberturaResuelta, servicioHabilitado, puedeGuardar: estos computed son los que desbloquean las secciones en el HTML (@if
+  (store.coberturaResuelta())). La UI no decide nada, solo refleja.
+  3. withMethods — el inject(SolicitudUseCase) (el dominio entra aquí, en presentación) y:
+    - cargarCobertura (rxMethod): mira el switchMap anidado (cobertura → planes disponibles) y el tapResponse capturando el error dentro del stream para no romper el rxMethod.
+    - seleccionarServicio (rxMethod): el filter evita inferir sin plan; el switchMap cancela una inferencia previa si cambias de servicio (adiós datos fantasma del legacy).
+    - seleccionarPlan / reiniciar: cambios síncronos con patchState.
+
+  Y observa el flujo completo: una sección llama store.seleccionarServicio($event) → el store hace patchState → los computed se recalculan → el panel de resumen y las
+  secciones reaccionan solos. Cero @Input/@Output entre secciones.
+
+  Para probarlo ya
+
+  npm start
+  Entra a No hospitalario → Solicitudes → Crear solicitud. Pon cualquier tipo de documento + número, Consultar cobertura (mock ~700 ms) → aparecen las secciones de paciente y
+  servicio. Elige plan → se habilita servicio → elígelo → se infiere y el resumen se llena → Guardar muestra el resultado. Todo con datos mock.
+
+  Lo que falta para "ir llenando" (en orden sugerido)
+
+  1. Backend real: cambia el mock de solicitud-http.repository.ts por HttpClient (los TODO ya marcan dónde y cómo, con apiUrl('solicitudes', …) + mapper DTO→dominio).
+  2. Tests: el store se testea como POJO (instánciar, llamar método, expect(store.x())), y el use-case con el mismo estilo de tus *.use-case.spec.ts.
+  3. Cascada granular (opcional): si quieres que el aprendizaje muestre encadenamiento real, parte inferirServicio en varios rxMethod (prestación → piso → conducta), todo
+  dentro del store.
+
+  ¿Quieres que sigamos con los tests del store y del use-case (buen ejercicio para ver @ngrx/signals desde el lado de pruebas), o prefieres que primero cablee el HttpClient
+  real de la capa de infraestructura?
+
+✻ Cogitated for 10m 27s
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ pero en ti
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ accept edits on (shift+tab to cycle) · gh auth login                                                                              ~180k uncached · /clear to start fresh

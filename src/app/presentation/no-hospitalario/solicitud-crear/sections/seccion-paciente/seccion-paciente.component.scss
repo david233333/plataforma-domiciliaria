@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+.dato-label {
+  font-size: var(--app-size-xs);
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dato-valor {
+  margin: 0.15rem 0 0;
+  font-size: var(--app-size-sm);
+  color: var(--app-text-primary);
+  font-weight: var(--app-weight-medium);
+}

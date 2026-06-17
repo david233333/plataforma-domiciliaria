@@ -1,0 +1,40 @@
+<section class="card">
+  <h2 class="text-heading-md text-text-primary m-0 mb-4">
+    Datos del servicio
+  </h2>
+
+  <div class="field-grid grid-cols-1 sm:grid-cols-2">
+    <app-form-field
+      label="Tipo de servicio"
+      controlId="tipoServicio"
+      [required]="true"
+      [hint]="
+        !store.servicioHabilitado()
+          ? 'Selecciona primero un plan de salud.'
+          : null
+      "
+    >
+      <p-select
+        inputId="tipoServicio"
+        [ngModel]="store.tipoServicio()"
+        (ngModelChange)="store.seleccionarServicio($event)"
+        [options]="store.tiposServicio()"
+        optionLabel="nombre"
+        optionValue="codigo"
+        [disabled]="!store.servicioHabilitado()"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </app-form-field>
+  </div>
+
+  @if (store.infiriendo()) {
+    <p
+      class="text-text-secondary flex items-center gap-2 mt-2"
+      style="font-size: var(--app-size-sm)"
+    >
+      <app-icon name="spinner" [spin]="true" label="Infiriendo" />
+      Infiriendo datos del servicio…
+    </p>
+  }
+</section>

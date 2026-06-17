@@ -8,18 +8,27 @@ import { Programa } from '../../domain/maestros/entities/programa.entity';
 import { TipoNovedad } from '../../domain/maestros/entities/tipo-novedad.entity';
 import { ClasificacionPermanentes } from '../../domain/maestros/entities/clasificacion-permanentes.entity';
 import { Profesion } from '../../domain/maestros/entities/profesion.entity';
+import { PlanSalud } from '../../domain/maestros/entities/plan-salud.entity';
+import { TiposPlanParticular } from '../../domain/maestros/entities/tipos-plan-particular.entity';
+import { Convenio } from '../../domain/maestros/entities/convenio.entity';
 import { CiudadDto } from './ciudad.dto';
 import { TipoIdentificacionDto } from './tipo-identificacion.dto';
 import { ProgramaDto } from './programa.dto';
 import { TipoNovedadDto } from './tipo-novedad.dto';
 import { ClasificacionPermanentesDto } from './clasificacion-permanentes.dto';
 import { ProfesionDto } from './profesion.dto';
+import { PlanSaludDto } from './plan-salud.dto';
+import { TiposPlanParticularDto } from './tipos-plan-particular.dto';
+import { ConvenioDto } from './convenio.dto';
 import { toCiudad } from './ciudad.mapper';
 import { toTipoIdentificacion } from './tipo-identificacion.mapper';
 import { toPrograma } from './programa.mapper';
 import { toTipoNovedad } from './tipo-novedad.mapper';
 import { toClasificacionPermanentes } from './clasificacion-permanentes.mapper';
 import { toProfesion } from './profesion.mapper';
+import { toPlanSalud } from './plan-salud.mapper';
+import { toTiposPlanParticular } from './tipos-plan-particular.mapper';
+import { toConvenio } from './convenio.mapper';
 import { apiUrl } from '../http/api-url';
 
 /**
@@ -77,5 +86,25 @@ export class MaestroHttpRepository extends MaestroRepository {
     return this.http
       .get<ProfesionDto[]>(apiUrl('novedades', '/maestros/profesiones'))
       .pipe(map((dtos) => dtos.map(toProfesion)));
+  }
+
+  override consultarPlanesSalud(): Observable<PlanSalud[]> {
+    return this.http
+      .get<PlanSaludDto[]>(apiUrl('novedades', '/maestros/planesSalud'))
+      .pipe(map((dtos) => dtos.map(toPlanSalud)));
+  }
+
+  override consultarTiposPlanParticular(): Observable<TiposPlanParticular[]> {
+    return this.http
+      .get<TiposPlanParticularDto[]>(
+        apiUrl('novedades', '/maestros/tiposPlanParticular'),
+      )
+      .pipe(map((dtos) => dtos.map(toTiposPlanParticular)));
+  }
+
+  override consultarConvenios(): Observable<Convenio[]> {
+    return this.http
+      .get<ConvenioDto[]>(apiUrl('novedades', '/maestros/convenios'))
+      .pipe(map((dtos) => dtos.map(toConvenio)));
   }
 }

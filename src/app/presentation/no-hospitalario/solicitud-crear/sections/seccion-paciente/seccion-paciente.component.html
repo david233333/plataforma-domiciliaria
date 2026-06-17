@@ -1,0 +1,213 @@
+<section class="card">
+  <h2 class="text-heading-md text-text-primary m-0 mb-4">
+    Datos del paciente
+  </h2>
+
+  @if (store.sinCobertura()) {
+    <!-- SIN COBERTURA: el paciente no vino del backend; se captura a mano. -->
+    <p
+      class="text-text-secondary flex items-center gap-2 mb-4"
+      style="font-size: var(--app-size-sm)"
+      role="status"
+    >
+      <i class="pi pi-info-circle" style="color: var(--app-info)"></i>
+      El paciente no tiene cobertura. Ingresa los datos manualmente.
+    </p>
+
+    <form [formGroup]="form">
+      <div class="field-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <app-form-field
+          label="Nombres"
+          controlId="pacienteNombre"
+          [required]="true"
+          [error]="mensajeError('nombre')"
+        >
+          <input
+            pInputText
+            id="pacienteNombre"
+            formControlName="nombre"
+            autocomplete="off"
+            [invalid]="esInvalido('nombre')"
+            (blur)="marcarTocado('nombre')"
+            class="w-full"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Apellidos"
+          controlId="pacienteApellido"
+          [required]="true"
+          [error]="mensajeError('apellido')"
+        >
+          <input
+            pInputText
+            id="pacienteApellido"
+            formControlName="apellido"
+            autocomplete="off"
+            [invalid]="esInvalido('apellido')"
+            (blur)="marcarTocado('apellido')"
+            class="w-full"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Fecha de nacimiento"
+          controlId="pacienteFechaNac"
+          [required]="true"
+          [error]="mensajeError('fechaNacimiento')"
+        >
+          <p-datepicker
+            inputId="pacienteFechaNac"
+            formControlName="fechaNacimiento"
+            dateFormat="dd/mm/yy"
+            iconDisplay="input"
+            [showIcon]="true"
+            [readonlyInput]="true"
+            [showButtonBar]="true"
+            [maxDate]="hoy"
+            [invalid]="esInvalido('fechaNacimiento')"
+            (onBlur)="marcarTocado('fechaNacimiento')"
+            styleClass="w-full"
+            appendTo="body"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Edad"
+          controlId="pacienteEdad"
+          [required]="true"
+          [error]="mensajeError('edad')"
+        >
+          <input
+            pInputText
+            id="pacienteEdad"
+            formControlName="edad"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            autocomplete="off"
+            [invalid]="esInvalido('edad')"
+            (blur)="marcarTocado('edad')"
+            class="w-full"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Sexo"
+          controlId="pacienteSexo"
+          [required]="true"
+          [error]="mensajeError('sexo')"
+        >
+          <p-select
+            inputId="pacienteSexo"
+            formControlName="sexo"
+            [options]="sexoOptions"
+            optionLabel="label"
+            optionValue="value"
+            [invalid]="esInvalido('sexo')"
+            (onBlur)="marcarTocado('sexo')"
+            styleClass="w-full"
+            appendTo="body"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Ocupación"
+          controlId="pacienteOcupacion"
+          [required]="true"
+          [error]="mensajeError('ocupacion')"
+        >
+          <input
+            pInputText
+            id="pacienteOcupacion"
+            formControlName="ocupacion"
+            autocomplete="off"
+            [invalid]="esInvalido('ocupacion')"
+            (blur)="marcarTocado('ocupacion')"
+            class="w-full"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Celular"
+          controlId="pacienteCelular"
+          [required]="true"
+          [error]="mensajeError('celular')"
+        >
+          <input
+            pInputText
+            id="pacienteCelular"
+            formControlName="celular"
+            type="tel"
+            inputmode="tel"
+            autocomplete="off"
+            [invalid]="esInvalido('celular')"
+            (blur)="marcarTocado('celular')"
+            class="w-full"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Teléfono"
+          controlId="pacienteTelefono"
+          [required]="true"
+          [error]="mensajeError('telefono')"
+        >
+          <input
+            pInputText
+            id="pacienteTelefono"
+            formControlName="telefono"
+            type="tel"
+            inputmode="tel"
+            autocomplete="off"
+            [invalid]="esInvalido('telefono')"
+            (blur)="marcarTocado('telefono')"
+            class="w-full"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Email"
+          controlId="pacienteCorreo"
+          [required]="true"
+          [error]="mensajeError('email')"
+        >
+          <input
+            pInputText
+            id="pacienteCorreo"
+            formControlName="email"
+            type="email"
+            autocomplete="off"
+            [invalid]="esInvalido('email')"
+            (blur)="marcarTocado('email')"
+            class="w-full"
+          />
+        </app-form-field>
+      </div>
+    </form>
+  } @else if (store.paciente(); as paciente) {
+    <!-- CON COBERTURA: datos del backend en solo lectura. -->
+    <div class="field-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <span class="dato-label">Nombre</span>
+        <p class="dato-valor">{{ store.nombrePaciente() }}</p>
+      </div>
+      <div>
+        <span class="dato-label">Fecha de nacimiento</span>
+        <p class="dato-valor">
+          {{ paciente.fechaNacimiento | date: 'dd/MM/yyyy' }}
+        </p>
+      </div>
+      <div>
+        <span class="dato-label">Sexo</span>
+        <p class="dato-valor">
+          {{ paciente.sexo === 'F' ? 'Femenino' : 'Masculino' }}
+        </p>
+      </div>
+      <div>
+        <span class="dato-label">Correo</span>
+        <p class="dato-valor">{{ paciente.email || '—' }}</p>
+      </div>
+    </div>
+  }
+</section>

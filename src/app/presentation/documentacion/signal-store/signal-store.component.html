@@ -1,0 +1,309 @@
+<div class="container-app section animate-fade-in">
+  <!-- ============================ HEADER ============================ -->
+  <header class="mb-10">
+    <p class="text-overline">Documentación interna</p>
+    <h1 class="text-display-md mt-2">Estado con SignalStore (&#64;ngrx/signals)</h1>
+    <p class="text-body-lg mt-3" style="color: var(--app-text-secondary); max-width: 70ch">
+      Qué es y cómo funciona el <strong>SignalStore</strong> de
+      <code class="doc-inline">&#64;ngrx/signals</code>, y cómo está implementado en
+      este proyecto en la pantalla <strong>«crear solicitud no hospitalaria»</strong>.
+      Primero la teoría desde cero (estado, derivados, acciones, asíncrono) y luego
+      el recorrido por el código real del flujo.
+    </p>
+  </header>
+
+  <!-- ============================ ÍNDICE ============================ -->
+  <nav class="card doc-toc mb-12" aria-label="Índice">
+    <p class="text-label-lg mb-3">Contenido</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+      <a href="#que-es">1. Qué es y por qué</a>
+      <a href="#features">2. Las "features": estado, derivados, acciones</a>
+      <a href="#patch-state">3. patchState — mutar el estado</a>
+      <a href="#rx-method">4. rxMethod y tapResponse (lo asíncrono)</a>
+      <a href="#donde-provee">5. Dónde se provee</a>
+      <a href="#proyecto">6. Implementación en el proyecto</a>
+      <a href="#flujo">7. Flujo completo</a>
+      <a href="#referencia">8. Referencia rápida</a>
+    </div>
+  </nav>
+
+  <!-- ============================ 1. QUÉ ES ============================ -->
+  <section id="que-es" class="mb-14">
+    <h2 class="text-heading-xl mb-4">1. Qué es y por qué</h2>
+
+    <h3 class="text-heading-sm mb-2">Punto de partida: los signals de Angular</h3>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Un <strong>signal</strong> es un contenedor reactivo de un valor: cuando cambia,
+      todo lo que lo lee (el template, un <code class="doc-inline">computed</code>, un
+      <code class="doc-inline">effect</code>) se actualiza solo.
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.signalsRecap }}</code></pre>
+
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      Eso resuelve la reactividad de <strong>un</strong> valor. El problema aparece con
+      <strong>muchos</strong> valores relacionados, lógica derivada y operaciones
+      asíncronas: acabas con un servicio lleno de signals sueltos,
+      <code class="doc-inline">subscribe()</code> manuales y limpieza de suscripciones a
+      mano. Ahí entra el SignalStore.
+    </p>
+
+    <h3 class="text-heading-sm mb-2">El SignalStore</h3>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      <code class="doc-inline">signalStore(...)</code> es una <strong>factoría que
+      construye un servicio Angular</strong> (una clase inyectable) cuyo estado son
+      signals. <strong>No es un store global</strong> tipo Redux: es un contenedor de
+      estado <strong>componible</strong>. En vez de escribir la clase a mano, la
+      ensamblas con "features".
+    </p>
+    <pre class="doc-code mb-4"><code>{{ code.storeShape }}</code></pre>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="card--outlined">
+        <i class="pi pi-database" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">Tipado y central</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Una sola forma del estado; cada campo es un signal de solo lectura.
+        </p>
+      </div>
+      <div class="card--outlined">
+        <i class="pi pi-lock" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">Escritura controlada</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          La UI no muta nada por la espalda: solo los métodos del store cambian el estado.
+        </p>
+      </div>
+      <div class="card--outlined">
+        <i class="pi pi-bolt" style="color: var(--app-primary-600); font-size: 1.5rem"></i>
+        <h3 class="text-heading-sm mt-3 mb-1">RxJS integrado</h3>
+        <p class="text-body-sm" style="color: var(--app-text-secondary)">
+          Lo asíncrono con <code class="doc-inline">rxMethod</code> y auto-limpieza de
+          suscripciones.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 2. FEATURES ============================ -->
+  <section id="features" class="mb-14">
+    <h2 class="text-heading-xl mb-4">2. Las "features": estado, derivados y acciones</h2>
+    <p class="text-body-md mb-5" style="color: var(--app-text-secondary)">
+      Cada feature aporta una parte, y <strong>las siguientes ven lo que aportaron las
+      anteriores</strong> (los computed leen el estado; los métodos leen estado y
+      computed).
+    </p>
+
+    <h3 class="text-heading-sm mb-2"><code class="doc-inline">withState(initialState)</code> — el estado</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Define la forma del estado. Cada propiedad se convierte en un signal de solo lectura.
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.withStateSnippet }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2"><code class="doc-inline">withComputed(...)</code> — lo derivado</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Son <code class="doc-inline">computed()</code> que se recalculan solos al cambiar
+      sus fuentes. Evitan duplicar lógica en los templates.
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.withComputedSnippet }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2"><code class="doc-inline">withMethods(...)</code> — las acciones</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      La única vía para cambiar el estado. Aquí inyectas dependencias (servicios, casos
+      de uso) en los parámetros por defecto.
+    </p>
+    <pre class="doc-code mb-4"><code>{{ code.withMethodsSnippet }}</code></pre>
+
+    <div class="doc-callout mb-6">
+      <i class="pi pi-info-circle"></i>
+      <div>
+        Existe además <code class="doc-inline">withHooks({{ '{' }} onInit, onDestroy {{ '}' }})</code>
+        para enganchar el ciclo de vida del store. En este proyecto la carga inicial se
+        hace desde el constructor del componente, así que no se usa.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 3. PATCHSTATE ============================ -->
+  <section id="patch-state" class="mb-14">
+    <h2 class="text-heading-xl mb-4">3. <code class="doc-inline">patchState</code> — cómo se muta el estado</h2>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Es <strong>la</strong> forma de actualizar. Aplica un parche
+      <strong>inmutable</strong>: reemplaza solo las claves que pasas y deja el resto igual.
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.patchStateSnippet }}</code></pre>
+  </section>
+
+  <!-- ============================ 4. RXMETHOD ============================ -->
+  <section id="rx-method" class="mb-14">
+    <h2 class="text-heading-xl mb-4">4. <code class="doc-inline">rxMethod</code> y <code class="doc-inline">tapResponse</code> — lo asíncrono</h2>
+
+    <h3 class="text-heading-sm mb-2"><code class="doc-inline">rxMethod</code> (de &#64;ngrx/signals/rxjs-interop)</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Crea un <strong>método reactivo</strong> a partir de un <em>pipe</em> de RxJS. Lo
+      llamas como una función normal y él gestiona la suscripción <strong>y la limpia</strong>
+      cuando el store se destruye (adiós al <code class="doc-inline">takeUntilDestroyed</code>
+      / <code class="doc-inline">subscribe</code> manual).
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.rxMethodSnippet }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2"><code class="doc-inline">tapResponse</code> (de &#64;ngrx/operators)</h3>
+    <pre class="doc-code mb-4"><code>{{ code.tapResponseSnippet }}</code></pre>
+    <div class="doc-callout doc-callout--warn">
+      <i class="pi pi-exclamation-triangle"></i>
+      <div>
+        <strong>Regla de oro:</strong> si un error llega hasta el
+        <code class="doc-inline">rxMethod</code>, el método deja de reaccionar a futuras
+        llamadas. Por eso <code class="doc-inline">tapResponse</code> captura
+        <code class="doc-inline">next</code>/<code class="doc-inline">error</code>
+        <strong>dentro</strong> del stream y la cadena reactiva sigue viva.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 5. DÓNDE SE PROVEE ============================ -->
+  <section id="donde-provee" class="mb-14">
+    <h2 class="text-heading-xl mb-4">5. Dónde se provee: global vs por pantalla</h2>
+    <pre class="doc-code mb-4"><code>{{ code.provideSnippet }}</code></pre>
+    <div class="doc-callout doc-callout--tip">
+      <i class="pi pi-check-circle"></i>
+      <div>
+        Este proyecto usa el estado <strong>por pantalla</strong>: el store se registra
+        en los <code class="doc-inline">providers</code> del componente página, así
+        <strong>nace y muere con la pantalla</strong>. Cada vez que entras a «Nueva
+        solicitud» empiezas limpio, sin resets manuales.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 6. PROYECTO ============================ -->
+  <section id="proyecto" class="mb-14">
+    <h2 class="text-heading-xl mb-4">6. Implementación en el proyecto</h2>
+    <p class="text-body-md mb-4" style="color: var(--app-text-secondary)">
+      La única implementación vive en la feature
+      <strong>«crear solicitud no hospitalaria»</strong>. El store está en la
+      <strong>capa de presentación</strong> (usa Angular DI) y <strong>no reemplaza al
+      dominio</strong>: el caso de uso (<code class="doc-inline">SolicitudUseCase</code>,
+      TypeScript puro) tiene la lógica de negocio y el store lo <strong>consume</strong>.
+    </p>
+
+    <div class="card !p-0 overflow-hidden mb-6">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Pieza</th>
+            <th>Archivo</th>
+            <th>Rol</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Store</td>
+            <td>solicitud-crear.store.ts</td>
+            <td>Estado del flujo: selecciones, inferencias y banderas de carga.</td>
+          </tr>
+          <tr>
+            <td>Página</td>
+            <td>solicitud-crear.component.ts</td>
+            <td>SMART: provee el store y orquesta las secciones.</td>
+          </tr>
+          <tr>
+            <td>Secciones</td>
+            <td>sections/seccion-*</td>
+            <td>"Tontas": leen/escriben el store; sin &#64;Input/&#64;Output entre ellas.</td>
+          </tr>
+          <tr>
+            <td>Caso de uso</td>
+            <td>solicitud.providers.ts</td>
+            <td>Cableado por factory, a nivel de ruta lazy del slice.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="text-heading-sm mb-2">El estado: única fuente de verdad</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Aquí viven las selecciones e inferencias. Hay <strong>una bandera de carga por
+      operación asíncrona</strong> para tener spinners independientes.
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.projState }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Los derivados: la UI refleja, no decide</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Los <code class="doc-inline">computed</code> desbloquean las secciones progresivas
+      y arman el resumen. Las secciones solo leen estos cálculos.
+    </p>
+    <pre class="doc-code mb-4"><code>{{ code.projComputed }}</code></pre>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      En el template, esto habilita/deshabilita controles sin lógica:
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.projTemplate }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Las acciones síncronas</h3>
+    <pre class="doc-code mb-6"><code>{{ code.projMethodsSync }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Las acciones asíncronas (<code class="doc-inline">rxMethod</code>)</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Reemplazan el <code class="doc-inline">subscribe</code> +
+      <code class="doc-inline">takeUntilDestroyed</code> del enfoque legacy. Cargar
+      cobertura y, encadenado, sus planes:
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.projMethodsAsync }}</code></pre>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Con <code class="doc-inline">filter</code> para no disparar trabajo inválido
+      (inferir solo si hay plan):
+    </p>
+    <pre class="doc-code mb-6"><code>{{ code.projMethodsFilter }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Ciclo de vida: provisto en el componente</h3>
+    <pre class="doc-code mb-6"><code>{{ code.projProvide }}</code></pre>
+
+    <h3 class="text-heading-sm mb-2">Secciones sin &#64;Input/&#64;Output</h3>
+    <p class="text-body-md mb-3" style="color: var(--app-text-secondary)">
+      Como todas inyectan <strong>la misma instancia</strong> (provista en la página),
+      no se pasan datos entre sí: leen los signals y llaman a los métodos del store
+      directamente. Adiós al "prop drilling".
+    </p>
+    <pre class="doc-code"><code>{{ code.projSection }}</code></pre>
+  </section>
+
+  <!-- ============================ 7. FLUJO ============================ -->
+  <section id="flujo" class="mb-14">
+    <h2 class="text-heading-xl mb-4">7. Flujo completo de un vistazo</h2>
+    <pre class="doc-code"><code>{{ code.projFlow }}</code></pre>
+  </section>
+
+  <!-- ============================ 8. REFERENCIA ============================ -->
+  <section id="referencia" class="mb-6">
+    <h2 class="text-heading-xl mb-4">8. Referencia rápida</h2>
+    <div class="card !p-0 overflow-hidden mb-6">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>API</th>
+            <th>De dónde viene</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Crear el store</td><td>signalStore(...)</td><td>&#64;ngrx/signals</td></tr>
+          <tr><td>Definir estado</td><td>withState(initial)</td><td>&#64;ngrx/signals</td></tr>
+          <tr><td>Estado derivado</td><td>withComputed((s) =&gt; ...)</td><td>&#64;ngrx/signals</td></tr>
+          <tr><td>Acciones</td><td>withMethods((s, dep=inject()) =&gt; ...)</td><td>&#64;ngrx/signals</td></tr>
+          <tr><td>Mutar estado</td><td>patchState(store, parcial)</td><td>&#64;ngrx/signals</td></tr>
+          <tr><td>Acción asíncrona</td><td>rxMethod&lt;T&gt;(pipe(...))</td><td>&#64;ngrx/signals/rxjs-interop</td></tr>
+          <tr><td>Error en stream</td><td>tapResponse(...)</td><td>&#64;ngrx/operators</td></tr>
+          <tr><td>Ciclo de vida</td><td>withHooks(...)</td><td>&#64;ngrx/signals</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-callout">
+      <i class="pi pi-file"></i>
+      <div>
+        Archivo de referencia en el repo (comentado a fondo):
+        <code class="doc-inline">presentation/no-hospitalario/solicitud-crear/solicitud-crear.store.ts</code>.
+        Ver también <code class="doc-inline">docs/estado-signal-store.md</code> y la
+        página <strong>Novedades de Angular</strong> para el repaso de signals.
+      </div>
+    </div>
+  </section>
+</div>

@@ -8,6 +8,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { merge } from 'rxjs';
 
 // PrimeNG 21 — standalone
@@ -91,6 +92,7 @@ export class SolicitudesComponent {
   private readonly fb = inject(FormBuilder);
   private readonly maestros = inject(MaestrosUseCase);
   private readonly toaster = inject(ToasterService);
+  private readonly router = inject(Router);
 
   // --- Estado UI ---
   protected readonly filtrosAbiertos = signal(true);
@@ -220,7 +222,8 @@ export class SolicitudesComponent {
   }
 
   protected crearSolicitud(): void {
-    // Abriría el flujo de creación de una solicitud.
+    // Navega al wizard de creación (secciones progresivas con @ngrx/signals).
+    void this.router.navigate(['/no-hospitalario/solicitudes/crear']);
   }
 
   /** Abre el modal de detalle con el detalle (demo) de la solicitud clicada. */

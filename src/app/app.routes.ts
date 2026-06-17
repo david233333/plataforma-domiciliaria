@@ -59,6 +59,16 @@ export const routes: Routes = [
     },
   },
   {
+    // Crear solicitud (wizard de secciones progresivas con @ngrx/signals). La
+    // ruta más específica va ANTES que la lista. El DI del slice se cablea
+    // dentro de sus propias rutas lazy (`SOLICITUD_CREAR_ROUTES`).
+    path: 'no-hospitalario/solicitudes/crear',
+    loadChildren: () =>
+      import(
+        './presentation/no-hospitalario/solicitud-crear/solicitud-crear.routes'
+      ).then((m) => m.SOLICITUD_CREAR_ROUTES),
+  },
+  {
     path: 'no-hospitalario/solicitudes',
     // El catálogo de tipos de identificación (filtro) viene del slice `maestros`;
     // se cablea a nivel de ruta lazy para aislar el slice mientras está cargada.
@@ -102,6 +112,17 @@ export const routes: Routes = [
     title: 'Novedades de Angular 18 → 21',
     data: {
       breadcrumb: [{ label: 'Documentación' }, { label: 'Novedades de Angular 18 → 21' }],
+    },
+  },
+  {
+    path: 'signal-store',
+    loadComponent: () =>
+      import(
+        './presentation/documentacion/signal-store/signal-store.component'
+      ).then((m) => m.SignalStoreComponent),
+    title: 'Estado con SignalStore (@ngrx/signals)',
+    data: {
+      breadcrumb: [{ label: 'Documentación' }, { label: 'SignalStore (@ngrx/signals)' }],
     },
   },
   ...(!environment.production

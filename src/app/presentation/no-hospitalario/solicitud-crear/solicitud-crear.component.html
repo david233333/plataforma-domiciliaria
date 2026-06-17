@@ -1,0 +1,48 @@
+<!--
+  CREAR SOLICITUD — pantalla SMART. La página solo orquesta: provee el store,
+  compone las secciones y las revela de forma PROGRESIVA según los `computed`
+  del store. El estado vive en el store, no aquí.
+-->
+<div class="container-fluid section animate-fade-in">
+  <app-page-header
+    class="mb-8"
+    overline="No hospitalario"
+    title="Nueva solicitud"
+    description="Consulta la cobertura del paciente y completa los datos del servicio."
+    icon="file-edit"
+  />
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <!-- Columna principal: secciones progresivas -->
+    <div class="lg:col-span-2 flex flex-col gap-6">
+      <app-seccion-cobertura />
+
+      @if (store.coberturaResuelta()) {
+        <app-seccion-paciente />
+        <app-seccion-servicio />
+
+        <app-form-actions divider>
+          <app-button
+            label="Reiniciar"
+            icon="times"
+            severity="secondary"
+            variant="text"
+            (clicked)="store.reiniciar()"
+          />
+          <app-button
+            label="Guardar solicitud"
+            icon="check"
+            [loading]="store.guardando()"
+            [disabled]="!store.puedeGuardar()"
+            (clicked)="store.guardar()"
+          />
+        </app-form-actions>
+      }
+    </div>
+
+    <!-- Panel de resumen fijo (sticky en pantallas grandes) -->
+    <aside class="lg:sticky lg:top-6">
+      <app-resumen-solicitud />
+    </aside>
+  </div>
+</div>

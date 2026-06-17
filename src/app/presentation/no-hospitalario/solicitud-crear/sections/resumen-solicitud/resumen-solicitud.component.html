@@ -1,0 +1,38 @@
+<section class="card">
+  <h2 class="text-heading-md text-text-primary m-0 mb-4">Resumen</h2>
+
+  <dl class="resumen">
+    <div><dt>Paciente</dt><dd>{{ store.nombrePaciente() }}</dd></div>
+    <div><dt>Plan</dt><dd>{{ store.nombrePlan() }}</dd></div>
+    <div><dt>Servicio</dt><dd>{{ store.nombreServicio() }}</dd></div>
+
+    @if (store.inferencia(); as inf) {
+      <div><dt>Programa</dt><dd>{{ inf.programa }}</dd></div>
+      <div><dt>Piso</dt><dd>{{ inf.piso }}</dd></div>
+      <div><dt>Zona</dt><dd>{{ inf.zona }}</dd></div>
+      <div><dt>Conducta</dt><dd>{{ inf.conducta }}</dd></div>
+      <div><dt>SLA</dt><dd>{{ inf.sla }}</dd></div>
+      <div>
+        <dt>Copago</dt>
+        <dd>{{ inf.copago | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</dd>
+      </div>
+    }
+  </dl>
+
+  @if (store.resultado(); as resultado) {
+    <div class="resumen-ok">
+      <p class="resumen-ok__titulo">
+        <app-icon name="check-circle" label="Éxito" />
+        Solicitud creada
+      </p>
+      <dl class="resumen">
+        <div><dt>ID</dt><dd>{{ resultado.idSolicitud }}</dd></div>
+        <div>
+          <dt>Atención máx.</dt>
+          <dd>{{ resultado.fechaMaximaAtencion | date: 'dd/MM/yyyy hh:mm a' }}</dd>
+        </div>
+      </dl>
+      <p class="resumen-ok__mensaje">{{ resultado.mensaje }}</p>
+    </div>
+  }
+</section>

@@ -11,5 +11,8 @@ export const environment = {
     apiBaseUrl: 'https://apidomiciliario.labsura.com',
     // Base de maestros. Cada repositorio agrega su path (p. ej. /maestros/ciudad).
     novedades: 'http://192.168.40.96:9099/api_novedades',
+    // Controlador «información paciente» (cobertura). Ej: /paciente/CC/1121939862.
+    // TODO: confirmar host/puerto reales de api_ingreso (placeholder).
+    ingreso: 'http://192.168.40.96:8091/api_ingreso',
   },
 };

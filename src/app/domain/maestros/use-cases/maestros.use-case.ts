@@ -5,6 +5,9 @@ import { Programa } from '../entities/programa.entity';
 import { TipoNovedad } from '../entities/tipo-novedad.entity';
 import { ClasificacionPermanentes } from '../entities/clasificacion-permanentes.entity';
 import { Profesion } from '../entities/profesion.entity';
+import { PlanSalud } from '../entities/plan-salud.entity';
+import { TiposPlanParticular } from '../entities/tipos-plan-particular.entity';
+import { Convenio } from '../entities/convenio.entity';
 import { MaestroRepository } from '../ports/maestro.repository';
 
 /**
@@ -30,6 +33,9 @@ export class MaestrosUseCase {
   private tiposNovedad$?: Observable<TipoNovedad[]>;
   private clasificacionesPermanentes$?: Observable<ClasificacionPermanentes[]>;
   private profesiones$?: Observable<Profesion[]>;
+  private planesSalud$?: Observable<PlanSalud[]>;
+  private tiposPlanParticular$?: Observable<TiposPlanParticular[]>;
+  private convenios$?: Observable<Convenio[]>;
 
   constructor(private readonly repositorio: MaestroRepository) {}
 
@@ -73,5 +79,26 @@ export class MaestrosUseCase {
       .consultarProfesiones()
       .pipe(shareReplay(1));
     return this.profesiones$;
+  }
+
+  consultarPlanesSalud(): Observable<PlanSalud[]> {
+    this.planesSalud$ ??= this.repositorio
+      .consultarPlanesSalud()
+      .pipe(shareReplay(1));
+    return this.planesSalud$;
+  }
+
+  consultarTiposPlanParticular(): Observable<TiposPlanParticular[]> {
+    this.tiposPlanParticular$ ??= this.repositorio
+      .consultarTiposPlanParticular()
+      .pipe(shareReplay(1));
+    return this.tiposPlanParticular$;
+  }
+
+  consultarConvenios(): Observable<Convenio[]> {
+    this.convenios$ ??= this.repositorio
+      .consultarConvenios()
+      .pipe(shareReplay(1));
+    return this.convenios$;
   }
 }

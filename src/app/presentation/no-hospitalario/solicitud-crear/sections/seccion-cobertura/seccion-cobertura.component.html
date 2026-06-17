@@ -1,0 +1,80 @@
+<section class="card">
+  <h2 class="text-heading-md text-text-primary m-0 mb-1">
+    Identificación y cobertura
+  </h2>
+  <p class="text-body-sm text-text-secondary m-0 mb-5">
+    Consulta al paciente para iniciar la solicitud.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="buscar()">
+    <div class="field-grid grid-cols-1 sm:grid-cols-2">
+      <app-form-field
+        label="Tipo de identificación"
+        controlId="tipoIdentificacion"
+        [required]="true"
+        [error]="mostrarErrorTipo() ? 'Selecciona un tipo de identificación.' : null"
+      >
+        <p-select
+          inputId="tipoIdentificacion"
+          formControlName="tipoIdentificacion"
+          [options]="tiposIdentificacion()"
+          optionLabel="nombre"
+          optionValue="idTipo"
+          [filter]="true"
+          filterBy="nombre"
+          [invalid]="mostrarErrorTipo()"
+          (onBlur)="marcarTocado('tipoIdentificacion')"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </app-form-field>
+
+      <app-form-field
+        label="Número de identificación"
+        controlId="numeroIdentificacion"
+        [required]="true"
+        [error]="mostrarErrorNumero() ? 'Indica el número de identificación.' : null"
+      >
+        <input
+          pInputText
+          id="numeroIdentificacion"
+          formControlName="numeroIdentificacion"
+          autocomplete="off"
+          [invalid]="mostrarErrorNumero()"
+          class="w-full"
+        />
+      </app-form-field>
+
+      <!--
+        Plan de salud: aparece una vez que la consulta de cobertura responde
+        (con cobertura → 200, o sin cobertura → 500). En la rejilla de 2 columnas
+        cae justo DEBAJO de «Tipo de identificación». No pertenece al formGroup
+        reactivo (su dueño es el store), por eso usa ngModel `standalone`.
+      -->
+      @if (store.coberturaResuelta()) {
+        <app-form-field label="Plan de salud" controlId="planSalud" [required]="true">
+          <p-select
+            inputId="planSalud"
+            [ngModel]="store.planSalud()"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="store.seleccionarPlan($event)"
+            [options]="store.planesSalud()"
+            optionLabel="nombre"
+            optionValue="id"
+            styleClass="w-full"
+            appendTo="body"
+          />
+        </app-form-field>
+      }
+    </div>
+
+    <app-form-actions class="mt-6" align="start">
+      <app-button
+        label="Consultar cobertura"
+        icon="search"
+        type="submit"
+        [loading]="store.cargandoCobertura()"
+      />
+    </app-form-actions>
+  </form>
+</section>

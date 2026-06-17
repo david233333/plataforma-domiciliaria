@@ -5,6 +5,9 @@ import { Programa } from '../entities/programa.entity';
 import { TipoNovedad } from '../entities/tipo-novedad.entity';
 import { ClasificacionPermanentes } from '../entities/clasificacion-permanentes.entity';
 import { Profesion } from '../entities/profesion.entity';
+import { PlanSalud } from '../entities/plan-salud.entity';
+import { TiposPlanParticular } from '../entities/tipos-plan-particular.entity';
+import { Convenio } from '../entities/convenio.entity';
 
 /**
  * Puerto (contrato) del repositorio de «maestros»: los catálogos compartidos
@@ -27,4 +30,7 @@ export abstract class MaestroRepository {
     ClasificacionPermanentes[]
   >;
   abstract consultarProfesiones(): Observable<Profesion[]>;
+  abstract consultarPlanesSalud(): Observable<PlanSalud[]>;
+  abstract consultarTiposPlanParticular(): Observable<TiposPlanParticular[]>;
+  abstract consultarConvenios(): Observable<Convenio[]>;
 }
