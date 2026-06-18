@@ -8,7 +8,8 @@ import { SolicitudCrearStore } from './solicitud-crear.store';
 import { SeccionCoberturaComponent } from './sections/seccion-cobertura/seccion-cobertura.component';
 import { SeccionPacienteComponent } from './sections/seccion-paciente/seccion-paciente.component';
 import { SeccionServicioComponent } from './sections/seccion-servicio/seccion-servicio.component';
-import { ResumenSolicitudComponent } from './sections/resumen-solicitud/resumen-solicitud.component';
+// TODO: Resumen pendiente para el final.
+// import { ResumenSolicitudComponent } from './sections/resumen-solicitud/resumen-solicitud.component';
 
 /**
  * Página «crear solicitud» (SMART). Su única responsabilidad es ORQUESTAR:
@@ -30,7 +31,7 @@ import { ResumenSolicitudComponent } from './sections/resumen-solicitud/resumen-
     SeccionCoberturaComponent,
     SeccionPacienteComponent,
     SeccionServicioComponent,
-    ResumenSolicitudComponent,
+    // ResumenSolicitudComponent,
   ],
   templateUrl: './solicitud-crear.component.html',
 })

@@ -80,6 +80,15 @@ export const routes: Routes = [
     title: 'Solicitudes no hospitalario · Salud en Casa',
     data: { breadcrumb: [{ label: 'No hospitalario' }, { label: 'Solicitudes' }] },
   },
+  {
+    // Recaudo no hospitalario. Slice independiente de Solicitudes; su DI propio
+    // se cablea dentro de sus rutas lazy (`RECAUDO_ROUTES`).
+    path: 'no-hospitalario/recaudo',
+    loadChildren: () =>
+      import('./presentation/no-hospitalario/recaudo/recaudo.routes').then(
+        (m) => m.RECAUDO_ROUTES,
+      ),
+  },
 
   {
     path: 'arquitectura-estilos',

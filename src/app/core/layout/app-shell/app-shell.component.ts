@@ -91,6 +91,7 @@ export class AppShellComponent {
       label: 'No hospitalario',
       items: [
         { label: 'Solicitudes', icon: 'pi pi-inbox', route: '/no-hospitalario/solicitudes' },
+        { label: 'Recaudo', icon: 'pi pi-wallet', route: '/no-hospitalario/recaudo' },
       ],
     },
     // Negrilla (emphasis) para que pese visualmente como los rótulos de sección.
